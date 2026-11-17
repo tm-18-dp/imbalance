@@ -31,7 +31,15 @@ const TIER_SHORT: Record<Tier, string> = {
   Covert: "Covert (red) to knife",
 };
 
-type ApiOutcome = Outcome & { volume30d: number };
+type ApiOutcome = Outcome & {
+  volume30d: number;
+  priceSource: "steam" | "skinport" | null;
+  /** Null for Doppler phases, which Steam doesn't list separately. */
+  marketHashName: string | null;
+};
+
+/** Steam allows about 20 price checks a minute; stay well under it. */
+const STEAM_CHECK_GAP_MS = 3500;
 type ApiContract = Omit<FoundContract, "result"> & {
   timeline: ContractTimeline;
   result: Omit<FoundContract["result"], "outcomes"> & {
@@ -69,6 +77,7 @@ export function TradeUps() {
     loading: boolean;
     error?: string;
     contracts?: ApiContract[];
+    market?: MarketplaceId;
   }>({ loading: false });
   const [selected, setSelected] = useState<ApiContract | null>(null);
 
@@ -88,9 +97,14 @@ export function TradeUps() {
       const json = (await res.json()) as {
         error?: string;
         contracts?: ApiContract[];
+        market?: MarketplaceId;
       };
       if (!res.ok) throw new Error(json.error ?? "Scan failed.");
-      setState({ loading: false, contracts: json.contracts });
+      setState({
+        loading: false,
+        contracts: json.contracts,
+        market: json.market,
+      });
     } catch (err) {
       setState({
         loading: false,
@@ -115,7 +129,8 @@ export function TradeUps() {
         <h1 className="text-2xl font-bold">Trade-ups</h1>
         <p className="text-sm text-muted">
           Pick a rarity, scan, and see which contracts pay after fees. Prices
-          come from Skinport. Inputs assume the worst float of their wear, so
+          come from Skinport, or from Steam when you sell on Steam and have
+          checked that item. Inputs assume the worst float of their wear, so
           lower floats only make it better.
         </p>
       </div>
@@ -306,7 +321,15 @@ export function TradeUps() {
       )}
 
       {selected && (
-        <ContractDetail contract={selected} onClose={() => setSelected(null)} />
+        <ContractDetail
+          contract={selected}
+          sellOnSteam={state.market === "steam"}
+          onRescan={() => {
+            setSelected(null);
+            void scan();
+          }}
+          onClose={() => setSelected(null)}
+        />
       )}
     </div>
   );
@@ -314,13 +337,20 @@ export function TradeUps() {
 
 function ContractDetail({
   contract: c,
+  sellOnSteam,
+  onRescan,
   onClose,
 }: {
   contract: ApiContract;
+  sellOnSteam: boolean;
+  onRescan: () => void;
   onClose: () => void;
 }) {
   const { money } = useMoney();
   const risks = contractRisks(c);
+  const notOnSteam = c.result.outcomes.filter(
+    (o) => o.priceSource !== "steam" && o.marketHashName,
+  );
   return (
     <div
       role="dialog"
@@ -359,6 +389,14 @@ function ContractDetail({
               <li key={r}>{r}</li>
             ))}
           </ul>
+        )}
+
+        {sellOnSteam && notOnSteam.length > 0 && (
+          <SteamPricesNote
+            names={notOnSteam.map((o) => o.marketHashName!)}
+            total={c.result.outcomes.length}
+            onDone={onRescan}
+          />
         )}
 
         <div className="mt-4">
@@ -457,7 +495,17 @@ function ContractDetail({
                       max={o.skin.maxFloat}
                     />
                   </td>
-                  <td>{money(o.priceCents)}</td>
+                  <td>
+                    {money(o.priceCents)}
+                    {sellOnSteam && o.priceSource === "skinport" && (
+                      <span
+                        className="block text-xs text-muted"
+                        title="No Steam price checked for this item yet, so this is Skinport's price"
+                      >
+                        Skinport price
+                      </span>
+                    )}
+                  </td>
                   <td
                     className={
                       o.netCents > c.result.costCents ? "text-good" : ""
@@ -505,4 +553,68 @@ function contractForAi(c: ApiContract, risks: string[]) {
       sales30d: o.volume30d,
     })),
   };
+}
+
+/**
+ * When selling on Steam, outcomes without a checked Steam price use Skinport's price, which
+ * is often lower. This fetches Steam prices one by one, slowly, then rescans.
+ */
+function SteamPricesNote({
+  names,
+  total,
+  onDone,
+}: {
+  names: string[];
+  total: number;
+  onDone: () => void;
+}) {
+  const [progress, setProgress] = useState<{
+    done: number;
+    error?: string;
+  } | null>(null);
+
+  async function run() {
+    const unique = [...new Set(names)];
+    setProgress({ done: 0 });
+    for (let i = 0; i < unique.length; i++) {
+      if (i > 0) await new Promise((r) => setTimeout(r, STEAM_CHECK_GAP_MS));
+      const res = await fetch(
+        `/api/steam-price?name=${encodeURIComponent(unique[i])}`,
+      );
+      if (!res.ok) {
+        const json = (await res.json().catch(() => ({}))) as {
+          error?: string;
+        };
+        setProgress({
+          done: i,
+          error: json.error ?? "Steam didn't answer. Try again in a minute.",
+        });
+        return;
+      }
+      setProgress({ done: i + 1 });
+    }
+    onDone();
+  }
+
+  const count = new Set(names).size;
+  return (
+    <div className="panel mt-3 border-accent p-3 text-sm">
+      <p>
+        {names.length} of {total} outcomes use Skinport&apos;s price because
+        Steam hasn&apos;t been checked for them. Steam prices are often higher.
+      </p>
+      {progress ? (
+        <p className="mt-1 text-muted" role="status">
+          {progress.error
+            ? progress.error
+            : `Checking Steam: ${progress.done} of ${count}.`}
+        </p>
+      ) : (
+        <button className="btn mt-2" onClick={run}>
+          Get Steam prices (about{" "}
+          {Math.ceil((count * STEAM_CHECK_GAP_MS) / 1000)} s), then rescan
+        </button>
+      )}
+    </div>
+  );
 }

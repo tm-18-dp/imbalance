@@ -8,6 +8,8 @@ export type Deal = {
   image: string | null;
   buyCents: number;
   usualCents: number;
+  /** What it should resell for: the lowest of the recent sales medians, so a slide counts. */
+  resaleCents: number;
   discount: number;
   quantity: number;
   volume30d: number;
@@ -34,7 +36,9 @@ type Row = {
   min_cents: number;
   quantity: number;
   median_24h: number | null;
+  volume_24h: number;
   median_7d: number | null;
+  volume_7d: number;
   median_30d: number;
   volume_30d: number;
   median_90d: number | null;
@@ -54,6 +58,29 @@ export function baseSkinName(marketHashName: string): string {
     .replace(/^Souvenir /, "");
 }
 
+/** Sales in a window below this don't move the resale estimate. */
+const MIN_SALES = 3;
+
+/**
+ * Cautious resale price: the 30-day median, pulled down by the 7-day and 24-hour medians
+ * when they are lower and backed by enough sales. A price that is sliding shouldn't be
+ * expected to bounce back to last month's level by the time the item can be resold.
+ */
+export function resalePrice(r: {
+  median_24h: number | null;
+  volume_24h: number;
+  median_7d: number | null;
+  volume_7d: number;
+  median_30d: number;
+}): number {
+  let p = r.median_30d;
+  if (r.median_7d != null && r.volume_7d >= MIN_SALES)
+    p = Math.min(p, r.median_7d);
+  if (r.median_24h != null && r.volume_24h >= MIN_SALES)
+    p = Math.min(p, r.median_24h);
+  return p;
+}
+
 /**
  * Items listed below what they usually sell for (30-day median), that sell often enough to
  * flip, ranked by profit after the chosen marketplace's fee.
@@ -62,7 +89,7 @@ export function findDeals(db: DatabaseSync, opts: DealOptions): Deal[] {
   const rows = db
     .prepare(
       `SELECT p.market_hash_name, p.version, p.min_cents, p.quantity,
-              h.median_24h, h.median_7d, h.median_30d, h.volume_30d, h.median_90d
+              h.median_24h, h.volume_24h, h.median_7d, h.volume_7d, h.median_30d, h.volume_30d, h.median_90d
        FROM prices p JOIN price_history h
          ON h.market_hash_name = p.market_hash_name AND h.source = p.source AND h.version = p.version
        WHERE p.source = 'skinport' AND p.min_cents > 0 AND p.quantity > 0
@@ -92,13 +119,15 @@ export function findDeals(db: DatabaseSync, opts: DealOptions): Deal[] {
   return rows
     .filter((r) => !opts.weaponsOnly || !NOT_WEAPON.test(r.market_hash_name))
     .map((r) => {
-      const netResaleCents = opts.market.net(r.median_30d);
+      const resaleCents = resalePrice(r);
+      const netResaleCents = opts.market.net(resaleCents);
       return {
         marketHashName: r.market_hash_name,
         version: r.version,
         image: images.get(baseSkinName(r.market_hash_name)) ?? null,
         buyCents: r.min_cents,
         usualCents: r.median_30d,
+        resaleCents,
         discount: 1 - r.min_cents / r.median_30d,
         quantity: r.quantity,
         volume30d: r.volume_30d,

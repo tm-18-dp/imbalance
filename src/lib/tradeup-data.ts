@@ -5,6 +5,28 @@ import { marketHashName, WEARS, type WearName } from "./wear";
 import { listHoldings } from "./tracker";
 
 export type Variant = "normal" | "stattrak";
+export type PriceSource = "steam" | "skinport";
+
+/** Steam prices saved by "Steam check" are trusted for a week when selling on Steam. */
+export const STEAM_PRICE_MAX_AGE_MS = 7 * 24 * 60 * 60_000;
+
+/** Saved Steam sell prices (median, else lowest listing) keyed by market name. */
+export function loadSteamPrices(
+  db: DatabaseSync,
+  now = Date.now(),
+): Map<string, number> {
+  const rows = db
+    .prepare(
+      `SELECT market_hash_name, COALESCE(median_cents, min_cents) cents FROM prices
+       WHERE source = 'steam' AND version = '' AND updated_at >= ?
+         AND COALESCE(median_cents, min_cents) IS NOT NULL`,
+    )
+    .all(now - STEAM_PRICE_MAX_AGE_MS) as {
+    market_hash_name: string;
+    cents: number;
+  }[];
+  return new Map(rows.map((r) => [r.market_hash_name, r.cents]));
+}
 
 type PriceRow = {
   market_hash_name: string;
@@ -61,8 +83,11 @@ export function loadTierData(
   tier: Tier,
   variant: Variant,
   includeOwned = false,
+  sellOnSteam = false,
 ) {
   const prices = loadPrices(db);
+  // Steam names have no Doppler phase, so phased outcomes always use Skinport.
+  const steam = sellOnSteam ? loadSteamPrices(db) : new Map<string, number>();
   const st = variant === "stattrak" ? " AND s.stattrak = 1" : "";
   const next = nextTier(tier);
 
@@ -127,7 +152,25 @@ export function loadTierData(
     prices.get(
       `${marketHashName(skin.name, wear, variant)}|${skin.phase ?? ""}`,
     );
-  const price: PriceFn = (skin, wear) => sellPrice(priceRow(skin, wear));
+  const steamCents = (skin: OutcomeSkin, wear: WearName | null) =>
+    skin.phase
+      ? undefined
+      : steam.get(marketHashName(skin.name, wear, variant));
+  const price: PriceFn = (skin, wear) =>
+    steamCents(skin, wear) ?? sellPrice(priceRow(skin, wear));
+  /** Where an outcome's sell price came from, or null when there is none. */
+  const priceSource = (
+    skin: OutcomeSkin,
+    wear: WearName | null,
+  ): PriceSource | null =>
+    steamCents(skin, wear) != null
+      ? "steam"
+      : sellPrice(priceRow(skin, wear)) != null
+        ? "skinport"
+        : null;
+  /** Market name of an outcome, for looking up its Steam price. */
+  const outcomeName = (skin: OutcomeSkin, wear: WearName | null) =>
+    marketHashName(skin.name, wear, variant);
   /** Sales in the last 30 days: low numbers mean the price may be fake or hard to sell at. */
   const volume30d = (skin: OutcomeSkin, wear: WearName | null) =>
     priceRow(skin, wear)?.volume_30d ?? 0;
@@ -179,6 +222,8 @@ export function loadTierData(
     options: [...cheapestPerCollectionWear(options), ...owned],
     outcomes,
     price,
+    priceSource,
+    outcomeName,
     volume30d,
   };
 }

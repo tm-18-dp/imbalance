@@ -141,6 +141,16 @@ POSTs from curl need `-H "Origin: http://localhost:3000"`.
     eslint-config-next and vitest). Recheck when picomatch 4.0.8+ ships.
   - Windows PowerShell blocks `npm.ps1` by default: README tells friends to use `npm.cmd`
     or `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`.
+- **Fork improvements (2026-11-18):**
+  - Trade-up inputs: only the first copy costs the cheapest listing. Further copies cost
+    `nextCostCents` = max(cheapest, `sellPrice`), since Skinport only reports the lowest
+    listing. `optionCost` in `finder.ts` is the one place this is summed.
+  - `src/proxy.ts` returns 403 unless Host is localhost, 127.0.0.1 or [::1] (DNS rebinding).
+    `isSameOrigin` also requires a local Host. Opening the app from another device won't work.
+  - Security headers and a CSP in `next.config.ts`. Pages are prerendered, so scripts use
+    `'unsafe-inline'` (no nonces); all outside calls happen on the server.
+  - Deals resell at `resalePrice`: the 30-day median, pulled down by the 7-day or 24-hour
+    median when lower with 3+ sales.
 - **Next:** the owner continues tomorrow. Open items: test the AI (Find box, Ask AI) and
   CSFloat with real keys, then pick from `docs/roadmap.md`. taste-skill and impeccable were
   not installed, so M17 was done by hand; run them later if wanted.
@@ -153,7 +163,8 @@ POSTs from curl need `-H "Origin: http://localhost:3000"`.
   inherits the latest unlock of its inputs.
 - **Open questions:** none.
 - **Known issues:** AI calls untested with real keys. CSFloat response shape not checked
-  against a real key. Key guide steps for CSFloat are from memory. Sell prices are
-  Skinport-based even when "Sell on Steam" is picked. After many hot reloads the dev page
+  against a real key. Key guide steps for CSFloat are from memory. When "Sell on Steam" is
+  picked, outcomes use Steam prices only where one was checked in the last 7 days (the
+  contract panel has a "Get Steam prices" button); the rest still use Skinport's price. After many hot reloads the dev page
   can loop on full reloads: kill node, delete `.next`, restart (`npm start` is not affected).
 - **Not pushed:** see `git log origin/main..main`.

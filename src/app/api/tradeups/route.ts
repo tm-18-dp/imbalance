@@ -25,7 +25,13 @@ export async function GET(req: Request) {
   const hideRisky = p.get("hideRisky") === "1";
   const db = getDb();
   const { holdDays } = getSettings(db);
-  const data = loadTierData(db, tier, variant, p.get("owned") !== "0");
+  const data = loadTierData(
+    db,
+    tier,
+    variant,
+    p.get("owned") !== "0",
+    market === "steam",
+  );
   const contracts = findContracts(data.options, data.outcomes, data.price, {
     tier,
     market: MARKETPLACES[market],
@@ -36,6 +42,8 @@ export async function GET(req: Request) {
       const outcomes = c.result.outcomes.map((o) => ({
         ...o,
         volume30d: data.volume30d(o.skin, o.wear),
+        priceSource: data.priceSource(o.skin, o.wear),
+        marketHashName: o.skin.phase ? null : data.outcomeName(o.skin, o.wear),
       }));
       const risky = riskNotes(outcomes, c.result.evCents).length > 0;
       const timeline = contractTimeline(holdDays, outcomes);

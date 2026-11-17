@@ -194,6 +194,20 @@ describe("loadTierData", () => {
     expect(owned).toMatchObject({ quantity: 2, float: 0.31, costCents: 100 });
     const outSkin = d.outcomes.get("C")![0];
     expect(d.price(outSkin, "Field-Tested")).toBe(3000);
+    expect(d.priceSource(outSkin, "Field-Tested")).toBe("skinport");
+    expect(d.options[0].nextCostCents).toBe(100);
+
+    // A checked Steam price wins when selling on Steam, and only then.
+    db.prepare(
+      `INSERT INTO prices (market_hash_name, source, version, min_cents, median_cents, quantity, updated_at)
+       VALUES (?, 'steam', '', 3600, 3500, 40, ?)`,
+    ).run("StatTrak™ AK-47 | Output (Field-Tested)", Date.now());
+    const steam = loadTierData(db, "Restricted", "stattrak", false, true);
+    expect(steam.price(outSkin, "Field-Tested")).toBe(3500);
+    expect(steam.priceSource(outSkin, "Field-Tested")).toBe("steam");
+    expect(
+      loadTierData(db, "Restricted", "stattrak").price(outSkin, "Field-Tested"),
+    ).toBe(3000);
   });
 
   it("uses the most recent sales median with enough sales", () => {

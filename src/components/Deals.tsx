@@ -79,7 +79,9 @@ export function Deals() {
         <p className="text-sm text-muted">
           Skins listed on Skinport for less than they usually sell for (their
           30-day median), that sell often enough to flip. Profit is what you
-          keep after reselling at the usual price and paying the fee.
+          keep after reselling and paying the fee. If the price has slid in the
+          last week or day, the resale price follows it down. Items you buy are
+          usually trade locked for a week before you can resell them.
         </p>
       </div>
 
@@ -187,6 +189,12 @@ export function Deals() {
                 <th className="p-2 font-normal">Buy now</th>
                 <th className="p-2 font-normal">Usually</th>
                 <th className="p-2 font-normal">Below</th>
+                <th
+                  className="p-2 font-normal"
+                  title="What it should resell for: the 30-day median, or lower if the last 7 days or 24 hours sold for less"
+                >
+                  Resell at
+                </th>
                 <th className="p-2 font-normal">Sold 30d</th>
                 <th className="p-2 font-normal">Flip profit</th>
                 <th className="p-2 font-normal">Steam</th>
@@ -232,6 +240,7 @@ export function Deals() {
                   <td className="p-2">{money(d.buyCents)}</td>
                   <td className="p-2">{money(d.usualCents)}</td>
                   <td className="p-2">{Math.round(d.discount * 100)}%</td>
+                  <td className="p-2">{money(d.resaleCents)}</td>
                   <td className="p-2">{d.volume30d}</td>
                   <td className="p-2 font-medium text-good">
                     {money(d.flipProfitCents)}

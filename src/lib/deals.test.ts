@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { openDb } from "./db";
 import { saveSkinport } from "./prices/skinport";
-import { baseSkinName, findDeals } from "./deals";
+import { baseSkinName, findDeals, resalePrice } from "./deals";
 import { MARKETPLACES } from "./fees";
 import { overviewSchema, steamPrice } from "./prices/steam";
 
@@ -52,6 +52,33 @@ function seeded() {
 
 afterEach(() => vi.unstubAllGlobals());
 
+describe("resalePrice", () => {
+  const base = {
+    median_24h: null,
+    volume_24h: 0,
+    median_7d: null,
+    volume_7d: 0,
+    median_30d: 1000,
+  };
+  it("uses the 30-day median when nothing recent is lower", () => {
+    expect(resalePrice({ ...base, median_7d: 1100, volume_7d: 20 })).toBe(1000);
+  });
+  it("follows a recent slide backed by enough sales", () => {
+    expect(
+      resalePrice({
+        ...base,
+        median_7d: 900,
+        volume_7d: 20,
+        median_24h: 850,
+        volume_24h: 5,
+      }),
+    ).toBe(850);
+  });
+  it("ignores recent medians from too few sales", () => {
+    expect(resalePrice({ ...base, median_24h: 500, volume_24h: 1 })).toBe(1000);
+  });
+});
+
 describe("findDeals", () => {
   it("finds liquid items under their usual price that flip for profit after fees", () => {
     const deals = findDeals(seeded(), {
@@ -63,8 +90,10 @@ describe("findDeals", () => {
       marketHashName: "AK-47 | Redline (Field-Tested)",
       buyCents: 1500,
       usualCents: 2000,
-      netResaleCents: 1840,
-      flipProfitCents: 340,
+      // Falling: the 7-day median (17) is the realistic resale, not the 30-day (20).
+      resaleCents: 1700,
+      netResaleCents: 1564,
+      flipProfitCents: 64,
       trend: "falling",
     });
     expect(deals[0].discount).toBeCloseTo(0.25);
