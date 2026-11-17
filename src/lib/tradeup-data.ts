@@ -165,6 +165,8 @@ export function loadTierData(
         minFloat: r.min_float,
         maxFloat: r.max_float,
         costCents: p.min_cents,
+        // Only one copy is at the lowest listing; the others cost about what it sells for.
+        nextCostCents: Math.max(p.min_cents, sellPrice(p) ?? p.min_cents),
         quantity: p.quantity,
       });
     }
@@ -181,15 +183,23 @@ export function loadTierData(
   };
 }
 
-/** Keeps only the cheapest skin per collection and wear: the others never win. */
+/**
+ * Keeps only the cheapest skins per collection and wear: the others never win. "Cheapest"
+ * has two meanings: the lowest single listing (best for one copy) and the lowest going price
+ * (best for many copies), so up to two options survive per collection and wear.
+ */
 function cheapestPerCollectionWear(options: InputOption[]): InputOption[] {
-  const best = new Map<string, InputOption>();
+  const single = new Map<string, InputOption>();
+  const bulk = new Map<string, InputOption>();
+  const bulkCost = (o: InputOption) => o.nextCostCents ?? o.costCents;
   for (const o of options) {
     const k = `${o.collectionId}|${o.wear}`;
-    const cur = best.get(k);
-    if (!cur || o.costCents < cur.costCents) best.set(k, o);
+    const s = single.get(k);
+    if (!s || o.costCents < s.costCents) single.set(k, o);
+    const b = bulk.get(k);
+    if (!b || bulkCost(o) < bulkCost(b)) bulk.set(k, o);
   }
-  return [...best.values()];
+  return [...new Set([...single.values(), ...bulk.values()])];
 }
 
 /**

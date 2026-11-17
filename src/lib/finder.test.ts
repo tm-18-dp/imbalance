@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { MARKETPLACES } from "./fees";
-import { findContracts, type InputOption } from "./finder";
+import { findContracts, optionCost, type InputOption } from "./finder";
 import { openDb } from "./db";
 import { saveCatalog } from "./catalog";
 import { saveSkinport } from "./prices/skinport";
@@ -95,6 +95,19 @@ describe("findContracts", () => {
     expect(
       owned.every((f) => f.inputs.every((i) => i.count <= i.option.quantity)),
     ).toBe(true);
+  });
+
+  it("prices only the first copy at the cheapest listing", () => {
+    const gold = { ...opt("GOLD", 300), nextCostCents: 400 };
+    expect(optionCost(gold, 1)).toBe(300);
+    expect(optionCost(gold, 10)).toBe(300 + 9 * 400);
+    expect(optionCost(opt("JUNK", 50), 4)).toBe(200);
+    const found = findContracts([gold], outcomes, price, {
+      tier: "Restricted",
+      market: noFee,
+    });
+    expect(found[0].result.costCents).toBe(3900);
+    expect(found[0].result.profitCents).toBe(50000 - 3900);
   });
 
   it("skips options whose collection can't trade up", () => {

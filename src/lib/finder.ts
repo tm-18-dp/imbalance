@@ -22,7 +22,13 @@ export type InputOption = {
   float: number;
   minFloat: number;
   maxFloat: number;
+  /** Price of the cheapest listing. */
   costCents: number;
+  /**
+   * Expected price of each further copy. Only the cheapest listing sells at `costCents`; the
+   * rest usually cost about the recent sales price. Missing means every copy costs `costCents`.
+   */
+  nextCostCents?: number;
   quantity: number;
   /**
    * True for skins the user already owns (from the tracker). Their cost is today's market
@@ -30,6 +36,21 @@ export type InputOption = {
    */
   owned?: boolean;
 };
+
+/** What `count` copies of an option really cost: the cheapest listing, then the going price. */
+export function optionCost(option: InputOption, count: number): number {
+  if (count <= 0) return 0;
+  return (
+    option.costCents + (count - 1) * (option.nextCostCents ?? option.costCents)
+  );
+}
+
+/** Per-copy costs for `count` copies, cheapest first. */
+function copyCosts(option: InputOption, count: number): number[] {
+  return Array.from({ length: count }, (_, i) =>
+    i === 0 ? option.costCents : (option.nextCostCents ?? option.costCents),
+  );
+}
 
 export type FoundContract = {
   key: string;
@@ -65,7 +86,7 @@ export function findContracts(
   const fillers = [
     ...[...usable]
       .filter((o) => !o.owned)
-      .sort((a, b) => a.costCents - b.costCents)
+      .sort((a, b) => optionCost(a, 2) - optionCost(b, 2))
       .slice(0, opts.fillerPool ?? 30),
     ...usable.filter((o) => o.owned),
   ];
@@ -85,7 +106,7 @@ export function findContracts(
         : [{ option: target, count: n }];
     // Can't use 10 of something with only 3 listed (or 3 owned).
     if (parts.some((p) => p.count > p.option.quantity)) return;
-    const cost = parts.reduce((s, p) => s + p.option.costCents * p.count, 0);
+    const cost = parts.reduce((s, p) => s + optionCost(p.option, p.count), 0);
     if (opts.budgetCents != null && cost > opts.budgetCents) return;
     const key = parts
       .map(
@@ -96,7 +117,10 @@ export function findContracts(
       .join("+");
     if (found.has(key)) return;
     const inputs = parts.flatMap((p) =>
-      Array<InputOption>(p.count).fill(p.option),
+      copyCosts(p.option, p.count).map((costCents) => ({
+        ...p.option,
+        costCents,
+      })),
     );
     try {
       const result = evaluateContract(

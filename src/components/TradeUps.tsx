@@ -382,8 +382,17 @@ function ContractDetail({
                 />
               )}
               <span>
-                <strong>{i.count}x</strong> {i.option.marketHashName} at about{" "}
-                {money(i.option.costCents)} each
+                <strong>{i.count}x</strong> {i.option.marketHashName}:{" "}
+                {i.count > 1 &&
+                i.option.nextCostCents != null &&
+                i.option.nextCostCents > i.option.costCents ? (
+                  <>
+                    cheapest {money(i.option.costCents)}, then about{" "}
+                    {money(i.option.nextCostCents)} each
+                  </>
+                ) : (
+                  <>about {money(i.option.costCents)} each</>
+                )}
                 <br />
                 <span className="text-muted">
                   Any float up to {i.option.float.toFixed(3)} works.{" "}
@@ -482,7 +491,8 @@ function contractForAi(c: ApiContract, risks: string[]) {
     inputs: c.inputs.map((i) => ({
       count: i.count,
       item: i.option.marketHashName,
-      eachCents: i.option.costCents,
+      cheapestCents: i.option.costCents,
+      furtherCopiesCents: i.option.nextCostCents ?? i.option.costCents,
       owned: Boolean(i.option.owned),
     })),
     outcomes: c.result.outcomes.map((o) => ({
