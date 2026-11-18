@@ -209,6 +209,12 @@ POSTs from curl need `-H "Origin: http://localhost:3000"`.
     3.5 s apart, and CSFloat listings through `/api/listings` when a key is set, then asks
     again. Selling on Steam is opt-in and scaled by a wallet value (% of cash). Steam
     purchases are still counted at full cash.
+  - **E4 patterns:** `patterns.ts` (pure): `patternFinish` (exact finish names, so "Amber
+    Fade" is not "Fade"), `BUILT_IN_PATTERNS` kept tiny on purpose (a wrong seed costs
+    money), `patternFlag` (user list wins). `patterns-data.ts` reads `data/patterns.json`
+    with zod and returns a readable error for a broken file; `/api/patterns` serves it.
+    `PatternBadge` shows on Skins-page CSFloat listings, Float snipes and trade-up
+    outcomes. Patterns are never priced, and fade % is not calculated.
 - **Next:** the owner continues tomorrow. Open items: test the AI (Find box, Ask AI) and
   CSFloat with real keys, then pick from `docs/roadmap.md`. taste-skill and impeccable were
   not installed, so M17 was done by hand; run them later if wanted.

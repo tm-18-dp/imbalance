@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { Snipe } from "@/lib/snipes";
 import { useMoney } from "./Money";
 import { SizedCost, useBankroll } from "./Bankroll";
+import { PatternBadge, useUserPatterns } from "./PatternBadge";
 
 type ApiSnipe = Snipe & { volume30d: number };
 
@@ -15,6 +16,7 @@ type ApiSnipe = Snipe & { volume30d: number };
 export function FloatSnipes() {
   const { money, rates, currency } = useMoney();
   const bankrollCents = useBankroll();
+  const userPatterns = useUserPatterns();
   const [q, setQ] = useState("");
   const [min, setMin] = useState("1");
   const [max, setMax] = useState("");
@@ -180,7 +182,14 @@ export function FloatSnipes() {
             <tbody>
               {state.snipes.map((s) => (
                 <tr key={s.listing.id} className="border-t border-line">
-                  <td className="p-2">{s.listing.marketHashName}</td>
+                  <td className="p-2">
+                    {s.listing.marketHashName}
+                    <PatternBadge
+                      name={s.listing.marketHashName}
+                      seed={s.listing.paintSeed}
+                      patterns={userPatterns.patterns}
+                    />
+                  </td>
                   <td className="p-2">
                     <span className="font-mono">
                       {s.listing.float.toFixed(5)}

@@ -14,6 +14,7 @@ import {
 } from "@/lib/risk";
 import { useMoney } from "./Money";
 import { ExactFloats } from "./ExactFloats";
+import { PatternBadge } from "./PatternBadge";
 import { SizedCost, useBankroll } from "./Bankroll";
 import { sizingWarning, triesText, triesToBeAhead } from "@/lib/sizing";
 import {
@@ -576,6 +577,12 @@ function ContractDetail({
                         {o.skin.name}
                         {o.skin.phase ? ` ${o.skin.phase}` : ""}{" "}
                         <span className="text-muted">{o.wear ?? ""}</span>
+                        {/* The price is an average: a lucky pattern is worth more. */}
+                        <PatternBadge
+                          name={o.skin.name}
+                          seed={null}
+                          patterns={[]}
+                        />
                         {o.betterWear && (
                           <span className="block text-xs text-muted">
                             {o.betterWear.wear} if average float position is

@@ -13,6 +13,7 @@ export type SnipeListing = {
   priceCents: number;
   float: number;
   url: string;
+  paintSeed?: number | null;
 };
 
 export type Snipe = {

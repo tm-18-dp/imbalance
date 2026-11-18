@@ -7,6 +7,7 @@ import type { Listing } from "@/lib/prices/csfloat";
 import { useMoney } from "./Money";
 import { PriceHistory } from "./PriceHistory";
 import { FloatBadges } from "./FloatBadges";
+import { PatternBadge, useUserPatterns } from "./PatternBadge";
 
 const RARITIES = [
   "Consumer Grade",
@@ -306,6 +307,7 @@ function Listings({
   maxFloat: number | null;
 }) {
   const { money } = useMoney();
+  const userPatterns = useUserPatterns();
   const [state, setState] = useState<{
     listings?: Listing[];
     error?: string;
@@ -328,6 +330,9 @@ function Listings({
     <div className="mt-4">
       <h3 className="mb-2 font-semibold">CSFloat listings: {name}</h3>
       {!state && <p className="text-sm text-muted">Loading...</p>}
+      {userPatterns.error && (
+        <p className="text-sm text-bad">{userPatterns.error}</p>
+      )}
       {state?.error && <p className="text-sm text-bad">{state.error}</p>}
       {state?.listings?.length === 0 && (
         <p className="text-sm text-muted">No listings right now.</p>
@@ -360,7 +365,14 @@ function Listings({
                   {l.float?.toFixed(6) ?? "-"}
                   <FloatBadges float={l.float} min={minFloat} max={maxFloat} />
                 </td>
-                <td>{l.paintSeed ?? "-"}</td>
+                <td>
+                  {l.paintSeed ?? "-"}
+                  <PatternBadge
+                    name={l.marketHashName}
+                    seed={l.paintSeed}
+                    patterns={userPatterns.patterns}
+                  />
+                </td>
                 <td className="text-right">
                   <a
                     className="text-accent underline"

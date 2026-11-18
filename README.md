@@ -159,6 +159,10 @@ The AI only comments on numbers Imbalance worked out. It never does the maths.
 - **Set a bankroll on the Tracker page** (the money you've set aside for trading). Costs
   over 10% of it turn red, and each contract says roughly how many tries it needs before
   you're likely to be ahead. Knife trade-ups often need hundreds.
+- **"Pattern matters"** marks finishes whose value depends on the pattern (Case Hardened,
+  Fade, Marble Fade, Crimson Web and others). Imbalance doesn't price patterns. To flag
+  patterns you know are valuable, copy `docs/patterns.example.json` to
+  `data/patterns.json` and add yours; matching CSFloat listings get a green badge.
 - **Charts fill up over time.** The app saves prices every 6 hours while you use it.
 - **New items are trade locked for 7 days.** Change this on the Tracker page if it changes.
 

@@ -111,9 +111,13 @@ Sizes: S = an hour or two, M = a session, L = more than a session.
       is valued at 70% of cash; no cash-only gap between Skinport and Steam. Possible
       follow-up: value Steam purchases made with wallet money the same way.
 
-- [ ] **E4. Pattern premiums (L).** Case Hardened blue gems and Fade percentages. Start
-      with a small hand-made table of known premium patterns and only flag them; don't
-      price them automatically.
+- [x] **E4. Pattern premiums (L).** Done, flags only. "Pattern matters" on finishes whose
+      value depends on the pattern (Case Hardened, Heat Treated, Fade, Marble Fade, Crimson
+      Web, Slaughter, Doppler), on CSFloat listings, Float snipes and trade-up outcomes.
+      Known premium patterns: a deliberately tiny built-in list (AK-47 CH 661, Karambit CH
+      387, Five-SeveN CH 278) plus your own in `data/patterns.json` (example in
+      `docs/patterns.example.json`). Fade % is not calculated.
+
 - [ ] **E5. Search more mixes (M).** The finder tries one target plus one filler. Add
       three-way mixes and a greedy improve step (swap one input at a time while profit
       rises), with a time limit so a scan stays under about 3 seconds.
