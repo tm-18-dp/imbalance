@@ -13,6 +13,7 @@ const LINKS = [
   { href: "/deals", label: "Deals" },
   { href: "/catalog", label: "Skins" },
   { href: "/tracker", label: "Tracker" },
+  { href: "/guide", label: "Guide" },
 ];
 
 function toggleTheme() {

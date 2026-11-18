@@ -85,7 +85,10 @@ export function Dashboard() {
         <h1 className="text-2xl font-bold">Dashboard</h1>
         <p className="text-sm text-muted">
           Update the skin list and prices, then look for trade-ups and deals.
-          Log what you buy on the Tracker page.
+          Log what you buy on the Tracker page.{" "}
+          <Link href="/guide" className="font-medium text-accent underline">
+            New here? Read the guide.
+          </Link>
         </p>
       </div>
 

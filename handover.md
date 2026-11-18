@@ -314,6 +314,10 @@ POSTs from curl need `-H "Origin: http://localhost:3000"`.
     11 rem and wraps. Before, item names squeezed to a word per line and numbers ran
     together. Header controls wrap; "API keys" and the price status stay on one line.
     Desktop is unchanged.
+  - **Guide page:** `src/app/guide/page.tsx`, a static first-time guide (setup, how it
+    makes money, risk levels, Trade-ups, Deals, Tracker, alerts and watchlist, keys,
+    safety). Linked as "Guide" in the header and from the Dashboard intro. Update it when
+    a feature's buttons or wording change.
 - **Next:** the owner continues tomorrow. Open items: test the AI (Find box, Ask AI) and
   CSFloat with real keys, then pick from `docs/roadmap.md`. taste-skill and impeccable were
   not installed, so M17 was done by hand; run them later if wanted.
