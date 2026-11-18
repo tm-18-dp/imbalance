@@ -148,8 +148,9 @@ Sizes: S = an hour or two, M = a session, L = more than a session.
 - [x] **T2. Expected vs actual (S).** Done: recording a trade-up saves what the app
       expected from the exact inputs; the Tracker compares it with what you got and says,
       after 20 contracts, whether the gap is more than luck.
-- [ ] **T3. Alerts (S).** A browser notification when a saved search (for example
-      "Aggressive Covert trade-ups over 20% ROI") finds something new.
+- [x] **T3. Alerts (S).** Done: "Alert me" on Trade-ups and Deals saves the search with a
+      minimum return or profit; after each price update the app reruns it and sends a
+      browser notification (or shows a header link) for anything new.
 
 ### U. Usability
 

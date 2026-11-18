@@ -20,6 +20,7 @@ import { AskAi } from "./AskAi";
 import { useSearchParams } from "next/navigation";
 import { urlFlag, urlNumber } from "@/lib/filters";
 import { PriceHistory, TrendBadge } from "./PriceHistory";
+import { AlertMe } from "./Alerts";
 
 export function Deals() {
   const { money, rates, currency } = useMoney();
@@ -63,19 +64,24 @@ export function Deals() {
     deals?: Deal[];
   }>({ loading: false });
 
+  /** The API query for the filters on screen; alerts save it too. */
+  function scanQuery() {
+    const usdMax = max ? Number(max) / (rates[currency] ?? 1) : 0;
+    return new URLSearchParams({
+      market,
+      minDiscount,
+      minVolume,
+      max: String(usdMax || ""),
+      q,
+      weapons: weapons ? "1" : "0",
+      dips: dips ? "1" : "0",
+    });
+  }
+
   async function scan() {
     setState({ loading: true });
     try {
-      const usdMax = max ? Number(max) / (rates[currency] ?? 1) : 0;
-      const params = new URLSearchParams({
-        market,
-        minDiscount,
-        minVolume,
-        max: String(usdMax || ""),
-        q,
-        weapons: weapons ? "1" : "0",
-        dips: dips ? "1" : "0",
-      });
+      const params = scanQuery();
       const res = await fetch(`/api/deals?${params}`);
       const json = (await res.json()) as { error?: string; deals?: Deal[] };
       if (!res.ok) throw new Error(json.error ?? "Scan failed.");
@@ -192,6 +198,11 @@ export function Deals() {
         >
           {state.loading ? "Scanning..." : "Find deals"}
         </button>
+        <AlertMe
+          kind="deals"
+          query={() => scanQuery().toString()}
+          defaultName={q ? `Deals: ${q}` : `${risk.profile.label} deals`}
+        />
       </div>
 
       {state.error && <p className="text-sm text-bad">{state.error}</p>}

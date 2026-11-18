@@ -9,6 +9,7 @@ import { AskAi } from "./AskAi";
 import { PlainSearch } from "./PlainSearch";
 import { formatAgo } from "@/lib/format";
 import { PRICES_UPDATED } from "./PriceRefresher";
+import { AlertList } from "./Alerts";
 
 type FullStatus = Status & {
   keys: Record<string, boolean>;
@@ -162,6 +163,8 @@ export function Dashboard() {
           )}
         </div>
       </div>
+
+      <AlertList />
 
       {status && !empty && (
         <Link href="/catalog" className="btn inline-block">

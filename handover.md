@@ -278,6 +278,18 @@ POSTs from curl need `-H "Origin: http://localhost:3000"`.
     z-score from the summed variances (|z| < 2 is luck), the verdict (needs 20) and
     results that weren't predicted. Checked on real data: logging the top Classified
     contract's inputs gave exactly the scan's EV ($61.48 on $48.43).
+  - **T3 alerts:** `alerts.ts`: saved searches in meta `alerts` (max 10), each an API
+    query (`cleanQuery` whitelists keys), an optional min ROI % and min profit, the keys
+    already reported (`seen`, last 500) and `lastHit`. `newHits` is pure. Routes:
+    `/api/alerts` (list without `seen`; add, which runs the search once so what's on
+    screen now never alerts; delete) and `/api/alerts/check` (reruns every alert, one
+    check at a time, saves `seen`). `api/alerts/run.ts` calls the Trade-ups and Deals
+    route handlers directly so alerts match the pages exactly. Deal keys include the buy
+    price, so a cheaper relisting is new. UI (`Alerts.tsx`): `AlertMe` next to Scan and
+    Find deals (asks for notification permission on save), `AlertWatcher` in the header
+    (checks 3 s after load and on `imbalance:prices-updated`; browser notification if
+    allowed, else an "N new finds" link), `AlertList` on the Dashboard. Checks only run
+    while a page is open: nothing runs in the background with the app closed.
 - **Next:** the owner continues tomorrow. Open items: test the AI (Find box, Ask AI) and
   CSFloat with real keys, then pick from `docs/roadmap.md`. taste-skill and impeccable were
   not installed, so M17 was done by hand; run them later if wanted.

@@ -76,6 +76,8 @@ in the `imbalance` folder and run `npm start`.
    while the app is open, prices update by themselves every 10 minutes (switch in the
    header).
 3. Open **Trade-ups**, pick a rarity and click **Scan**.
+4. On Trade-ups or Deals, **Alert me** saves a search. While the app is open it reruns
+   after each price update and notifies you when it finds something new.
 
 ### Updating
 

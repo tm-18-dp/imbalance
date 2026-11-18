@@ -30,6 +30,7 @@ import { urlFlag, urlNumber } from "@/lib/filters";
 import { AskAi } from "./AskAi";
 import type { ContractTimeline } from "@/lib/timeline";
 import { FloatBadges } from "./FloatBadges";
+import { AlertMe } from "./Alerts";
 import { TrendBadge } from "./PriceHistory";
 import type { TrendSignal } from "@/lib/trend";
 
@@ -113,20 +114,25 @@ export function TradeUps() {
   const [selected, setSelected] = useState<ApiContract | null>(null);
   const bankrollCents = useBankroll();
 
+  /** The API query for the filters on screen; alerts save it too. */
+  function scanQuery(sortBy: ContractSort = sort) {
+    // Budget is typed in the shown currency; the server works in USD.
+    const usd = budget ? Number(budget) / (rates[currency] ?? 1) : 0;
+    return new URLSearchParams({
+      tier,
+      market,
+      stattrak: stattrak ? "1" : "0",
+      hideRisky: hideRisky ? "1" : "0",
+      risk: risk.profile.id,
+      sort: sortBy,
+      budget: String(usd || ""),
+    });
+  }
+
   async function scan(sortBy: ContractSort = sort) {
     setState({ loading: true });
     try {
-      // Budget is typed in the shown currency; the server works in USD.
-      const usd = budget ? Number(budget) / (rates[currency] ?? 1) : 0;
-      const q = new URLSearchParams({
-        tier,
-        market,
-        stattrak: stattrak ? "1" : "0",
-        hideRisky: hideRisky ? "1" : "0",
-        risk: risk.profile.id,
-        sort: sortBy,
-        budget: String(usd || ""),
-      });
+      const q = scanQuery(sortBy);
       const res = await fetch(`/api/tradeups?${q}`);
       const json = (await res.json()) as {
         error?: string;
@@ -244,6 +250,11 @@ export function TradeUps() {
         >
           {state.loading ? "Scanning..." : "Scan"}
         </button>
+        <AlertMe
+          kind="tradeups"
+          query={() => scanQuery().toString()}
+          defaultName={`${risk.profile.label} ${stattrak ? "StatTrak " : ""}${tier} trade-ups`}
+        />
         <label className="flex items-center gap-2">
           <input
             type="checkbox"
