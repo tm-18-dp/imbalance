@@ -145,8 +145,9 @@ Sizes: S = an hour or two, M = a session, L = more than a session.
 - [x] **T1. Results per strategy (M).** Done: tracker entries carry a strategy and risk
       level (set when adding, editable on each row), and a Results panel shows profit per
       strategy or risk level, and per month.
-- [ ] **T2. Expected vs actual (S).** For logged trade-ups, compare what the app expected
-      with what you got. Over 20 or more contracts this shows whether the maths is right.
+- [x] **T2. Expected vs actual (S).** Done: recording a trade-up saves what the app
+      expected from the exact inputs; the Tracker compares it with what you got and says,
+      after 20 contracts, whether the gap is more than luck.
 - [ ] **T3. Alerts (S).** A browser notification when a saved search (for example
       "Aggressive Covert trade-ups over 20% ROI") finds something new.
 

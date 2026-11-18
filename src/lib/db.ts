@@ -129,6 +129,11 @@ const MIGRATIONS: string[] = [
   ALTER TABLE holdings ADD COLUMN strategy TEXT;
   ALTER TABLE holdings ADD COLUMN risk TEXT;
   `,
+  // v4: what the app expected from a recorded trade-up (JSON, see expectation.ts), saved on
+  // its result so it can be compared with what you got.
+  `
+  ALTER TABLE holdings ADD COLUMN expected TEXT;
+  `,
 ];
 
 export const SCHEMA_VERSION = MIGRATIONS.length;

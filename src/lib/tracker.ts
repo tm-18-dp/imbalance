@@ -4,6 +4,11 @@ import { getMeta, setMeta, transaction } from "./db";
 import { MARKETPLACE_IDS, MARKETPLACES, type MarketplaceId } from "./fees";
 import { RISK_PROFILE_IDS } from "./risk";
 import { STRATEGIES } from "./results";
+import {
+  expectationSchema,
+  readExpectation,
+  type Expectation,
+} from "./expectation";
 
 export const DAY = 86_400_000;
 
@@ -63,6 +68,8 @@ export type Holding = {
   strategy: string | null;
   /** The risk level it was picked at, null if not tagged. */
   risk: string | null;
+  /** For a trade-up's result: what the app expected when it was recorded. */
+  expected: Expectation | null;
 };
 
 const name = z.string().trim().min(1).max(200);
@@ -165,6 +172,8 @@ export function recordTradeUp(
     risk?: (typeof RISK_PROFILE_IDS)[number] | null;
   },
   at: number,
+  /** Works out what the app expects from these inputs, saved on the result. */
+  expect?: (inputs: Holding[]) => Expectation | null,
 ): number {
   if (inputIds.length !== 10 && inputIds.length !== 5)
     throw new Error("A trade-up uses 10 skins (or 5 Coverts).");
@@ -187,10 +196,10 @@ export function recordTradeUp(
       risk: output.risk ?? risk.safeParse(shared).data ?? null,
     });
     const tradableAt = Math.max(at, ...inputs.map((h) => h.tradableAt));
-    db.prepare("UPDATE holdings SET tradable_at = ? WHERE id = ?").run(
-      tradableAt,
-      id,
-    );
+    const expected = expect?.(inputs) ?? null;
+    db.prepare(
+      "UPDATE holdings SET tradable_at = ?, expected = ? WHERE id = ?",
+    ).run(tradableAt, expected ? JSON.stringify(expected) : null, id);
     const use = db.prepare(
       "UPDATE holdings SET status = 'used', used_in = ? WHERE id = ?",
     );
@@ -223,6 +232,7 @@ const toHolding = (r: Row): Holding => ({
   note: r.note == null ? null : String(r.note),
   strategy: r.strategy == null ? null : String(r.strategy),
   risk: r.risk == null ? null : String(r.risk),
+  expected: readExpectation(r.expected),
 });
 
 export function listHoldings(db: DatabaseSync): Holding[] {
@@ -285,6 +295,7 @@ const exportSchema = z.object({
       // Backups from before tags have none.
       strategy,
       risk,
+      expected: expectationSchema.nullish(),
     }),
   ),
 });
@@ -308,8 +319,8 @@ export function importTracker(db: DatabaseSync, data: unknown): number {
     db.exec("DELETE FROM holdings");
     const ins = db.prepare(
       `INSERT INTO holdings (id, market_hash_name, version, float_value, cost_cents, bought_at, tradable_at, source,
-         status, used_in, sold_cents, sold_net_cents, sold_on, sold_at, note, strategy, risk)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+         status, used_in, sold_cents, sold_net_cents, sold_on, sold_at, note, strategy, risk, expected)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     );
     for (const h of holdings) {
       ins.run(
@@ -330,6 +341,7 @@ export function importTracker(db: DatabaseSync, data: unknown): number {
         h.note ?? null,
         h.strategy ?? null,
         h.risk ?? null,
+        h.expected ? JSON.stringify(h.expected) : null,
       );
     }
     if (settings) saveSettings(db, settings);

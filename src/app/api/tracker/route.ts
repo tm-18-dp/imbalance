@@ -22,6 +22,8 @@ import {
 } from "@/lib/tracker";
 import { RISK_PROFILE_IDS } from "@/lib/risk";
 import { monthlyRealized, resultsBy } from "@/lib/results";
+import { chanceOfResult, expectedVsActual } from "@/lib/expectation";
+import { expectTradeUp } from "@/lib/tradeup-expect";
 import { nextSteps } from "@/lib/timeline";
 import { errorResponse, forbidden } from "../errors";
 
@@ -62,6 +64,26 @@ export async function GET() {
         ...monthlyRealized(holdings, "risk"),
       },
     },
+    expectedVsActual: expectedVsActual(
+      holdings.flatMap((h) =>
+        h.expected && h.status !== "used"
+          ? [
+              {
+                id: h.id,
+                marketHashName: h.marketHashName,
+                costCents: h.costCents,
+                expectedCents: h.expected.evCents,
+                sdCents: h.expected.sdCents,
+                actualCents:
+                  h.status === "sold" ? h.soldNetCents : h.valueCents,
+                sold: h.status === "sold",
+                chance: chanceOfResult(h.expected, h.marketHashName),
+                floatsEstimated: h.expected.floatsEstimated,
+              },
+            ]
+          : [],
+      ),
+    ),
     portfolio: portfolio(holdings, (h) => values.get(h.id) ?? null),
     ...nextSteps(holdings, Date.now()),
   });
@@ -110,10 +132,16 @@ export async function POST(req: Request) {
       return Response.json({ id: addHolding(db, a.item) });
     if (a.action === "sell")
       markSold(db, a.id, a.soldCents, a.market, a.soldAt);
-    if (a.action === "tradeup")
-      return Response.json({
-        id: recordTradeUp(db, a.inputIds, a.output, a.at),
+    if (a.action === "tradeup") {
+      // What the app expects from these exact inputs at today's prices, for T2.
+      let reason: string | null = null;
+      const id = recordTradeUp(db, a.inputIds, a.output, a.at, (inputs) => {
+        const e = expectTradeUp(db, inputs, getSettings(db).sellMarket);
+        if ("reason" in e) reason = e.reason;
+        return "expectation" in e ? e.expectation : null;
       });
+      return Response.json({ id, noExpectation: reason });
+    }
     if (a.action === "delete") deleteHolding(db, a.id);
     if (a.action === "tag") tagHolding(db, a.id, a.tags);
     if (a.action === "settings")

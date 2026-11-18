@@ -267,6 +267,17 @@ POSTs from curl need `-H "Origin: http://localhost:3000"`.
     tags and older backups still restore. UI: `StrategyResults.tsx` (panel, pickers,
     `TagPicker` on held and sold rows); the buy form defaults to Trade-up at the saved
     risk level. Entries are still only logged on the Tracker page.
+  - **T2 expected vs actual:** migration v4 adds `holdings.expected` (JSON,
+    `expectationSchema` in expectation.ts). On the `tradeup` action the route passes an
+    `expect` callback to `recordTradeUp`; `tradeup-expect.ts` rebuilds the contract from
+    the inputs that really went in (skin list lookup by name, logged floats, else the worst
+    float of the wear, flagged `floatsEstimated`) and runs `evaluateContract` at that
+    day's prices after the `sellMarket` fee. When it can't (unknown skin, mixed rarity or
+    StatTrak), the reply's `noExpectation` says why and the message shows it.
+    `expectedVsActual` (pure) totals expected vs got (sale, or value now while held), a
+    z-score from the summed variances (|z| < 2 is luck), the verdict (needs 20) and
+    results that weren't predicted. Checked on real data: logging the top Classified
+    contract's inputs gave exactly the scan's EV ($61.48 on $48.43).
 - **Next:** the owner continues tomorrow. Open items: test the AI (Find box, Ask AI) and
   CSFloat with real keys, then pick from `docs/roadmap.md`. taste-skill and impeccable were
   not installed, so M17 was done by hand; run them later if wanted.

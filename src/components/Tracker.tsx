@@ -14,6 +14,8 @@ import {
   TagPicker,
   type GroupResults,
 } from "./StrategyResults";
+import { ExpectedVsActual } from "./ExpectedVsActual";
+import type { ExpectedVsActual as Comparison } from "@/lib/expectation";
 import { FloatBadges } from "./FloatBadges";
 
 type Row = Holding & {
@@ -25,6 +27,7 @@ type Data = {
   holdings: Row[];
   settings: Settings;
   results: Record<ResultGroup, GroupResults>;
+  expectedVsActual: Comparison;
   portfolio: Portfolio;
   steps: NextStep[];
   comeBackAt: number | null;
@@ -78,12 +81,18 @@ export function Tracker() {
       );
   }, []);
 
-  async function run(body: unknown, done: string) {
+  async function run(
+    body: unknown,
+    done: string | ((reply: Record<string, unknown>) => string),
+  ) {
     setMessage(null);
     try {
-      await post(body);
+      const reply = await post(body);
       await load();
-      setMessage({ ok: true, text: done });
+      setMessage({
+        ok: true,
+        text: typeof done === "string" ? done : done(reply),
+      });
       return true;
     } catch (err) {
       setMessage({
@@ -156,6 +165,8 @@ export function Tracker() {
       <NextSteps steps={data.steps} comeBackAt={data.comeBackAt} />
 
       <StrategyResults results={data.results} />
+
+      <ExpectedVsActual data={data.expectedVsActual} />
 
       <AddPurchase
         defaultRisk={data.settings.riskProfile}
@@ -300,7 +311,10 @@ export function Tracker() {
                   output,
                   at: Date.now(),
                 },
-                "Trade-up recorded.",
+                (reply) =>
+                  reply.noExpectation
+                    ? `Trade-up recorded. It can't be compared with what the app expected: ${String(reply.noExpectation)}`
+                    : "Trade-up recorded, with what the app expected from it.",
               )
             )
               setSelected([]);
