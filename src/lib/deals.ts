@@ -116,8 +116,16 @@ export function findDeals(db: DatabaseSync, opts: DealOptions): Deal[] {
     ).map((r) => [r.name, r.image]),
   );
 
+  // A weapon skin is one in the skin list (weapons, knives, gloves). Name patterns alone
+  // let 286 others through (case keys, agents, viewer passes). Before the first skin list
+  // update there is no list, so the patterns are all there is.
+  const isWeapon = (name: string) =>
+    images.size
+      ? images.has(baseSkinName(name)) || name.startsWith("★ ")
+      : !NOT_WEAPON.test(name);
+
   return rows
-    .filter((r) => !opts.weaponsOnly || !NOT_WEAPON.test(r.market_hash_name))
+    .filter((r) => !opts.weaponsOnly || isWeapon(r.market_hash_name))
     .map((r) => {
       const resaleCents = resalePrice(r);
       const netResaleCents = opts.market.net(resaleCents);

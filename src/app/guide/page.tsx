@@ -11,6 +11,7 @@ const SECTIONS = [
   { id: "deals", title: "Deals" },
   { id: "tracker", title: "Tracker" },
   { id: "alerts", title: "Alerts and the watchlist" },
+  { id: "sim", title: "Practice with the Simulator" },
   { id: "keys", title: "Free API keys (optional)" },
   { id: "safety", title: "Before you spend money" },
 ];
@@ -267,7 +268,42 @@ export default function GuidePage() {
         </Bullets>
       </Section>
 
-      <Section id="keys" title="8. Free API keys (optional)">
+      <Section id="sim" title="8. Practice with the Simulator">
+        <p>
+          The <Page href="/sim">Simulator</Page> runs practice bots with pretend
+          money at real Skinport prices, so you can see how a strategy does
+          before risking money.
+        </p>
+        <Steps>
+          <li>
+            Pick a strategy (Trade-ups and a rarity, or Deals), a risk level,
+            how much pretend money, and the most one buy may use. Click{" "}
+            <strong>Start bot</strong>; it makes its first buys straight away.
+          </li>
+          <li>
+            After each price update while the app is open, every bot sells what
+            is due and looks for new buys, following the same picks you see on
+            Trade-ups and Deals. Trade-up results are rolled with the app&apos;s
+            odds.
+          </li>
+          <li>
+            It plays by the real rules: buys at the lowest listing, waits out
+            the 7-day trade hold and the usual time to sell, and pays the
+            selling fee. Results build up over weeks.
+          </li>
+          <li>
+            Each bot shows its value, cash, profit from sales, how often it sold
+            at a profit, a value chart and every item it bought.
+          </li>
+        </Steps>
+        <p className="text-muted">
+          Run two bots side by side (say Safe deals and Aggressive trade-ups) to
+          compare. A bot&apos;s value counts unsold items at their usual price;
+          only sales are real profit.
+        </p>
+      </Section>
+
+      <Section id="keys" title="9. Free API keys (optional)">
         <p>
           Click <strong>API keys</strong> in the top bar. Each popup entry links
           to where you get the key and a how-to video. All are free.
@@ -291,7 +327,7 @@ export default function GuidePage() {
         </p>
       </Section>
 
-      <Section id="safety" title="9. Before you spend money">
+      <Section id="safety" title="10. Before you spend money">
         <Bullets>
           <li>
             Check the price and float of every item on the marketplace before

@@ -326,6 +326,21 @@ POSTs from curl need `-H "Origin: http://localhost:3000"`.
     and `priceLookup` now fall back to the cheapest listed phase. Checked and not a bug:
     repeated alert checks on unchanged prices raised no false finds (Restricted 3 runs,
     Covert 5 runs).
+  - **Simulator (practice bots):** migration v6 (`sim_bots`, `sim_positions`,
+    `sim_snapshots`, cascading deletes). `sim.ts` (pure: `pickOutcome`, `botSummary`,
+    `newBotSchema`), `sim-data.ts` (`runBot`: sell positions past `sell_after` = trade
+    hold + `daysToSell` at today's `priceLookup` price after the fee, waiting if
+    unpriced; then buy within min(cash, value x `max_buy_share`): up to 3 deals not held
+    at the lowest listing, or the first profitable trade-up from the real Trade-ups
+    search (`api/sims/search.ts` calls that route) with the result rolled by
+    `pickOutcome`; hourly value snapshots). `/api/sims` (list with summaries;
+    create, which runs once, pause, resume, delete, run) and `/api/sims/run` (every
+    active bot not run in 9 minutes, one run at a time), triggered by `SimRunner` in the
+    header on load and on `imbalance:prices-updated`. Bots only trade while the app is
+    open. Value counts holdings at their usual price, like the Tracker.
+  - **Deals weapons filter:** "weapon skins only" now means "in the skin list, or a ★
+    knife or glove"; name patterns let 286 non-weapons through (case keys, agents,
+    viewer passes). Patterns remain the fallback before the first skin list update.
 - **Next:** the owner continues tomorrow. Open items: test the AI (Find box, Ask AI) and
   CSFloat with real keys, then pick from `docs/roadmap.md`. taste-skill and impeccable were
   not installed, so M17 was done by hand; run them later if wanted.

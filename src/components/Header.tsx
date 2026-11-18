@@ -6,6 +6,7 @@ import { KeysModal } from "./KeysModal";
 import { CurrencyPicker } from "./Money";
 import { PriceRefresher } from "./PriceRefresher";
 import { AlertWatcher } from "./Alerts";
+import { SimRunner } from "./Simulator";
 
 const LINKS = [
   { href: "/", label: "Dashboard" },
@@ -13,6 +14,7 @@ const LINKS = [
   { href: "/deals", label: "Deals" },
   { href: "/catalog", label: "Skins" },
   { href: "/tracker", label: "Tracker" },
+  { href: "/sim", label: "Simulator" },
   { href: "/guide", label: "Guide" },
 ];
 
@@ -36,7 +38,7 @@ export function Header() {
           <img src="/logo.svg" alt="" width={32} height={32} />
           Imbalance
         </Link>
-        <nav aria-label="Main" className="flex gap-4 text-sm">
+        <nav aria-label="Main" className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
           {LINKS.map((l) => (
             <Link
               key={l.href}
@@ -53,6 +55,7 @@ export function Header() {
           ))}
         </nav>
         <div className="ml-auto flex flex-wrap items-center gap-2">
+          <SimRunner />
           <AlertWatcher />
           <PriceRefresher />
           <CurrencyPicker />

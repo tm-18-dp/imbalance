@@ -144,6 +144,44 @@ const MIGRATIONS: string[] = [
     PRIMARY KEY (market_hash_name, version)
   );
   `,
+  // v6: practice bots that trade pretend money at real prices (sim.ts, sim-data.ts).
+  `
+  CREATE TABLE sim_bots (
+    id INTEGER PRIMARY KEY,
+    name TEXT NOT NULL,
+    strategy TEXT NOT NULL CHECK (strategy IN ('tradeups', 'deals')),
+    risk TEXT NOT NULL,
+    tier TEXT,
+    market TEXT NOT NULL DEFAULT 'skinport',
+    start_cents INTEGER NOT NULL,
+    cash_cents INTEGER NOT NULL,
+    max_buy_share REAL NOT NULL,
+    active INTEGER NOT NULL DEFAULT 1,
+    created_at INTEGER NOT NULL,
+    last_run_at INTEGER
+  );
+  CREATE TABLE sim_positions (
+    id INTEGER PRIMARY KEY,
+    bot_id INTEGER NOT NULL REFERENCES sim_bots (id) ON DELETE CASCADE,
+    market_hash_name TEXT NOT NULL,
+    version TEXT NOT NULL DEFAULT '',
+    cost_cents INTEGER NOT NULL,
+    bought_at INTEGER NOT NULL,
+    tradable_at INTEGER NOT NULL,
+    sell_after INTEGER NOT NULL,
+    status TEXT NOT NULL DEFAULT 'holding' CHECK (status IN ('holding', 'sold')),
+    sold_net_cents INTEGER,
+    sold_at INTEGER,
+    detail TEXT
+  );
+  CREATE INDEX sim_positions_bot ON sim_positions (bot_id, status);
+  CREATE TABLE sim_snapshots (
+    bot_id INTEGER NOT NULL REFERENCES sim_bots (id) ON DELETE CASCADE,
+    at INTEGER NOT NULL,
+    value_cents INTEGER NOT NULL,
+    PRIMARY KEY (bot_id, at)
+  );
+  `,
 ];
 
 export const SCHEMA_VERSION = MIGRATIONS.length;

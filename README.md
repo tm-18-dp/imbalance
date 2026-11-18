@@ -24,6 +24,7 @@ on your PC.
 | **Deals**     | Skins listed below their 30-day price that sell often enough to flip, with dip and rebound signals, price charts and a Steam price check                                                                 |
 | **Skins**     | Every skin with images, float ranges, prices per wear, charts and CSFloat listings with special-float badges (0.00x, best of a wear and so on)                                                           |
 | **Tracker**   | Log buys, sales and trade-ups. See what it is all worth after fees, when each item can be traded again, and back it up. Tag each buy with its strategy and risk level to see which actually earns        |
+| **Simulator** | Practice bots that trade pretend money at real prices with the app's own picks, so you can see how a strategy really does before using money                                                             |
 | **Guide**     | How to use each feature, for first-time users: setup, risk levels, trade-ups, deals, the tracker, alerts and keys                                                                                        |
 
 Prices show in your currency (pick it in the header). Dark and light themes.

@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { openDb } from "./db";
 import { saveSkinport } from "./prices/skinport";
+import { saveCatalog } from "./catalog";
 import { baseSkinName, findDeals, resalePrice } from "./deals";
 import { MARKETPLACES } from "./fees";
 import { overviewSchema, steamPrice } from "./prices/steam";
@@ -152,5 +153,60 @@ describe("steamPrice", () => {
     });
     await steamPrice(db, "x", 1000 + 60_000);
     expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("weapon skins only", () => {
+  it("keeps items in the skin list and knives, and drops keys, agents and passes", () => {
+    const db = openDb(":memory:");
+    saveCatalog(db, {
+      skins: [
+        {
+          id: "ak",
+          name: "AK-47 | Redline",
+          rarity: { id: "r", name: "Classified" },
+          min_float: 0.1,
+          max_float: 0.7,
+          stattrak: true,
+          wears: [{ id: "a", name: "Field-Tested" }],
+          collections: [{ id: "C", name: "C" }],
+        },
+      ],
+      collections: [{ id: "C", name: "C" }],
+      crates: [],
+    });
+    const names = [
+      "AK-47 | Redline (Field-Tested)",
+      "StatTrak™ AK-47 | Redline (Field-Tested)",
+      "★ Bayonet",
+      "Operation Breakout Case Key",
+      "'The Doctor' Romanov | Sabre",
+      "Cologne 2015 Viewer Pass",
+    ];
+    const hist = (name: string) => ({
+      market_hash_name: name,
+      last_24_hours: win(null, 0),
+      last_7_days: win(20, 50),
+      last_30_days: win(20, 50),
+      last_90_days: win(20, 50),
+    });
+    saveSkinport(db, {
+      items: names.map((n) => ({
+        market_hash_name: n,
+        min_price: 15,
+        quantity: 5,
+      })),
+      history: names.map(hist),
+    });
+    const found = (weaponsOnly: boolean) =>
+      findDeals(db, { market: MARKETPLACES.skinport, weaponsOnly })
+        .map((d) => d.marketHashName)
+        .sort();
+    expect(found(true)).toEqual([
+      "AK-47 | Redline (Field-Tested)",
+      "StatTrak™ AK-47 | Redline (Field-Tested)",
+      "★ Bayonet",
+    ]);
+    expect(found(false)).toHaveLength(names.length);
   });
 });
