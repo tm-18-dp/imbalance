@@ -4,7 +4,7 @@ import { findContracts, optionCost, type InputOption } from "./finder";
 import { openDb } from "./db";
 import { saveCatalog } from "./catalog";
 import { saveSkinport } from "./prices/skinport";
-import { loadTierData, sellPrice } from "./tradeup-data";
+import { floorEstimate, loadTierData, sellPrice } from "./tradeup-data";
 import { addHolding } from "./tracker";
 import type { OutcomeSkin } from "./tradeup";
 
@@ -226,9 +226,61 @@ describe("loadTierData", () => {
     expect(sellPrice(row)).toBe(90);
     expect(sellPrice({ ...row, volume_7d: 1 })).toBe(80);
     expect(sellPrice({ ...row, volume_7d: 1, volume_30d: 2 })).toBe(70);
+    // Two sales at 70 beat a lone listing at 100: the listing may be wishful.
     expect(
       sellPrice({ ...row, volume_7d: 0, volume_30d: 0, volume_90d: 2 }),
+    ).toBe(70);
+    // A listing below the sparse sales is the real price to beat.
+    expect(
+      sellPrice({
+        ...row,
+        min_cents: 50,
+        volume_7d: 0,
+        volume_30d: 0,
+        volume_90d: 2,
+      }),
+    ).toBe(50);
+    // No sales at all: the listing is all there is.
+    expect(
+      sellPrice({ ...row, volume_7d: 0, volume_30d: 0, volume_90d: 0 }),
     ).toBe(100);
     expect(sellPrice(undefined)).toBeNull();
+    // No listing and only a couple of sales: the sparse median beats nothing.
+    const rare = {
+      ...row,
+      min_cents: null,
+      median_7d: null,
+      volume_7d: 0,
+      median_30d: null,
+      volume_30d: 0,
+      median_90d: 33100,
+      volume_90d: 2,
+    };
+    expect(sellPrice(rare)).toBe(33100);
+    expect(sellPrice({ ...rare, median_90d: null, volume_90d: 0 })).toBeNull();
+  });
+
+  it("estimates a cautious floor for unpriced rare wears and phases", () => {
+    // Prices by phase and wear for one Doppler knife; FN and the gems are missing.
+    const known: Record<string, number> = {
+      "Phase 1|Minimal Wear": 30000,
+      "Phase 2|Minimal Wear": 33000,
+      "Phase 2|Factory New": 40000,
+    };
+    const lookup = (phase: string | undefined, wear: string | null) =>
+      known[`${phase}|${wear}`] ?? null;
+    // Ruby MW: at least the cheapest normal phase in MW.
+    expect(floorEstimate(lookup, "Ruby", "Minimal Wear")).toBe(30000);
+    // Ruby FN: the cheapest normal phase in FN.
+    expect(floorEstimate(lookup, "Ruby", "Factory New")).toBe(40000);
+    // Phase 1 FN: at least Phase 1 in the next worse wear.
+    expect(floorEstimate(lookup, "Phase 1", "Factory New")).toBe(30000);
+    // Nothing related priced: no guess.
+    expect(floorEstimate(lookup, "Phase 3", "Factory New")).toBeNull();
+    expect(floorEstimate(() => null, undefined, null)).toBeNull();
+    // A plain skin falls back through worse wears.
+    const plain = (_: string | undefined, wear: string | null) =>
+      wear === "Field-Tested" ? 9000 : null;
+    expect(floorEstimate(plain, undefined, "Factory New")).toBe(9000);
   });
 });

@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useMemo, useState } from "react";
 import type { FoundContract } from "@/lib/finder";
 import type { Outcome } from "@/lib/tradeup";
-import { isTier, TIERS, type Tier } from "@/lib/tradeup";
+import { isTier, TIERS, valueDrivers, type Tier } from "@/lib/tradeup";
 import { isMarketplaceId, MARKETPLACES, type MarketplaceId } from "@/lib/fees";
 import {
   isRiskProfileId,
@@ -48,7 +48,7 @@ const TIER_SHORT: Record<Tier, string> = {
 
 type ApiOutcome = Outcome & {
   volume30d: number;
-  priceSource: "steam" | "skinport" | null;
+  priceSource: "steam" | "skinport" | "estimate" | null;
   /** Null for Doppler phases, which Steam doesn't list separately. */
   marketHashName: string | null;
 };
@@ -531,6 +531,7 @@ function ContractDetail({
         </p>
 
         <h3 className="mt-4 mb-2 font-semibold">2. What you can get</h3>
+        <ValueDrivers outcomes={c.result.outcomes} />
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="text-left text-muted">
@@ -580,7 +581,23 @@ function ContractDetail({
                     />
                   </td>
                   <td>
-                    {money(o.priceCents)}
+                    {o.priceCents == null ? (
+                      <span
+                        className="text-bad"
+                        title="Nobody has sold or listed this lately. Counted as $0, though it's worth something."
+                      >
+                        Unknown
+                      </span>
+                    ) : o.priceSource === "estimate" ? (
+                      <span title="Nobody has sold or listed this lately. Worth at least this: the price of the same knife in a worse wear, or of a normal phase.">
+                        at least {money(o.priceCents)}
+                        <span className="block text-xs text-muted">
+                          estimate
+                        </span>
+                      </span>
+                    ) : (
+                      money(o.priceCents)
+                    )}
                     {sellOnSteam && o.priceSource === "skinport" && (
                       <span
                         className="block text-xs text-muted"
@@ -676,6 +693,47 @@ function SpreadSummary({
         days={c.timeline.totalDays}
         bankrollCents={bankrollCents}
       />
+    </div>
+  );
+}
+
+/**
+ * For knife and glove pools: which knife types the expected value rests on. A contract
+ * whose value is mostly one rare knife is a lottery ticket, however good its average.
+ */
+function ValueDrivers({ outcomes }: { outcomes: ApiOutcome[] }) {
+  const drivers = valueDrivers(outcomes);
+  if (drivers.length < 3) return null;
+  const top = drivers.slice(0, 5);
+  const lead = top[0];
+  return (
+    <div className="mb-3 text-sm">
+      <p className="mb-1 text-muted">Where the value comes from</p>
+      <ul className="space-y-1">
+        {top.map((d) => (
+          <li key={d.item} className="flex items-center gap-2">
+            <span className="w-40 shrink-0 truncate" title={d.item}>
+              {d.item}
+            </span>
+            <span
+              className="h-2 rounded bg-accent"
+              style={{ width: `${Math.max(2, d.evShare * 100) * 1.5}px` }}
+              aria-hidden="true"
+            />
+            <span>
+              {Math.round(d.evShare * 100)}% of the value,{" "}
+              <span className="text-muted">{pct(d.probability)} chance</span>
+            </span>
+          </li>
+        ))}
+      </ul>
+      {lead.evShare > 0.4 && lead.probability < 0.2 && (
+        <p className="mt-1 text-bad">
+          {Math.round(lead.evShare * 100)}% of the value rests on a{" "}
+          {pct(lead.probability)} chance of {lead.item}. Most tries won&apos;t
+          get it.
+        </p>
+      )}
     </div>
   );
 }

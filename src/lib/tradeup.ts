@@ -268,3 +268,42 @@ export function evaluateContract(
     missingPrices,
   };
 }
+
+export type ValueDriver = {
+  /** The knife or glove type, e.g. "★ Karambit" or "★ Sport Gloves". */
+  item: string;
+  probability: number;
+  /** Share of the expected value this item brings. */
+  evShare: number;
+  outcomes: number;
+};
+
+/**
+ * Groups outcomes by knife or glove type (the name before " | ") and ranks them by how
+ * much of the expected value they bring. Knife pools have dozens of outcomes; this shows
+ * whether a contract's value rests on one lucky knife or is spread out.
+ */
+export function valueDrivers(
+  outcomes: readonly {
+    skin: { name: string };
+    probability: number;
+    netCents: number;
+  }[],
+): ValueDriver[] {
+  const ev = outcomes.reduce((s, o) => s + o.probability * o.netCents, 0);
+  const groups = new Map<string, ValueDriver>();
+  for (const o of outcomes) {
+    const item = o.skin.name.split(" | ")[0];
+    const g = groups.get(item) ?? {
+      item,
+      probability: 0,
+      evShare: 0,
+      outcomes: 0,
+    };
+    g.probability += o.probability;
+    g.evShare += ev > 0 ? (o.probability * o.netCents) / ev : 0;
+    g.outcomes++;
+    groups.set(item, g);
+  }
+  return [...groups.values()].sort((a, b) => b.evShare - a.evShare);
+}

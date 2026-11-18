@@ -5,6 +5,7 @@ import {
   evaluateContract,
   normalizeFloat,
   contractSpread,
+  valueDrivers,
   outcomeProbabilities,
   phaseShares,
   outputFloat,
@@ -275,5 +276,28 @@ describe("contractSpread", () => {
       worstCents: -1000,
       chanceLoseHalf: 1,
     });
+  });
+});
+
+describe("valueDrivers", () => {
+  const o = (name: string, probability: number, netCents: number) => ({
+    skin: { name },
+    probability,
+    netCents,
+  });
+  it("groups knife types and ranks them by share of the value", () => {
+    const d = valueDrivers([
+      o("★ Karambit | Fade", 0.25, 100000),
+      o("★ Karambit | Night", 0.25, 20000),
+      o("★ Gut Knife | Fade", 0.5, 10000),
+    ]);
+    // EV = 25000 + 5000 + 5000 = 35000.
+    expect(d.map((x) => x.item)).toEqual(["★ Karambit", "★ Gut Knife"]);
+    expect(d[0]).toMatchObject({ probability: 0.5, outcomes: 2 });
+    expect(d[0].evShare).toBeCloseTo(30000 / 35000);
+    expect(d[1].evShare).toBeCloseTo(5000 / 35000);
+  });
+  it("copes with a worthless pool", () => {
+    expect(valueDrivers([o("★ Bayonet | Night", 1, 0)])[0].evShare).toBe(0);
   });
 });

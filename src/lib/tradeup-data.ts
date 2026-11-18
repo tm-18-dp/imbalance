@@ -1,11 +1,51 @@
 import type { DatabaseSync } from "node:sqlite";
 import type { InputOption } from "./finder";
-import { nextTier, type OutcomeSkin, type PriceFn, type Tier } from "./tradeup";
+import {
+  GEM_PHASES,
+  nextTier,
+  type OutcomeSkin,
+  type PriceFn,
+  type Tier,
+} from "./tradeup";
 import { marketHashName, WEARS, type WearName } from "./wear";
 import { listHoldings } from "./tracker";
 
 export type Variant = "normal" | "stattrak";
-export type PriceSource = "steam" | "skinport";
+/** "estimate" is a cautious floor from a related item, see `floorEstimate`. */
+export type PriceSource = "steam" | "skinport" | "estimate";
+
+const NORMAL_PHASES = ["Phase 1", "Phase 2", "Phase 3", "Phase 4"];
+
+/**
+ * A cautious "worth at least" price for an outcome nobody has listed or sold lately:
+ * - a rare phase (Ruby, Sapphire, Black Pearl, Emerald) is worth at least the cheapest
+ *   normal phase of the same knife and wear;
+ * - a better wear is worth at least the nearest worse wear of the same skin and phase.
+ * `lookup` returns a real price (no estimates) or null. Null when nothing related is priced.
+ */
+export function floorEstimate(
+  lookup: (phase: string | undefined, wear: WearName | null) => number | null,
+  phase: string | undefined,
+  wear: WearName | null,
+): number | null {
+  if (phase && GEM_PHASES.includes(phase)) {
+    const normals = NORMAL_PHASES.map((p) => lookup(p, wear)).filter(
+      (c): c is number => c != null,
+    );
+    if (normals.length) return Math.min(...normals);
+  }
+  if (!wear) return null;
+  const idx = WEARS.findIndex((w) => w.name === wear);
+  for (let j = idx + 1; j < WEARS.length; j++) {
+    const c =
+      lookup(phase, WEARS[j].name) ??
+      (phase && GEM_PHASES.includes(phase)
+        ? floorEstimate(lookup, phase, WEARS[j].name)
+        : null);
+    if (c != null) return c;
+  }
+  return null;
+}
 
 /** Steam prices saved by "Steam check" are trusted for a week when selling on Steam. */
 export const STEAM_PRICE_MAX_AGE_MS = 7 * 24 * 60 * 60_000;
@@ -57,14 +97,30 @@ function loadPrices(db: DatabaseSync) {
 
 /**
  * What a skin really sells for: the most recent sales median with at least 3 sales
- * (7, then 30, then 90 days), otherwise the lowest listing. Sales beat hopeful listings.
+ * (7, then 30, then 90 days). Sales beat hopeful listings.
+ * Without that, the lower of the lowest listing and the most recent median from even 1 or
+ * 2 sales. A lone listing can be a wishful asking price many times the real value (seen:
+ * a $6,113 listing on a knife that sells for far less), and you'd have to undercut it to
+ * sell anyway. Rare items (old knives in Factory New, rare phases) often sell only a couple
+ * of times in 90 days; their 30-day volume stays low, so the risk checks still treat them
+ * as thin markets.
  */
 export function sellPrice(r: PriceRow | undefined): number | null {
   if (!r) return null;
   if (r.median_7d != null && (r.volume_7d ?? 0) >= 3) return r.median_7d;
   if (r.median_30d != null && (r.volume_30d ?? 0) >= 3) return r.median_30d;
   if (r.median_90d != null && (r.volume_90d ?? 0) >= 3) return r.median_90d;
-  return r.min_cents;
+  const sparse =
+    (r.volume_7d ?? 0) > 0 && r.median_7d != null
+      ? r.median_7d
+      : (r.volume_30d ?? 0) > 0 && r.median_30d != null
+        ? r.median_30d
+        : (r.volume_90d ?? 0) > 0
+          ? r.median_90d
+          : null;
+  if (r.min_cents != null && sparse != null)
+    return Math.min(r.min_cents, sparse);
+  return r.min_cents ?? sparse;
 }
 
 type SkinRow = {
@@ -156,8 +212,17 @@ export function loadTierData(
     skin.phase
       ? undefined
       : steam.get(marketHashName(skin.name, wear, variant));
-  const price: PriceFn = (skin, wear) =>
+  /** A real price: Steam (when selling there) or Skinport. */
+  const realPrice = (skin: OutcomeSkin, wear: WearName | null) =>
     steamCents(skin, wear) ?? sellPrice(priceRow(skin, wear));
+  const estimate = (skin: OutcomeSkin, wear: WearName | null) =>
+    floorEstimate(
+      (phase, w) => realPrice({ ...skin, phase }, w),
+      skin.phase,
+      wear,
+    );
+  const price: PriceFn = (skin, wear) =>
+    realPrice(skin, wear) ?? estimate(skin, wear);
   /** Where an outcome's sell price came from, or null when there is none. */
   const priceSource = (
     skin: OutcomeSkin,
@@ -167,7 +232,9 @@ export function loadTierData(
       ? "steam"
       : sellPrice(priceRow(skin, wear)) != null
         ? "skinport"
-        : null;
+        : estimate(skin, wear) != null
+          ? "estimate"
+          : null;
   /** Market name of an outcome, for looking up its Steam price. */
   const outcomeName = (skin: OutcomeSkin, wear: WearName | null) =>
     marketHashName(skin.name, wear, variant);

@@ -29,7 +29,17 @@ describe("riskNotes", () => {
   });
   it("flags missing prices", () => {
     expect(riskNotes([o(1, 0, 10, null)], 0)).toEqual([
-      "1 outcome(s) have no price, counted as 0",
+      "100% chance of an outcome nobody has sold or listed lately, counted as $0 (it's worth something, so the real value is likely higher)",
+    ]);
+    expect(
+      riskNotes([o(0.004, 0, 10, null), o(0.996, 100, 50)], 100)[0],
+    ).toMatch(/^under 1% chance/);
+  });
+
+  it("flags value that rests on estimated floors", () => {
+    const est = { ...o(0.2, 500, 50), priceSource: "estimate" };
+    expect(riskNotes([est, o(0.8, 500, 50)], 500)).toEqual([
+      '20% chance of an outcome priced by a cautious "worth at least" estimate from a related item',
     ]);
   });
 });

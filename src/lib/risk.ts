@@ -5,7 +5,13 @@ export type RiskOutcome = {
   netCents: number;
   priceCents: number | null;
   volume30d: number;
+  /** "estimate" when the price is a cautious floor from a related item. */
+  priceSource?: string | null;
 };
+
+/** A chance as a short percentage, never rounding a real chance down to 0%. */
+const chanceText = (p: number) =>
+  p > 0 && p < 0.01 ? "under 1%" : `${Math.round(p * 100)}%`;
 
 export const RISK_PROFILE_IDS = ["safe", "balanced", "aggressive"] as const;
 export type RiskProfileId = (typeof RISK_PROFILE_IDS)[number];
@@ -104,8 +110,20 @@ export function riskNotes(
 ): string[] {
   const safe = RISK_PROFILES.safe;
   const notes: string[] = [];
-  const missing = outcomes.filter((o) => o.priceCents == null).length;
-  if (missing) notes.push(`${missing} outcome(s) have no price, counted as 0`);
+  const unpriced = outcomes
+    .filter((o) => o.priceCents == null)
+    .reduce((s, o) => s + o.probability, 0);
+  if (unpriced > 0)
+    notes.push(
+      `${chanceText(unpriced)} chance of an outcome nobody has sold or listed lately, counted as $0 (it's worth something, so the real value is likely higher)`,
+    );
+  const estimated = outcomes
+    .filter((o) => o.priceCents != null && o.priceSource === "estimate")
+    .reduce((s, o) => s + o.probability, 0);
+  if (estimated > 0)
+    notes.push(
+      `${chanceText(estimated)} chance of an outcome priced by a cautious "worth at least" estimate from a related item`,
+    );
   const share = thinShare(outcomes, evCents, safe.thinMarket);
   if (share > safe.maxThinShare) {
     notes.push(

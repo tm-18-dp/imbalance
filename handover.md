@@ -179,6 +179,13 @@ POSTs from curl need `-H "Origin: http://localhost:3000"`.
     with its default, so saving one setting reset the rest (changing the sell market reset
     the trade hold to 7). API routes and backup restore now use `settingsPatchSchema`,
     which has no defaults.
+  - **R5 knife pricing:** `sellPrice` falls back to the lower of the lowest listing and the
+    most recent median from 1 or 2 sales (a lone listing was $6,113 on a knife selling near
+    $109). `floorEstimate` gives a cautious "worth at least" price (gem phase: cheapest
+    normal phase; better wear: nearest worse wear), `priceSource` "estimate". Knife/glove
+    coverage 84% to 98%; the rest (mostly Battle-Scarred) stay unpriced and count as $0.
+    `riskNotes` reports the chance of unpriced and estimated outcomes. `valueDrivers`
+    groups outcomes by knife type for the "Where the value comes from" bars.
 - **Next:** the owner continues tomorrow. Open items: test the AI (Find box, Ask AI) and
   CSFloat with real keys, then pick from `docs/roadmap.md`. taste-skill and impeccable were
   not installed, so M17 was done by hand; run them later if wanted.

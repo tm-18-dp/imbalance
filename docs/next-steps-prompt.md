@@ -80,9 +80,12 @@ Sizes: S = an hour or two, M = a session, L = more than a session.
       shows rough tries needed to be 9 in 10 likely ahead (`src/lib/sizing.ts`). Also
       fixed: saving one setting used to reset all the others to their defaults.
 
-- [ ] **R5. Covert to knife/gloves focus (M).** These have the biggest swings. Make sure
-      rare-pool prices cover every Doppler phase and glove wear, flag outcomes with no price
-      as unknown (not zero) in Aggressive mode, and show which knives drive the EV.
+- [x] **R5. Covert to knife/gloves focus (M).** Done. Knife and glove price coverage went
+      from 84% to 98%: sparse sales (1 or 2 in 90 days) now count, and a cautious "worth at
+      least" floor fills the rest (gem phase: cheapest normal phase; better wear: nearest
+      worse wear). Unpriced and estimated outcomes show as "Unknown" and "at least", with
+      their chance in the warnings. The contract panel shows which knife types the value
+      rests on. Also: a lone wishful listing no longer beats real sales.
 
 ### E. Real edge (where bigger, more reliable profit comes from)
 
