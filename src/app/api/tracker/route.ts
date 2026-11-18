@@ -17,7 +17,11 @@ import {
   recordTradeUp,
   saveSettings,
   settingsPatchSchema,
+  tagHolding,
+  tagSchema,
 } from "@/lib/tracker";
+import { RISK_PROFILE_IDS } from "@/lib/risk";
+import { monthlyRealized, resultsBy } from "@/lib/results";
 import { nextSteps } from "@/lib/timeline";
 import { errorResponse, forbidden } from "../errors";
 
@@ -48,6 +52,16 @@ export async function GET() {
   return Response.json({
     holdings,
     settings,
+    results: {
+      strategy: {
+        rows: resultsBy(holdings, "strategy"),
+        ...monthlyRealized(holdings, "strategy"),
+      },
+      risk: {
+        rows: resultsBy(holdings, "risk"),
+        ...monthlyRealized(holdings, "risk"),
+      },
+    },
     portfolio: portfolio(holdings, (h) => values.get(h.id) ?? null),
     ...nextSteps(holdings, Date.now()),
   });
@@ -69,9 +83,11 @@ const actionSchema = z.discriminatedUnion("action", [
     output: z.object({
       marketHashName: z.string().trim().min(1).max(200),
       float: z.number().min(0).max(1).nullish(),
+      risk: z.enum(RISK_PROFILE_IDS).nullish(),
     }),
     at: z.number().int().positive(),
   }),
+  z.object({ action: z.literal("tag"), id, tags: tagSchema }),
   z.object({ action: z.literal("delete"), id }),
   z.object({
     action: z.literal("settings"),
@@ -99,6 +115,7 @@ export async function POST(req: Request) {
         id: recordTradeUp(db, a.inputIds, a.output, a.at),
       });
     if (a.action === "delete") deleteHolding(db, a.id);
+    if (a.action === "tag") tagHolding(db, a.id, a.tags);
     if (a.action === "settings")
       return Response.json({ settings: saveSettings(db, a.settings) });
     if (a.action === "import")

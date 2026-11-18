@@ -257,6 +257,16 @@ POSTs from curl need `-H "Origin: http://localhost:3000"`.
     tabs). Done updates fire the `imbalance:prices-updated` window event; the Dashboard
     reloads its status on it. Deals and Trade-ups keep their results until you scan
     again. On/off is per browser (`imbalance-auto-refresh` in localStorage, on by default).
+  - **T1 results per strategy:** migration v3 adds nullable `strategy` and `risk` to
+    `holdings` (old entries stay untagged). `results.ts` (pure): `STRATEGIES` (deal,
+    trade-up, float-snipe, cross-market, other), `resultsBy` (sold, profit after fees,
+    ROI on sold cost, held, profit if sold now; `used` inputs skipped because the
+    trade-up result carries their cost) and `monthlyRealized` (UTC months). The tracker
+    GET returns both groupings; `tag` action edits tags. `recordTradeUp` tags the output
+    "trade-up", at the form's risk level or else the one all inputs share. Backups keep
+    tags and older backups still restore. UI: `StrategyResults.tsx` (panel, pickers,
+    `TagPicker` on held and sold rows); the buy form defaults to Trade-up at the saved
+    risk level. Entries are still only logged on the Tracker page.
 - **Next:** the owner continues tomorrow. Open items: test the AI (Find box, Ask AI) and
   CSFloat with real keys, then pick from `docs/roadmap.md`. taste-skill and impeccable were
   not installed, so M17 was done by hand; run them later if wanted.

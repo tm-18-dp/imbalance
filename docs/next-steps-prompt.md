@@ -142,9 +142,9 @@ Sizes: S = an hour or two, M = a session, L = more than a session.
 
 ### T. Tracking results (prove it works)
 
-- [ ] **T1. Results per strategy (M).** Tag each tracker entry as deal, trade-up, float
-      snipe or cross-market, and show actual profit per strategy and per risk profile over
-      time. This is how to tell whether Aggressive is really earning more.
+- [x] **T1. Results per strategy (M).** Done: tracker entries carry a strategy and risk
+      level (set when adding, editable on each row), and a Results panel shows profit per
+      strategy or risk level, and per month.
 - [ ] **T2. Expected vs actual (S).** For logged trade-ups, compare what the app expected
       with what you got. Over 20 or more contracts this shows whether the maths is right.
 - [ ] **T3. Alerts (S).** A browser notification when a saved search (for example

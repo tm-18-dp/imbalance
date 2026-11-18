@@ -123,6 +123,12 @@ const MIGRATIONS: string[] = [
   );
   CREATE INDEX holdings_status ON holdings (status);
   `,
+  // v3: tag each tracker entry with the strategy and risk level it came from, so results
+  // can be compared. Null for entries logged before this.
+  `
+  ALTER TABLE holdings ADD COLUMN strategy TEXT;
+  ALTER TABLE holdings ADD COLUMN risk TEXT;
+  `,
 ];
 
 export const SCHEMA_VERSION = MIGRATIONS.length;

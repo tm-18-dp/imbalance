@@ -5,7 +5,15 @@ import { useCallback, useEffect, useState } from "react";
 import type { Holding, Portfolio, Settings } from "@/lib/tracker";
 import type { NextStep } from "@/lib/timeline";
 import { MARKETPLACES, type MarketplaceId } from "@/lib/fees";
+import type { ResultGroup } from "@/lib/results";
 import { useMoney } from "./Money";
+import {
+  RiskSelect,
+  StrategyResults,
+  StrategySelect,
+  TagPicker,
+  type GroupResults,
+} from "./StrategyResults";
 import { FloatBadges } from "./FloatBadges";
 
 type Row = Holding & {
@@ -16,6 +24,7 @@ type Row = Holding & {
 type Data = {
   holdings: Row[];
   settings: Settings;
+  results: Record<ResultGroup, GroupResults>;
   portfolio: Portfolio;
   steps: NextStep[];
   comeBackAt: number | null;
@@ -97,6 +106,10 @@ export function Tracker() {
     data.steps.filter((s) => s.kind === "wait").map((s) => s.id),
   );
   const tone = (c: number) => (c >= 0 ? "text-good" : "text-bad");
+  const tag = (
+    id: number,
+    tags: { strategy: string | null; risk: string | null },
+  ) => run({ action: "tag", id, tags }, "Tag saved.");
 
   return (
     <div className="space-y-6">
@@ -142,7 +155,10 @@ export function Tracker() {
 
       <NextSteps steps={data.steps} comeBackAt={data.comeBackAt} />
 
+      <StrategyResults results={data.results} />
+
       <AddPurchase
+        defaultRisk={data.settings.riskProfile}
         onAdd={(item) => run({ action: "buy", item }, "Added to your tracker.")}
         toUsdCents={toUsdCents}
         currency={currency}
@@ -166,6 +182,7 @@ export function Tracker() {
                   <th className="p-2 font-normal">Paid</th>
                   <th className="p-2 font-normal">Worth now</th>
                   <th className="p-2 font-normal">Tradable</th>
+                  <th className="p-2 font-normal">Strategy</th>
                   <th className="p-2 font-normal" />
                 </tr>
               </thead>
@@ -225,6 +242,9 @@ export function Tracker() {
                       ) : (
                         day(h.tradableAt)
                       )}
+                    </td>
+                    <td className="p-2">
+                      <TagPicker holding={h} onTag={tag} />
                     </td>
                     <td className="p-2 text-right whitespace-nowrap">
                       <SellButton
@@ -298,6 +318,7 @@ export function Tracker() {
                   <th className="p-2 font-normal">Item</th>
                   <th className="p-2 font-normal">Paid</th>
                   <th className="p-2 font-normal">Result</th>
+                  <th className="p-2 font-normal">Strategy</th>
                 </tr>
               </thead>
               <tbody>
@@ -315,6 +336,18 @@ export function Tracker() {
                           Sold for {money(h.soldCents)} on {h.soldOn}, kept{" "}
                           {money(h.soldNetCents)} (
                           {money((h.soldNetCents ?? 0) - h.costCents)})
+                        </span>
+                      )}
+                    </td>
+                    <td className="p-2">
+                      {h.status === "sold" ? (
+                        <TagPicker holding={h} onTag={tag} />
+                      ) : (
+                        <span
+                          className="text-xs text-muted"
+                          title="Its cost counts in the trade-up's result"
+                        >
+                          In a trade-up
                         </span>
                       )}
                     </td>
@@ -386,11 +419,15 @@ function AddPurchase({
   onAdd,
   toUsdCents,
   currency,
+  defaultRisk,
 }: {
   onAdd: (item: Record<string, unknown>) => Promise<boolean>;
   toUsdCents: (v: string) => number;
   currency: string;
+  defaultRisk: string;
 }) {
+  const [strategy, setStrategy] = useState("trade-up");
+  const [risk, setRisk] = useState(defaultRisk);
   const [name, setName] = useState("");
   const [names, setNames] = useState<string[]>([]);
   const [price, setPrice] = useState("");
@@ -418,6 +455,8 @@ function AddPurchase({
         float: float ? Number(float) : null,
         boughtAt: new Date(`${date}T12:00:00`).getTime(),
         source,
+        strategy: strategy || null,
+        risk: risk || null,
       });
       if (!ok) return;
     }
@@ -501,6 +540,24 @@ function AddPurchase({
           ))}
         </select>
       </label>
+      <label className="flex flex-col gap-1">
+        <span
+          className="text-muted"
+          title="What you bought it for, so Results can compare strategies"
+        >
+          Bought for
+        </span>
+        <StrategySelect value={strategy} onChange={setStrategy} />
+      </label>
+      <label className="flex flex-col gap-1">
+        <span
+          className="text-muted"
+          title="The risk level you found it at, so Results can compare them"
+        >
+          Risk level
+        </span>
+        <RiskSelect value={risk} onChange={setRisk} />
+      </label>
       <button className="btn-primary">Add</button>
     </form>
   );
@@ -579,9 +636,11 @@ function RecordTradeUp({
   onRecord: (output: {
     marketHashName: string;
     float: number | null;
+    risk: string | null;
   }) => Promise<void>;
 }) {
   const [name, setName] = useState("");
+  const [risk, setRisk] = useState("");
   const [float, setFloat] = useState("");
   if (count === 0)
     return (
@@ -598,6 +657,7 @@ function RecordTradeUp({
         void onRecord({
           marketHashName: name,
           float: float ? Number(float) : null,
+          risk: risk || null,
         });
       }}
     >
@@ -625,6 +685,14 @@ function RecordTradeUp({
               inputMode="decimal"
               value={float}
               onChange={(e) => setFloat(e.target.value.replace(/[^\d.]/g, ""))}
+            />
+          </label>
+          <label className="flex flex-col gap-1">
+            <span className="text-muted">Risk level</span>
+            <RiskSelect
+              value={risk}
+              onChange={setRisk}
+              emptyLabel="Same as the inputs"
             />
           </label>
           <button className="btn-primary">Record trade-up</button>

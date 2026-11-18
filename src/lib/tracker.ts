@@ -3,6 +3,7 @@ import type { DatabaseSync } from "node:sqlite";
 import { getMeta, setMeta, transaction } from "./db";
 import { MARKETPLACE_IDS, MARKETPLACES, type MarketplaceId } from "./fees";
 import { RISK_PROFILE_IDS } from "./risk";
+import { STRATEGIES } from "./results";
 
 export const DAY = 86_400_000;
 
@@ -58,11 +59,18 @@ export type Holding = {
   soldOn: string | null;
   soldAt: number | null;
   note: string | null;
+  /** The strategy it was bought for (see `STRATEGIES`), null if not tagged. */
+  strategy: string | null;
+  /** The risk level it was picked at, null if not tagged. */
+  risk: string | null;
 };
 
 const name = z.string().trim().min(1).max(200);
 const cents = z.number().int().min(0).max(1e10);
 const floatValue = z.number().min(0).max(1).nullish();
+const strategy = z.enum(STRATEGIES).nullish();
+const risk = z.enum(RISK_PROFILE_IDS).nullish();
+export const tagSchema = z.object({ strategy, risk });
 
 export const buySchema = z.object({
   marketHashName: name,
@@ -72,6 +80,8 @@ export const buySchema = z.object({
   boughtAt: z.number().int().positive(),
   source: z.string().max(40).default("skinport"),
   note: z.string().max(500).nullish(),
+  strategy,
+  risk,
 });
 
 export function addHolding(
@@ -83,8 +93,9 @@ export function addHolding(
   return Number(
     db
       .prepare(
-        `INSERT INTO holdings (market_hash_name, version, float_value, cost_cents, bought_at, tradable_at, source, note)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO holdings (market_hash_name, version, float_value, cost_cents, bought_at, tradable_at, source, note,
+           strategy, risk)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       )
       .run(
         b.marketHashName,
@@ -95,6 +106,8 @@ export function addHolding(
         tradableAt,
         b.source,
         b.note ?? null,
+        b.strategy ?? null,
+        b.risk ?? null,
       ).lastInsertRowid,
   );
 }
@@ -121,14 +134,36 @@ export function markSold(
   ).run(soldCents, MARKETPLACES[market].net(soldCents), market, soldAt, id);
 }
 
+/** Sets or clears the strategy and risk tags of one entry. */
+export function tagHolding(
+  db: DatabaseSync,
+  id: number,
+  tags: z.input<typeof tagSchema>,
+): void {
+  getHolding(db, id);
+  const t = tagSchema.parse(tags);
+  db.prepare("UPDATE holdings SET strategy = ?, risk = ? WHERE id = ?").run(
+    t.strategy ?? null,
+    t.risk ?? null,
+    id,
+  );
+}
+
 /**
  * Records a trade-up: the inputs are used up and the output becomes a new holding that cost
- * what the inputs cost. It stays locked until the latest-unlocking input would have.
+ * what the inputs cost. It stays locked until the latest-unlocking input would have. The
+ * output is tagged as a trade-up, at the given risk level or else the one all its inputs
+ * share.
  */
 export function recordTradeUp(
   db: DatabaseSync,
   inputIds: number[],
-  output: { marketHashName: string; version?: string; float?: number | null },
+  output: {
+    marketHashName: string;
+    version?: string;
+    float?: number | null;
+    risk?: (typeof RISK_PROFILE_IDS)[number] | null;
+  },
   at: number,
 ): number {
   if (inputIds.length !== 10 && inputIds.length !== 5)
@@ -139,6 +174,8 @@ export function recordTradeUp(
     const inputs = inputIds.map((id) => getHolding(db, id));
     if (inputs.some((h) => h.status !== "holding"))
       throw new Error("Some of those skins are already used or sold.");
+    const risks = new Set(inputs.map((h) => h.risk));
+    const shared = risks.size === 1 ? [...risks][0] : null;
     const id = addHolding(db, {
       marketHashName: output.marketHashName,
       version: output.version ?? "",
@@ -146,6 +183,8 @@ export function recordTradeUp(
       costCents: inputs.reduce((s, h) => s + h.costCents, 0),
       boughtAt: at,
       source: "trade-up",
+      strategy: "trade-up",
+      risk: output.risk ?? risk.safeParse(shared).data ?? null,
     });
     const tradableAt = Math.max(at, ...inputs.map((h) => h.tradableAt));
     db.prepare("UPDATE holdings SET tradable_at = ? WHERE id = ?").run(
@@ -182,6 +221,8 @@ const toHolding = (r: Row): Holding => ({
   soldOn: r.sold_on == null ? null : String(r.sold_on),
   soldAt: r.sold_at == null ? null : Number(r.sold_at),
   note: r.note == null ? null : String(r.note),
+  strategy: r.strategy == null ? null : String(r.strategy),
+  risk: r.risk == null ? null : String(r.risk),
 });
 
 export function listHoldings(db: DatabaseSync): Holding[] {
@@ -241,6 +282,9 @@ const exportSchema = z.object({
       soldOn: z.string().max(40).nullish(),
       soldAt: z.number().int().nullish(),
       note: z.string().max(500).nullish(),
+      // Backups from before tags have none.
+      strategy,
+      risk,
     }),
   ),
 });
@@ -264,8 +308,8 @@ export function importTracker(db: DatabaseSync, data: unknown): number {
     db.exec("DELETE FROM holdings");
     const ins = db.prepare(
       `INSERT INTO holdings (id, market_hash_name, version, float_value, cost_cents, bought_at, tradable_at, source,
-         status, used_in, sold_cents, sold_net_cents, sold_on, sold_at, note)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+         status, used_in, sold_cents, sold_net_cents, sold_on, sold_at, note, strategy, risk)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     );
     for (const h of holdings) {
       ins.run(
@@ -284,6 +328,8 @@ export function importTracker(db: DatabaseSync, data: unknown): number {
         h.soldOn ?? null,
         h.soldAt ?? null,
         h.note ?? null,
+        h.strategy ?? null,
+        h.risk ?? null,
       );
     }
     if (settings) saveSettings(db, settings);

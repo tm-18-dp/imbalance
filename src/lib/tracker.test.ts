@@ -13,6 +13,7 @@ import {
   recordTradeUp,
   saveSettings,
   settingsPatchSchema,
+  tagHolding,
 } from "./tracker";
 
 const buy = (
@@ -115,5 +116,68 @@ describe("tracker", () => {
       /isn't an Imbalance backup/,
     );
     expect(listHoldings(db)).toHaveLength(1);
+  });
+
+  it("tags entries, carries the risk level into trade-ups and keeps tags in backups", () => {
+    const db = openDb(":memory:");
+    const ids = Array.from({ length: 10 }, (_, i) =>
+      addHolding(db, {
+        marketHashName: "P250 | Sand Dune (Field-Tested)",
+        costCents: 10,
+        boughtAt: 1000 * DAY,
+        strategy: "trade-up",
+        risk: i === 0 ? null : "aggressive",
+      }),
+    );
+    // One input untagged: the inputs don't share a risk level.
+    const mixed = recordTradeUp(
+      db,
+      ids,
+      { marketHashName: "AK-47 | Safari Mesh (Field-Tested)" },
+      1001 * DAY,
+    );
+    expect(listHoldings(db).find((x) => x.id === mixed)).toMatchObject({
+      strategy: "trade-up",
+      risk: null,
+    });
+
+    tagHolding(db, mixed, { strategy: "trade-up", risk: "balanced" });
+    expect(listHoldings(db).find((x) => x.id === mixed)?.risk).toBe("balanced");
+    expect(() =>
+      tagHolding(db, mixed, { strategy: "lottery" as "deal", risk: null }),
+    ).toThrow();
+
+    // All inputs Aggressive: the result is too, unless the form says otherwise.
+    const more = Array.from({ length: 10 }, () =>
+      addHolding(db, {
+        marketHashName: "P250 | Sand Dune (Field-Tested)",
+        costCents: 10,
+        boughtAt: 1000 * DAY,
+        risk: "aggressive",
+      }),
+    );
+    const shared = recordTradeUp(
+      db,
+      more,
+      { marketHashName: "AK-47 | Safari Mesh (Field-Tested)" },
+      1001 * DAY,
+    );
+    expect(listHoldings(db).find((x) => x.id === shared)?.risk).toBe(
+      "aggressive",
+    );
+
+    // Backups keep tags, and ones from before tags still restore.
+    const backup = JSON.parse(JSON.stringify(exportTracker(db)));
+    const copy = openDb(":memory:");
+    importTracker(copy, backup);
+    expect(listHoldings(copy).find((x) => x.id === mixed)?.risk).toBe(
+      "balanced",
+    );
+    for (const x of backup.holdings) {
+      delete x.strategy;
+      delete x.risk;
+    }
+    importTracker(copy, backup);
+    expect(listHoldings(copy).every((x) => x.strategy == null)).toBe(true);
   });
 });
