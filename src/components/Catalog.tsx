@@ -8,6 +8,7 @@ import { useMoney } from "./Money";
 import { PriceHistory } from "./PriceHistory";
 import { FloatBadges } from "./FloatBadges";
 import { PatternBadge, useUserPatterns } from "./PatternBadge";
+import { WatchStar } from "./Watchlist";
 
 const RARITIES = [
   "Consumer Grade",
@@ -253,6 +254,7 @@ function SkinDetail({ id, onClose }: { id: string; onClose: () => void }) {
                             ? "Souv. "
                             : ""}
                         {p.wear ?? "Any"}
+                        <WatchStar name={p.marketHashName} />
                       </td>
                       <td>{money(p.minCents)}</td>
                       <td>{money(p.median7d)}</td>

@@ -10,6 +10,7 @@ import { PlainSearch } from "./PlainSearch";
 import { formatAgo } from "@/lib/format";
 import { PRICES_UPDATED } from "./PriceRefresher";
 import { AlertList } from "./Alerts";
+import { WatchlistPanel } from "./Watchlist";
 
 type FullStatus = Status & {
   keys: Record<string, boolean>;
@@ -163,6 +164,8 @@ export function Dashboard() {
           )}
         </div>
       </div>
+
+      <WatchlistPanel />
 
       <AlertList />
 

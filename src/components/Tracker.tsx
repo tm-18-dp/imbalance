@@ -17,6 +17,7 @@ import {
 import { ExpectedVsActual } from "./ExpectedVsActual";
 import type { ExpectedVsActual as Comparison } from "@/lib/expectation";
 import { FloatBadges } from "./FloatBadges";
+import { WatchStar } from "./Watchlist";
 
 type Row = Holding & {
   image: string | null;
@@ -227,6 +228,10 @@ export function Tracker() {
                         )}
                         <span>
                           {h.marketHashName}
+                          <WatchStar
+                            name={h.marketHashName}
+                            version={h.version}
+                          />
                           {h.float != null && (
                             <span className="block font-mono text-xs text-muted">
                               {h.float.toFixed(6)}

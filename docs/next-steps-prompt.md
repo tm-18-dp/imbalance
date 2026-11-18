@@ -154,7 +154,8 @@ Sizes: S = an hour or two, M = a session, L = more than a session.
 
 ### U. Usability
 
-- [ ] **U1. Watchlist (S).** Star skins and see their price and trend on the Dashboard.
+- [x] **U1. Watchlist (S).** Done: star items on Deals, Skins, Trade-ups or the Tracker;
+      the Dashboard lists their price, trend, weekly change and change since starred.
 - [ ] **U2. Export contract shopping list (S).** Copy the list of exact items and floats to
       buy, with marketplace search links.
 - [ ] **U3. Mobile layout pass (S).** Check every page at 390 px wide.

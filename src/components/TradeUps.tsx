@@ -33,6 +33,7 @@ import { FloatBadges } from "./FloatBadges";
 import { AlertMe } from "./Alerts";
 import { TrendBadge } from "./PriceHistory";
 import type { TrendSignal } from "@/lib/trend";
+import { WatchStar } from "./Watchlist";
 
 const TIER_COLORS: Record<Tier, string> = {
   "Consumer Grade": "#b0c3d9",
@@ -592,6 +593,9 @@ function ContractDetail({
                         {o.skin.name}
                         {o.skin.phase ? ` ${o.skin.phase}` : ""}{" "}
                         <span className="text-muted">{o.wear ?? ""}</span>
+                        {o.marketHashName && (
+                          <WatchStar name={o.marketHashName} />
+                        )}
                         <TrendBadge trend={o.trend.signal} />
                         {/* The price is an average: a lucky pattern is worth more. */}
                         <PatternBadge

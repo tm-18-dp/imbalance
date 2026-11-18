@@ -134,6 +134,16 @@ const MIGRATIONS: string[] = [
   `
   ALTER TABLE holdings ADD COLUMN expected TEXT;
   `,
+  // v5: starred items, with the price when starred to show the change since.
+  `
+  CREATE TABLE watchlist (
+    market_hash_name TEXT NOT NULL,
+    version TEXT NOT NULL DEFAULT '',
+    added_at INTEGER NOT NULL,
+    added_cents INTEGER,
+    PRIMARY KEY (market_hash_name, version)
+  );
+  `,
 ];
 
 export const SCHEMA_VERSION = MIGRATIONS.length;

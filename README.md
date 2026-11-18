@@ -17,13 +17,13 @@ on your PC.
 
 ## What it does
 
-| Page          | What you get                                                                                                                                                                                      |
-| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Dashboard** | Update skins and prices, your next steps ("sell this", "come back on Tue"), a plain-English search ("purple trade-ups under 20") and an AI question box                                           |
-| **Trade-ups** | Profitable contracts for any rarity, mixing collections and cheap filler skins. Exact float maths, fees, odds, days to finish, risk check                                                         |
-| **Deals**     | Skins listed below their 30-day price that sell often enough to flip, with dip and rebound signals, price charts and a Steam price check                                                          |
-| **Skins**     | Every skin with images, float ranges, prices per wear, charts and CSFloat listings with special-float badges (0.00x, best of a wear and so on)                                                    |
-| **Tracker**   | Log buys, sales and trade-ups. See what it is all worth after fees, when each item can be traded again, and back it up. Tag each buy with its strategy and risk level to see which actually earns |
+| Page          | What you get                                                                                                                                                                                             |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Dashboard** | Update skins and prices, your next steps ("sell this", "come back on Tue"), a plain-English search ("purple trade-ups under 20"), an AI question box, your saved alerts and a watchlist of starred items |
+| **Trade-ups** | Profitable contracts for any rarity, mixing collections and cheap filler skins. Exact float maths, fees, odds, days to finish, risk check                                                                |
+| **Deals**     | Skins listed below their 30-day price that sell often enough to flip, with dip and rebound signals, price charts and a Steam price check                                                                 |
+| **Skins**     | Every skin with images, float ranges, prices per wear, charts and CSFloat listings with special-float badges (0.00x, best of a wear and so on)                                                           |
+| **Tracker**   | Log buys, sales and trade-ups. See what it is all worth after fees, when each item can be traded again, and back it up. Tag each buy with its strategy and risk level to see which actually earns        |
 
 Prices show in your currency (pick it in the header). Dark and light themes.
 

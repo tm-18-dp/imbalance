@@ -290,6 +290,14 @@ POSTs from curl need `-H "Origin: http://localhost:3000"`.
     (checks 3 s after load and on `imbalance:prices-updated`; browser notification if
     allowed, else an "N new finds" link), `AlertList` on the Dashboard. Checks only run
     while a page is open: nothing runs in the background with the app closed.
+  - **U1 watchlist:** migration v5 adds `watchlist` (name, version, `added_at`,
+    `added_cents` = lowest Skinport listing when starred). `watchlist.ts`: `addWatch`
+    (keeps the first star, max 100), `removeWatch`, `listWatch` (today's listing, 7/30-day
+    medians, 30-day sales, `classifyTrend`, image). `/api/watchlist` GET and add/remove.
+    `Watchlist.tsx`: one shared store (`useSyncExternalStore`) for every `WatchStar`
+    (Deals rows, Skins price rows, Trade-up outcomes, held Tracker items) and
+    `WatchlistPanel` on the Dashboard (this week = 7-day vs 30-day median, since starred,
+    chart in its own row; reloads on `imbalance:prices-updated`). Not in tracker backups.
 - **Next:** the owner continues tomorrow. Open items: test the AI (Find box, Ask AI) and
   CSFloat with real keys, then pick from `docs/roadmap.md`. taste-skill and impeccable were
   not installed, so M17 was done by hand; run them later if wanted.

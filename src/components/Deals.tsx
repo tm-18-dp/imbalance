@@ -21,6 +21,7 @@ import { useSearchParams } from "next/navigation";
 import { urlFlag, urlNumber } from "@/lib/filters";
 import { PriceHistory, TrendBadge } from "./PriceHistory";
 import { AlertMe } from "./Alerts";
+import { WatchStar } from "./Watchlist";
 
 export function Deals() {
   const { money, rates, currency } = useMoney();
@@ -260,6 +261,10 @@ export function Deals() {
                           {d.marketHashName}
                           {d.version ? ` (${d.version})` : ""}
                         </a>
+                        <WatchStar
+                          name={d.marketHashName}
+                          version={d.version}
+                        />
                         <TrendBadge trend={d.trend} />
                         <button
                           className="ml-2 text-xs text-accent underline"
