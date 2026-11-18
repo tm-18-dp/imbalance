@@ -195,6 +195,13 @@ POSTs from curl need `-H "Origin: http://localhost:3000"`.
     game's 32-bit floats. UI: `ExactFloats.tsx`, section 3 of the contract panel.
     **Unverified:** no CSFloat key was available, so the real response shape and the
     `lowest_float` sort value were never checked (tested with synthetic saved listings).
+  - **E2 float snipes:** `/api/snipes` (needs `CSFLOAT_API_KEY`) takes the most traded
+    weapon skins with a wear (`snipeCandidates`, min price $1 by default, at most 20) and
+    runs `findSnipes` on their CSFloat listings: special floats priced within `maxOver`
+    (15% default) of the lower of Skinport's sale price and CSFloat's cheapest ordinary
+    listing. Sequential calls with a 400 ms gap, reusing listings saved in the last 10
+    minutes, and it stops (keeping results) on the first CSFloat error. UI:
+    `FloatSnipes.tsx` at the bottom of Deals. Premiums are deliberately not priced.
 - **Next:** the owner continues tomorrow. Open items: test the AI (Find box, Ask AI) and
   CSFloat with real keys, then pick from `docs/roadmap.md`. taste-skill and impeccable were
   not installed, so M17 was done by hand; run them later if wanted.

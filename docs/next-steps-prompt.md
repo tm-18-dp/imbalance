@@ -97,10 +97,13 @@ Sizes: S = an hour or two, M = a session, L = more than a session.
       check against real CSFloat responses once a key is added (response shape and the
       `lowest_float` sort were never seen).
 
-- [ ] **E2. Float sniping deals (M).** Find CSFloat listings priced like an average float
-      but with a special float (`floatFlags`: 0.00x, best in wear, lowest possible). Price
-      the premium from past sales of similar floats where data exists, and label it as an
-      estimate.
+- [x] **E2. Float sniping deals (M).** Built: "Float snipes" on the Deals page. For the
+      most traded skins (or a search), CSFloat listings with a special float (`floatFlags`)
+      priced within a set % of an ordinary float (the lower of Skinport's sale price and
+      CSFloat's cheapest ordinary listing). The premium itself is not priced: that needs
+      sales at the exact float. Tested end to end with synthetic listings; **still to do:**
+      a run with a real CSFloat key.
+
 - [ ] **E3. Cross-market gaps (M).** Buy on Skinport, sell on CSFloat (2% fee) or the other
       way round. Show the gap after both fees and the trade lock. Note in the UI that Steam
       Market money stays in the Steam wallet and can't be withdrawn as cash, so a Steam
