@@ -8,6 +8,7 @@ import { NextSteps } from "./Tracker";
 import { AskAi } from "./AskAi";
 import { PlainSearch } from "./PlainSearch";
 import { formatAgo } from "@/lib/format";
+import { PRICES_UPDATED } from "./PriceRefresher";
 
 type FullStatus = Status & {
   keys: Record<string, boolean>;
@@ -25,6 +26,13 @@ export function Dashboard() {
     const res = await fetch("/api/status");
     setStatus((await res.json()) as FullStatus);
   }, []);
+
+  // A background price update (header) changes the counts and "Updated" time.
+  useEffect(() => {
+    const reload = () => void load().catch(() => {});
+    window.addEventListener(PRICES_UPDATED, reload);
+    return () => window.removeEventListener(PRICES_UPDATED, reload);
+  }, [load]);
 
   useEffect(() => {
     fetch("/api/status")

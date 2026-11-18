@@ -72,7 +72,9 @@ in the `imbalance` folder and run `npm start`.
 
 1. A popup lists the optional API keys. You can close it and add keys later (see below).
 2. On the **Dashboard**, click **Update skin list**, then **Update prices**. Both take a few
-   seconds. Prices can be updated again every 5 minutes (Skinport's limit).
+   seconds. Prices can be updated again every 5 minutes (Skinport's limit). After that,
+   while the app is open, prices update by themselves every 10 minutes (switch in the
+   header).
 3. Open **Trade-ups**, pick a rarity and click **Scan**.
 
 ### Updating

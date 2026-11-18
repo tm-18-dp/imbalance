@@ -137,8 +137,8 @@ Sizes: S = an hour or two, M = a session, L = more than a session.
       and `api-fixtures.test.ts` checks them. OpenRouter's model list is recorded; run the
       script again once CSFloat, Gemini, Groq or OpenRouter keys are set, and commit the
       new fixtures. Then tighten `listingsResponseSchema` to the shape CSFloat really uses.
-- [ ] **D4. Background price refresh (S).** While the app is open, refresh Skinport prices
-      every 10 minutes (inside the existing cooldown) so deals stay current.
+- [x] **D4. Background price refresh (S).** Done: while a page is open and visible,
+      Skinport prices update every 10 minutes (switch in the header, on by default).
 
 ### T. Tracking results (prove it works)
 

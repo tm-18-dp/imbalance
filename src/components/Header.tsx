@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { KeysModal } from "./KeysModal";
 import { CurrencyPicker } from "./Money";
+import { PriceRefresher } from "./PriceRefresher";
 
 const LINKS = [
   { href: "/", label: "Dashboard" },
@@ -49,7 +50,8 @@ export function Header() {
             </Link>
           ))}
         </nav>
-        <div className="ml-auto flex gap-2">
+        <div className="ml-auto flex items-center gap-2">
+          <PriceRefresher />
           <CurrencyPicker />
           <button
             className="btn"

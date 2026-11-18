@@ -249,6 +249,14 @@ POSTs from curl need `-H "Origin: http://localhost:3000"`.
     free models and none are Llama, Qwen, DeepSeek or Mistral, so `pickModel` falls back
     to the highest version number (`nvidia/nemotron-3.5-lightning:free`). Gemma is
     skipped by `pickModel` even though Gemma 4 is a usable chat model.
+  - **D4 background refresh:** `PriceRefresher` (header) POSTs `/api/sync/prices?auto=1`
+    every minute while the page is visible; the server runs an update only when
+    `autoRefreshDue` (auto-refresh.ts): prices 10+ minutes old, no try (failed ones
+    included, `skinport_auto_tried_at` meta) in the last 10 minutes, and never before the
+    first manual update. A module-level `running` flag stops two updates at once (many
+    tabs). Done updates fire the `imbalance:prices-updated` window event; the Dashboard
+    reloads its status on it. Deals and Trade-ups keep their results until you scan
+    again. On/off is per browser (`imbalance-auto-refresh` in localStorage, on by default).
 - **Next:** the owner continues tomorrow. Open items: test the AI (Find box, Ask AI) and
   CSFloat with real keys, then pick from `docs/roadmap.md`. taste-skill and impeccable were
   not installed, so M17 was done by hand; run them later if wanted.
