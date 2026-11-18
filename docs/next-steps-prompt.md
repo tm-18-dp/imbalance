@@ -133,8 +133,10 @@ Sizes: S = an hour or two, M = a session, L = more than a session.
 - [x] **D2. Liquidity-aware sell price (S).** Done: under 10 sales a month the sell price
       leans towards a cheaper lowest listing (all the way at none), and `daysToSell` queues
       behind up to a quarter of the listings, capped at 90 days.
-- [ ] **D3. Real API response tests (S).** Record one real response each from CSFloat,
-      Gemini, Groq and OpenRouter (keys removed) and test the zod schemas against them.
+- [ ] **D3. Real API response tests (S).** Partly done: `npm run record-fixtures` records
+      and `api-fixtures.test.ts` checks them. OpenRouter's model list is recorded; run the
+      script again once CSFloat, Gemini, Groq or OpenRouter keys are set, and commit the
+      new fixtures. Then tighten `listingsResponseSchema` to the shape CSFloat really uses.
 - [ ] **D4. Background price refresh (S).** While the app is open, refresh Skinport prices
       every 10 minutes (inside the existing cooldown) so deals stay current.
 

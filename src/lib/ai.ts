@@ -60,7 +60,7 @@ export function pickModel(provider: ProviderId, ids: string[]): string | null {
   return pool[0] ?? null;
 }
 
-const geminiModels = z.object({
+export const geminiModels = z.object({
   models: z.array(
     z.object({
       name: z.string(),
@@ -68,7 +68,9 @@ const geminiModels = z.object({
     }),
   ),
 });
-const openaiModels = z.object({ data: z.array(z.object({ id: z.string() })) });
+export const openaiModels = z.object({
+  data: z.array(z.object({ id: z.string() })),
+});
 
 const modelCache = new Map<ProviderId, { model: string; at: number }>();
 
@@ -104,7 +106,7 @@ async function chooseModel(provider: ProviderId, key: string): Promise<string> {
   return model;
 }
 
-const geminiReply = z.object({
+export const geminiReply = z.object({
   candidates: z
     .array(
       z.object({
@@ -119,7 +121,7 @@ const geminiReply = z.object({
     )
     .optional(),
 });
-const openaiReply = z.object({
+export const openaiReply = z.object({
   choices: z.array(
     z.object({ message: z.object({ content: z.string().nullish() }) }),
   ),

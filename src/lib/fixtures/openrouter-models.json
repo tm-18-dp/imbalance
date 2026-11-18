@@ -1,0 +1,2218 @@
+{
+  "data": [
+    {
+      "id": "openai/gpt-6.2-astra-pro",
+      "canonical_slug": "openai/gpt-6.2-astra-pro-20261117",
+      "hugging_face_id": null,
+      "name": "OpenAI: GPT-6.2 Astra Pro",
+      "created": 1794938432,
+      "context_length": 1050000,
+      "architecture": {
+        "modality": "text+image+file->text",
+        "input_modalities": ["file", "image", "text"],
+        "output_modalities": ["text"],
+        "tokenizer": "GPT",
+        "instruct_type": null
+      },
+      "pricing": {
+        "prompt": "0.000008",
+        "completion": "0.00004",
+        "web_search": "0.01",
+        "input_cache_read": "0.0000004",
+        "input_cache_write": "0.00001",
+        "overrides": [
+          {
+            "min_prompt_tokens": 272000,
+            "prompt": "0.000016",
+            "completion": "0.00006",
+            "input_cache_read": "0.0000008",
+            "input_cache_write": "0.00002"
+          }
+        ]
+      },
+      "top_provider": {
+        "context_length": 1050000,
+        "max_completion_tokens": 128000,
+        "is_moderated": true
+      },
+      "per_request_limits": null,
+      "supported_parameters": [
+        "include_reasoning",
+        "max_completion_tokens",
+        "max_tokens",
+        "reasoning",
+        "reasoning_effort",
+        "response_format",
+        "seed",
+        "structured_outputs",
+        "tool_choice",
+        "tools",
+        "verbosity"
+      ],
+      "default_parameters": {},
+      "supported_voices": null,
+      "knowledge_cutoff": null,
+      "expiration_date": null,
+      "links": {
+        "details": "/api/v1/models/openai/gpt-6.2-astra-pro-20261117/endpoints"
+      },
+      "endpoints": [
+        "/api/v1/chat/completions",
+        "/api/v1/completions",
+        "/api/v1/messages",
+        "/api/v1/responses"
+      ],
+      "reasoning": {
+        "mandatory": true,
+        "default_enabled": true,
+        "supported_efforts": ["max", "xhigh", "high", "medium", "low"],
+        "default_effort": "medium"
+      }
+    },
+    {
+      "id": "openai/gpt-6.2-astra-pro:batch",
+      "canonical_slug": "openai/gpt-6.2-astra-pro-20261117",
+      "hugging_face_id": null,
+      "name": "OpenAI: GPT-6.2 Astra Pro (batch)",
+      "created": 1794938432,
+      "context_length": 1050000,
+      "architecture": {
+        "modality": "text+image+file->text",
+        "input_modalities": ["file", "image", "text"],
+        "output_modalities": ["text"],
+        "tokenizer": "GPT",
+        "instruct_type": null
+      },
+      "pricing": {
+        "prompt": "0.000004",
+        "completion": "0.00002",
+        "web_search": "0.01",
+        "input_cache_read": "0.0000002",
+        "input_cache_write": "0.000005",
+        "overrides": [
+          {
+            "min_prompt_tokens": 272000,
+            "prompt": "0.000008",
+            "completion": "0.00003",
+            "input_cache_read": "0.0000004",
+            "input_cache_write": "0.00001"
+          }
+        ]
+      },
+      "top_provider": {
+        "context_length": 1050000,
+        "max_completion_tokens": 128000,
+        "is_moderated": true
+      },
+      "per_request_limits": null,
+      "supported_parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "reasoning_effort",
+        "response_format",
+        "seed",
+        "structured_outputs",
+        "tool_choice",
+        "tools",
+        "verbosity"
+      ],
+      "default_parameters": {},
+      "supported_voices": null,
+      "knowledge_cutoff": null,
+      "expiration_date": null,
+      "links": {
+        "details": "/api/v1/models/openai/gpt-6.2-astra-pro-20261117/endpoints"
+      },
+      "endpoints": ["/api/v1/batches"],
+      "reasoning": {
+        "mandatory": true,
+        "default_enabled": true,
+        "supported_efforts": ["max", "xhigh", "high", "medium", "low"],
+        "default_effort": "medium"
+      }
+    },
+    {
+      "id": "openai/gpt-6.2-astra",
+      "canonical_slug": "openai/gpt-6.2-astra-20261117",
+      "hugging_face_id": null,
+      "name": "OpenAI: GPT-6.2 Astra",
+      "created": 1794938423,
+      "context_length": 1050000,
+      "architecture": {
+        "modality": "text+image+file->text",
+        "input_modalities": ["file", "image", "text"],
+        "output_modalities": ["text"],
+        "tokenizer": "GPT",
+        "instruct_type": null
+      },
+      "pricing": {
+        "prompt": "0.000008",
+        "completion": "0.00004",
+        "web_search": "0.01",
+        "input_cache_read": "0.0000004",
+        "input_cache_write": "0.00001",
+        "overrides": [
+          {
+            "min_prompt_tokens": 272000,
+            "prompt": "0.000016",
+            "completion": "0.00006",
+            "input_cache_read": "0.0000008",
+            "input_cache_write": "0.00002"
+          }
+        ]
+      },
+      "top_provider": {
+        "context_length": 1050000,
+        "max_completion_tokens": 128000,
+        "is_moderated": true
+      },
+      "per_request_limits": null,
+      "supported_parameters": [
+        "include_reasoning",
+        "max_completion_tokens",
+        "max_tokens",
+        "reasoning",
+        "reasoning_effort",
+        "response_format",
+        "seed",
+        "structured_outputs",
+        "tool_choice",
+        "tools",
+        "verbosity"
+      ],
+      "default_parameters": {},
+      "supported_voices": null,
+      "knowledge_cutoff": null,
+      "expiration_date": null,
+      "links": {
+        "details": "/api/v1/models/openai/gpt-6.2-astra-20261117/endpoints"
+      },
+      "endpoints": [
+        "/api/v1/chat/completions",
+        "/api/v1/completions",
+        "/api/v1/messages",
+        "/api/v1/responses"
+      ],
+      "benchmarks": {
+        "design_arena": [],
+        "artificial_analysis": {
+          "intelligence_index": 62.1,
+          "coding_index": null,
+          "agentic_index": null,
+          "finance_and_accounting_index": 60.9,
+          "strategy_and_ops_index": 63.3,
+          "legal_index": 58.7,
+          "healthcare_and_medical_index": 57,
+          "engineering_index": 66.6,
+          "economics_index": 61.1,
+          "cyber_index": 40.8,
+          "openness_index": null,
+          "multilingual_index": null,
+          "decision_index": null
+        }
+      },
+      "reasoning": {
+        "mandatory": true,
+        "default_enabled": true,
+        "supported_efforts": ["max", "xhigh", "high", "medium", "low"],
+        "default_effort": "medium"
+      }
+    },
+    {
+      "id": "openai/gpt-6.2-astra:batch",
+      "canonical_slug": "openai/gpt-6.2-astra-20261117",
+      "hugging_face_id": null,
+      "name": "OpenAI: GPT-6.2 Astra (batch)",
+      "created": 1794938423,
+      "context_length": 1050000,
+      "architecture": {
+        "modality": "text+image+file->text",
+        "input_modalities": ["file", "image", "text"],
+        "output_modalities": ["text"],
+        "tokenizer": "GPT",
+        "instruct_type": null
+      },
+      "pricing": {
+        "prompt": "0.000004",
+        "completion": "0.00002",
+        "web_search": "0.01",
+        "input_cache_read": "0.0000002",
+        "input_cache_write": "0.000005",
+        "overrides": [
+          {
+            "min_prompt_tokens": 272000,
+            "prompt": "0.000008",
+            "completion": "0.00003",
+            "input_cache_read": "0.0000004",
+            "input_cache_write": "0.00001"
+          }
+        ]
+      },
+      "top_provider": {
+        "context_length": 1050000,
+        "max_completion_tokens": 128000,
+        "is_moderated": true
+      },
+      "per_request_limits": null,
+      "supported_parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "reasoning_effort",
+        "response_format",
+        "seed",
+        "structured_outputs",
+        "tool_choice",
+        "tools",
+        "verbosity"
+      ],
+      "default_parameters": {},
+      "supported_voices": null,
+      "knowledge_cutoff": null,
+      "expiration_date": null,
+      "links": {
+        "details": "/api/v1/models/openai/gpt-6.2-astra-20261117/endpoints"
+      },
+      "endpoints": ["/api/v1/batches"],
+      "benchmarks": {
+        "design_arena": [],
+        "artificial_analysis": {
+          "intelligence_index": 62.1,
+          "coding_index": null,
+          "agentic_index": null,
+          "finance_and_accounting_index": 60.9,
+          "strategy_and_ops_index": 63.3,
+          "legal_index": 58.7,
+          "healthcare_and_medical_index": 57,
+          "engineering_index": 66.6,
+          "economics_index": 61.1,
+          "cyber_index": 40.8,
+          "openness_index": null,
+          "multilingual_index": null,
+          "decision_index": null
+        }
+      },
+      "reasoning": {
+        "mandatory": true,
+        "default_enabled": true,
+        "supported_efforts": ["max", "xhigh", "high", "medium", "low"],
+        "default_effort": "medium"
+      }
+    },
+    {
+      "id": "openai/gpt-6.2-sol-pro",
+      "canonical_slug": "openai/gpt-6.2-sol-pro-20261117",
+      "hugging_face_id": null,
+      "name": "OpenAI: GPT-6.2 Sol Pro",
+      "created": 1794938409,
+      "context_length": 1050000,
+      "architecture": {
+        "modality": "text+image+file->text",
+        "input_modalities": ["file", "image", "text"],
+        "output_modalities": ["text"],
+        "tokenizer": "GPT",
+        "instruct_type": null
+      },
+      "pricing": {
+        "prompt": "0.000002",
+        "completion": "0.00001",
+        "web_search": "0.01",
+        "input_cache_read": "0.0000001",
+        "input_cache_write": "0.0000025",
+        "overrides": [
+          {
+            "min_prompt_tokens": 272000,
+            "prompt": "0.000004",
+            "completion": "0.000015",
+            "input_cache_read": "0.0000002",
+            "input_cache_write": "0.000005"
+          }
+        ]
+      },
+      "top_provider": {
+        "context_length": 1050000,
+        "max_completion_tokens": 128000,
+        "is_moderated": false
+      },
+      "per_request_limits": null,
+      "supported_parameters": [
+        "include_reasoning",
+        "max_completion_tokens",
+        "max_tokens",
+        "reasoning",
+        "reasoning_effort",
+        "response_format",
+        "seed",
+        "structured_outputs",
+        "tool_choice",
+        "tools",
+        "verbosity"
+      ],
+      "default_parameters": {},
+      "supported_voices": null,
+      "knowledge_cutoff": null,
+      "expiration_date": null,
+      "links": {
+        "details": "/api/v1/models/openai/gpt-6.2-sol-pro-20261117/endpoints"
+      },
+      "endpoints": [
+        "/api/v1/chat/completions",
+        "/api/v1/completions",
+        "/api/v1/messages",
+        "/api/v1/responses"
+      ],
+      "reasoning": {
+        "mandatory": true,
+        "default_enabled": true,
+        "supported_efforts": ["max", "xhigh", "high", "medium", "low"],
+        "default_effort": "medium"
+      }
+    },
+    {
+      "id": "openai/gpt-6.2-sol-pro:batch",
+      "canonical_slug": "openai/gpt-6.2-sol-pro-20261117",
+      "hugging_face_id": null,
+      "name": "OpenAI: GPT-6.2 Sol Pro (batch)",
+      "created": 1794938409,
+      "context_length": 1050000,
+      "architecture": {
+        "modality": "text+image+file->text",
+        "input_modalities": ["file", "image", "text"],
+        "output_modalities": ["text"],
+        "tokenizer": "GPT",
+        "instruct_type": null
+      },
+      "pricing": {
+        "prompt": "0.000001",
+        "completion": "0.000005",
+        "web_search": "0.01",
+        "input_cache_read": "0.00000005",
+        "input_cache_write": "0.00000125",
+        "overrides": [
+          {
+            "min_prompt_tokens": 272000,
+            "prompt": "0.000002",
+            "completion": "0.0000075",
+            "input_cache_read": "0.0000001",
+            "input_cache_write": "0.0000025"
+          }
+        ]
+      },
+      "top_provider": {
+        "context_length": 1050000,
+        "max_completion_tokens": 128000,
+        "is_moderated": true
+      },
+      "per_request_limits": null,
+      "supported_parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "reasoning_effort",
+        "response_format",
+        "seed",
+        "structured_outputs",
+        "tool_choice",
+        "tools",
+        "verbosity"
+      ],
+      "default_parameters": {},
+      "supported_voices": null,
+      "knowledge_cutoff": null,
+      "expiration_date": null,
+      "links": {
+        "details": "/api/v1/models/openai/gpt-6.2-sol-pro-20261117/endpoints"
+      },
+      "endpoints": ["/api/v1/batches"],
+      "reasoning": {
+        "mandatory": true,
+        "default_enabled": true,
+        "supported_efforts": ["max", "xhigh", "high", "medium", "low"],
+        "default_effort": "medium"
+      }
+    },
+    {
+      "id": "openai/gpt-6.2-sol",
+      "canonical_slug": "openai/gpt-6.2-sol-20261117",
+      "hugging_face_id": null,
+      "name": "OpenAI: GPT-6.2 Sol",
+      "created": 1794938371,
+      "context_length": 1050000,
+      "architecture": {
+        "modality": "text+image+file->text",
+        "input_modalities": ["file", "image", "text"],
+        "output_modalities": ["text"],
+        "tokenizer": "GPT",
+        "instruct_type": null
+      },
+      "pricing": {
+        "prompt": "0.000002",
+        "completion": "0.00001",
+        "web_search": "0.01",
+        "input_cache_read": "0.0000001",
+        "input_cache_write": "0.0000025",
+        "overrides": [
+          {
+            "min_prompt_tokens": 272000,
+            "prompt": "0.000004",
+            "completion": "0.000015",
+            "input_cache_read": "0.0000002",
+            "input_cache_write": "0.000005"
+          }
+        ]
+      },
+      "top_provider": {
+        "context_length": 1050000,
+        "max_completion_tokens": 128000,
+        "is_moderated": true
+      },
+      "per_request_limits": null,
+      "supported_parameters": [
+        "include_reasoning",
+        "max_completion_tokens",
+        "max_tokens",
+        "reasoning",
+        "reasoning_effort",
+        "response_format",
+        "seed",
+        "structured_outputs",
+        "tool_choice",
+        "tools",
+        "verbosity"
+      ],
+      "default_parameters": {},
+      "supported_voices": null,
+      "knowledge_cutoff": null,
+      "expiration_date": null,
+      "links": {
+        "details": "/api/v1/models/openai/gpt-6.2-sol-20261117/endpoints"
+      },
+      "endpoints": [
+        "/api/v1/chat/completions",
+        "/api/v1/completions",
+        "/api/v1/messages",
+        "/api/v1/responses"
+      ],
+      "benchmarks": {
+        "design_arena": [],
+        "artificial_analysis": {
+          "intelligence_index": 57.3,
+          "coding_index": null,
+          "agentic_index": null,
+          "finance_and_accounting_index": 57.2,
+          "strategy_and_ops_index": 59.4,
+          "legal_index": 55,
+          "healthcare_and_medical_index": 53.3,
+          "engineering_index": 61.2,
+          "economics_index": 57.4,
+          "cyber_index": 37.7,
+          "openness_index": null,
+          "multilingual_index": null,
+          "decision_index": null
+        }
+      },
+      "reasoning": {
+        "mandatory": true,
+        "default_enabled": true,
+        "supported_efforts": ["max", "xhigh", "high", "medium", "low"],
+        "default_effort": "medium"
+      }
+    },
+    {
+      "id": "openai/gpt-6.2-sol:batch",
+      "canonical_slug": "openai/gpt-6.2-sol-20261117",
+      "hugging_face_id": null,
+      "name": "OpenAI: GPT-6.2 Sol (batch)",
+      "created": 1794938371,
+      "context_length": 1050000,
+      "architecture": {
+        "modality": "text+image+file->text",
+        "input_modalities": ["file", "image", "text"],
+        "output_modalities": ["text"],
+        "tokenizer": "GPT",
+        "instruct_type": null
+      },
+      "pricing": {
+        "prompt": "0.000001",
+        "completion": "0.000005",
+        "web_search": "0.01",
+        "input_cache_read": "0.00000005",
+        "input_cache_write": "0.00000125",
+        "overrides": [
+          {
+            "min_prompt_tokens": 272000,
+            "prompt": "0.000002",
+            "completion": "0.0000075",
+            "input_cache_read": "0.0000001",
+            "input_cache_write": "0.0000025"
+          }
+        ]
+      },
+      "top_provider": {
+        "context_length": 1050000,
+        "max_completion_tokens": 128000,
+        "is_moderated": true
+      },
+      "per_request_limits": null,
+      "supported_parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "reasoning_effort",
+        "response_format",
+        "seed",
+        "structured_outputs",
+        "tool_choice",
+        "tools",
+        "verbosity"
+      ],
+      "default_parameters": {},
+      "supported_voices": null,
+      "knowledge_cutoff": null,
+      "expiration_date": null,
+      "links": {
+        "details": "/api/v1/models/openai/gpt-6.2-sol-20261117/endpoints"
+      },
+      "endpoints": ["/api/v1/batches"],
+      "benchmarks": {
+        "design_arena": [],
+        "artificial_analysis": {
+          "intelligence_index": 57.3,
+          "coding_index": null,
+          "agentic_index": null,
+          "finance_and_accounting_index": 57.2,
+          "strategy_and_ops_index": 59.4,
+          "legal_index": 55,
+          "healthcare_and_medical_index": 53.3,
+          "engineering_index": 61.2,
+          "economics_index": 57.4,
+          "cyber_index": 37.7,
+          "openness_index": null,
+          "multilingual_index": null,
+          "decision_index": null
+        }
+      },
+      "reasoning": {
+        "mandatory": true,
+        "default_enabled": true,
+        "supported_efforts": ["max", "xhigh", "high", "medium", "low"],
+        "default_effort": "medium"
+      }
+    },
+    {
+      "id": "tencent/hy4-flash",
+      "canonical_slug": "tencent/hy4-flash-20261116",
+      "hugging_face_id": "tencent/Hy4-flash",
+      "name": "Tencent: Hy4 flash",
+      "created": 1794838706,
+      "context_length": 1048576,
+      "architecture": {
+        "modality": "text+image->text",
+        "input_modalities": ["text", "image"],
+        "output_modalities": ["text"],
+        "tokenizer": "Other",
+        "instruct_type": null
+      },
+      "pricing": {
+        "prompt": "0.000000035",
+        "completion": "0.0000001405",
+        "input_cache_read": "0.0000000015"
+      },
+      "top_provider": {
+        "context_length": 1048576,
+        "max_completion_tokens": 65536,
+        "is_moderated": false
+      },
+      "per_request_limits": null,
+      "supported_parameters": [
+        "include_reasoning",
+        "max_completion_tokens",
+        "max_tokens",
+        "reasoning",
+        "response_format",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools"
+      ],
+      "default_parameters": {},
+      "supported_voices": null,
+      "knowledge_cutoff": null,
+      "expiration_date": null,
+      "links": {
+        "details": "/api/v1/models/tencent/hy4-flash-20261116/endpoints"
+      },
+      "endpoints": [
+        "/api/v1/chat/completions",
+        "/api/v1/completions",
+        "/api/v1/messages",
+        "/api/v1/responses"
+      ],
+      "benchmarks": {
+        "design_arena": [
+          {
+            "arena": "models",
+            "category": "3d",
+            "elo": 1225,
+            "win_rate": 46.7,
+            "rank": 40
+          },
+          {
+            "arena": "models",
+            "category": "codecategories",
+            "elo": 1228,
+            "win_rate": 44.8,
+            "rank": 50
+          },
+          {
+            "arena": "models",
+            "category": "gamedev",
+            "elo": 1211,
+            "win_rate": 43.5,
+            "rank": 49
+          },
+          {
+            "arena": "models",
+            "category": "uicomponent",
+            "elo": 1278,
+            "win_rate": 48.5,
+            "rank": 29
+          },
+          {
+            "arena": "models",
+            "category": "website",
+            "elo": 1226,
+            "win_rate": 44.4,
+            "rank": 58
+          }
+        ]
+      },
+      "reasoning": {
+        "mandatory": false,
+        "default_enabled": true
+      }
+    },
+    {
+      "id": "qwen/qwen4-max",
+      "canonical_slug": "qwen/qwen4-max-20261115",
+      "hugging_face_id": null,
+      "name": "Qwen: Qwen4 Max",
+      "created": 1794795526,
+      "context_length": 1000000,
+      "architecture": {
+        "modality": "text+image+video->text",
+        "input_modalities": ["text", "image", "video"],
+        "output_modalities": ["text"],
+        "tokenizer": "Qwen",
+        "instruct_type": null
+      },
+      "pricing": {
+        "prompt": "0.000001425",
+        "completion": "0.000004275",
+        "input_cache_read": "0.00000007125",
+        "input_cache_write": "0.00000178125"
+      },
+      "top_provider": {
+        "context_length": 1000000,
+        "max_completion_tokens": 131072,
+        "is_moderated": false
+      },
+      "per_request_limits": null,
+      "supported_parameters": [
+        "frequency_penalty",
+        "include_reasoning",
+        "logprobs",
+        "max_tokens",
+        "presence_penalty",
+        "reasoning",
+        "reasoning_effort",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_logprobs",
+        "top_p"
+      ],
+      "default_parameters": {},
+      "supported_voices": null,
+      "knowledge_cutoff": null,
+      "expiration_date": null,
+      "links": {
+        "details": "/api/v1/models/qwen/qwen4-max-20261115/endpoints"
+      },
+      "endpoints": [
+        "/api/v1/chat/completions",
+        "/api/v1/completions",
+        "/api/v1/messages",
+        "/api/v1/responses"
+      ],
+      "benchmarks": {
+        "design_arena": [],
+        "artificial_analysis": {
+          "intelligence_index": 42.9,
+          "coding_index": null,
+          "agentic_index": null,
+          "finance_and_accounting_index": 54.1,
+          "strategy_and_ops_index": 56.9,
+          "legal_index": 49.6,
+          "healthcare_and_medical_index": 48.2,
+          "engineering_index": 50.1,
+          "economics_index": 51.3,
+          "cyber_index": null,
+          "openness_index": null,
+          "multilingual_index": null,
+          "decision_index": null
+        }
+      },
+      "reasoning": {
+        "mandatory": false,
+        "default_enabled": true,
+        "supported_efforts": ["xhigh", "high", "low", "none"],
+        "default_effort": "high"
+      }
+    },
+    {
+      "id": "inclusionai/ling-3.2-flash:free",
+      "canonical_slug": "inclusionai/ling-3.2-flash-20261113",
+      "hugging_face_id": "inclusionAI/Ling-3.2-flash",
+      "name": "inclusionAI: Ling 3.2 Flash (free)",
+      "created": 1794591958,
+      "context_length": 1048576,
+      "architecture": {
+        "modality": "text+image->text",
+        "input_modalities": ["text", "image"],
+        "output_modalities": ["text"],
+        "tokenizer": "Other",
+        "instruct_type": null
+      },
+      "pricing": {
+        "prompt": "0",
+        "completion": "0"
+      },
+      "top_provider": {
+        "context_length": 1048576,
+        "max_completion_tokens": 262144,
+        "is_moderated": false
+      },
+      "per_request_limits": null,
+      "supported_parameters": [
+        "frequency_penalty",
+        "include_reasoning",
+        "max_tokens",
+        "presence_penalty",
+        "reasoning",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p"
+      ],
+      "default_parameters": {},
+      "supported_voices": null,
+      "knowledge_cutoff": null,
+      "expiration_date": null,
+      "links": {
+        "details": "/api/v1/models/inclusionai/ling-3.2-flash-20261113/endpoints"
+      },
+      "endpoints": [
+        "/api/v1/chat/completions",
+        "/api/v1/completions",
+        "/api/v1/messages",
+        "/api/v1/responses"
+      ],
+      "reasoning": {
+        "mandatory": false,
+        "default_enabled": true
+      }
+    },
+    {
+      "id": "google/gemini-4-hydrogen",
+      "canonical_slug": "google/gemini-4-hydrogen-20261112",
+      "hugging_face_id": null,
+      "name": "Google: Gemini 4 Hydrogen",
+      "created": 1794506460,
+      "context_length": 1048576,
+      "architecture": {
+        "modality": "text+image+file+audio+video->text",
+        "input_modalities": ["audio", "file", "image", "text", "video"],
+        "output_modalities": ["text"],
+        "tokenizer": "Gemini",
+        "instruct_type": null
+      },
+      "pricing": {
+        "prompt": "0.0000015",
+        "completion": "0.0000075",
+        "image": "0.0000015",
+        "audio": "0.0000015",
+        "input_audio_cache": "0.000000075",
+        "web_search": "0.014",
+        "internal_reasoning": "0.0000075",
+        "input_cache_read": "0.000000075",
+        "input_cache_write": "0.0000000833333333333333"
+      },
+      "top_provider": {
+        "context_length": 1048576,
+        "max_completion_tokens": 943718,
+        "is_moderated": false
+      },
+      "per_request_limits": null,
+      "supported_parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "reasoning_effort",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p"
+      ],
+      "default_parameters": {
+        "temperature": null,
+        "top_p": null,
+        "top_k": null,
+        "frequency_penalty": null,
+        "presence_penalty": null,
+        "repetition_penalty": null
+      },
+      "supported_voices": null,
+      "knowledge_cutoff": null,
+      "expiration_date": null,
+      "links": {
+        "details": "/api/v1/models/google/gemini-4-hydrogen-20261112/endpoints"
+      },
+      "endpoints": [
+        "/api/v1/chat/completions",
+        "/api/v1/completions",
+        "/api/v1/messages",
+        "/api/v1/responses"
+      ],
+      "benchmarks": {
+        "design_arena": [
+          {
+            "arena": "agents",
+            "category": "pdf",
+            "elo": 1241,
+            "win_rate": 56.3,
+            "rank": 13
+          },
+          {
+            "arena": "models",
+            "category": "3d",
+            "elo": 1407,
+            "win_rate": 67.3,
+            "rank": 7
+          },
+          {
+            "arena": "models",
+            "category": "asciiart",
+            "elo": 1458,
+            "win_rate": 74.1,
+            "rank": 1
+          },
+          {
+            "arena": "models",
+            "category": "codecategories",
+            "elo": 1339,
+            "win_rate": 58.1,
+            "rank": 9
+          },
+          {
+            "arena": "models",
+            "category": "gamedev",
+            "elo": 1346,
+            "win_rate": 54.2,
+            "rank": 10
+          },
+          {
+            "arena": "models",
+            "category": "uicomponent",
+            "elo": 1342,
+            "win_rate": 55.2,
+            "rank": 9
+          },
+          {
+            "arena": "models",
+            "category": "website",
+            "elo": 1331,
+            "win_rate": 59.6,
+            "rank": 5
+          }
+        ],
+        "artificial_analysis": {
+          "intelligence_index": 53.9,
+          "coding_index": null,
+          "agentic_index": null,
+          "finance_and_accounting_index": 58.1,
+          "strategy_and_ops_index": 57.7,
+          "legal_index": 56.7,
+          "healthcare_and_medical_index": 53.3,
+          "engineering_index": 60.1,
+          "economics_index": 55,
+          "cyber_index": null,
+          "openness_index": null,
+          "multilingual_index": null,
+          "decision_index": null
+        }
+      },
+      "reasoning": {
+        "mandatory": true,
+        "supported_efforts": ["xhigh", "high", "medium", "low"],
+        "default_effort": "medium"
+      }
+    },
+    {
+      "id": "google/gemini-4-hydrogen:batch",
+      "canonical_slug": "google/gemini-4-hydrogen-20261112",
+      "hugging_face_id": null,
+      "name": "Google: Gemini 4 Hydrogen (batch)",
+      "created": 1794506460,
+      "context_length": 1048576,
+      "architecture": {
+        "modality": "text+image+file+audio+video->text",
+        "input_modalities": ["audio", "file", "image", "text", "video"],
+        "output_modalities": ["text"],
+        "tokenizer": "Gemini",
+        "instruct_type": null
+      },
+      "pricing": {
+        "prompt": "0.00000075",
+        "completion": "0.00000375",
+        "image": "0.00000075",
+        "audio": "0.00000075",
+        "input_audio_cache": "0.0000000375",
+        "web_search": "0.014",
+        "internal_reasoning": "0.00000375",
+        "input_cache_read": "0.0000000375",
+        "input_cache_write": "0.0000000833333333333333"
+      },
+      "top_provider": {
+        "context_length": 1048576,
+        "max_completion_tokens": 943718,
+        "is_moderated": false
+      },
+      "per_request_limits": null,
+      "supported_parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "reasoning_effort",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p"
+      ],
+      "default_parameters": {
+        "temperature": null,
+        "top_p": null,
+        "top_k": null,
+        "frequency_penalty": null,
+        "presence_penalty": null,
+        "repetition_penalty": null
+      },
+      "supported_voices": null,
+      "knowledge_cutoff": null,
+      "expiration_date": null,
+      "links": {
+        "details": "/api/v1/models/google/gemini-4-hydrogen-20261112/endpoints"
+      },
+      "endpoints": ["/api/v1/batches"],
+      "benchmarks": {
+        "design_arena": [
+          {
+            "arena": "agents",
+            "category": "pdf",
+            "elo": 1241,
+            "win_rate": 56.3,
+            "rank": 13
+          },
+          {
+            "arena": "models",
+            "category": "3d",
+            "elo": 1407,
+            "win_rate": 67.3,
+            "rank": 7
+          },
+          {
+            "arena": "models",
+            "category": "asciiart",
+            "elo": 1458,
+            "win_rate": 74.1,
+            "rank": 1
+          },
+          {
+            "arena": "models",
+            "category": "codecategories",
+            "elo": 1339,
+            "win_rate": 58.1,
+            "rank": 9
+          },
+          {
+            "arena": "models",
+            "category": "gamedev",
+            "elo": 1346,
+            "win_rate": 54.2,
+            "rank": 10
+          },
+          {
+            "arena": "models",
+            "category": "uicomponent",
+            "elo": 1342,
+            "win_rate": 55.2,
+            "rank": 9
+          },
+          {
+            "arena": "models",
+            "category": "website",
+            "elo": 1331,
+            "win_rate": 59.6,
+            "rank": 5
+          }
+        ],
+        "artificial_analysis": {
+          "intelligence_index": 53.9,
+          "coding_index": null,
+          "agentic_index": null,
+          "finance_and_accounting_index": 58.1,
+          "strategy_and_ops_index": 57.7,
+          "legal_index": 56.7,
+          "healthcare_and_medical_index": 53.3,
+          "engineering_index": 60.1,
+          "economics_index": 55,
+          "cyber_index": null,
+          "openness_index": null,
+          "multilingual_index": null,
+          "decision_index": null
+        }
+      },
+      "reasoning": {
+        "mandatory": true,
+        "supported_efforts": ["xhigh", "high", "medium", "low"],
+        "default_effort": "medium"
+      }
+    },
+    {
+      "id": "baidu/ernie-5.5-flash-preview:free",
+      "canonical_slug": "baidu/ernie-5.5-flash-preview-20261110",
+      "hugging_face_id": "baidu/ERNIE-5.5-Flash-Preview",
+      "name": "Baidu: ERNIE-5.5-Flash-Preview (free)",
+      "created": 1794333533,
+      "context_length": 1024000,
+      "architecture": {
+        "modality": "text->text",
+        "input_modalities": ["text"],
+        "output_modalities": ["text"],
+        "tokenizer": "Other",
+        "instruct_type": null
+      },
+      "pricing": {
+        "prompt": "0",
+        "completion": "0"
+      },
+      "top_provider": {
+        "context_length": 1024000,
+        "max_completion_tokens": 921600,
+        "is_moderated": false
+      },
+      "per_request_limits": null,
+      "supported_parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "reasoning_effort",
+        "response_format",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p"
+      ],
+      "default_parameters": {},
+      "supported_voices": null,
+      "knowledge_cutoff": null,
+      "expiration_date": null,
+      "links": {
+        "details": "/api/v1/models/baidu/ernie-5.5-flash-preview-20261110/endpoints"
+      },
+      "endpoints": [
+        "/api/v1/chat/completions",
+        "/api/v1/completions",
+        "/api/v1/messages",
+        "/api/v1/responses"
+      ],
+      "reasoning": {
+        "mandatory": true,
+        "default_enabled": true,
+        "supported_efforts": ["high"],
+        "default_effort": "high"
+      }
+    },
+    {
+      "id": "baidu/ernie-light-dt-1.0-intl",
+      "canonical_slug": "baidu/ernie-light-dt-1.0-intl-20261110",
+      "hugging_face_id": null,
+      "name": "Baidu: ERNIE-Light-DT-1.0",
+      "created": 1794331260,
+      "context_length": 1024000,
+      "architecture": {
+        "modality": "text->text",
+        "input_modalities": ["text"],
+        "output_modalities": ["text"],
+        "tokenizer": "Other",
+        "instruct_type": null
+      },
+      "pricing": {
+        "prompt": "0.00000113",
+        "completion": "0.00000394",
+        "input_cache_read": "0.000000113"
+      },
+      "top_provider": {
+        "context_length": 1024000,
+        "max_completion_tokens": 131072,
+        "is_moderated": false
+      },
+      "per_request_limits": null,
+      "supported_parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "reasoning_effort",
+        "response_format",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p"
+      ],
+      "default_parameters": {},
+      "supported_voices": null,
+      "knowledge_cutoff": null,
+      "expiration_date": null,
+      "links": {
+        "details": "/api/v1/models/baidu/ernie-light-dt-1.0-intl-20261110/endpoints"
+      },
+      "endpoints": [
+        "/api/v1/chat/completions",
+        "/api/v1/completions",
+        "/api/v1/messages",
+        "/api/v1/responses"
+      ],
+      "reasoning": {
+        "mandatory": false,
+        "default_enabled": true,
+        "supported_efforts": ["max", "high", "low", "none"],
+        "default_effort": "max"
+      }
+    },
+    {
+      "id": "thinkingmachines/inkling-2-small:free",
+      "canonical_slug": "thinkingmachines/inkling-2-small-20261107",
+      "hugging_face_id": "thinkingmachines/Inkling-2-Small",
+      "name": "Thinking Machines: Inkling 2 Small (free)",
+      "created": 1794261847,
+      "context_length": 1048576,
+      "architecture": {
+        "modality": "text+image->text",
+        "input_modalities": ["text", "image"],
+        "output_modalities": ["text"],
+        "tokenizer": "Other",
+        "instruct_type": null
+      },
+      "pricing": {
+        "prompt": "0",
+        "completion": "0"
+      },
+      "top_provider": {
+        "context_length": 1048576,
+        "max_completion_tokens": 131072,
+        "is_moderated": false
+      },
+      "per_request_limits": null,
+      "supported_parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "reasoning_effort",
+        "seed",
+        "stop",
+        "temperature",
+        "tools",
+        "top_p"
+      ],
+      "default_parameters": {
+        "temperature": null,
+        "top_p": null,
+        "top_k": null,
+        "frequency_penalty": null,
+        "presence_penalty": null,
+        "repetition_penalty": null
+      },
+      "supported_voices": null,
+      "knowledge_cutoff": null,
+      "expiration_date": "2026-11-19",
+      "links": {
+        "details": "/api/v1/models/thinkingmachines/inkling-2-small-20261107/endpoints"
+      },
+      "endpoints": [
+        "/api/v1/chat/completions",
+        "/api/v1/completions",
+        "/api/v1/messages",
+        "/api/v1/responses"
+      ],
+      "benchmarks": {
+        "design_arena": [],
+        "artificial_analysis": {
+          "intelligence_index": 30.6,
+          "coding_index": null,
+          "agentic_index": null,
+          "finance_and_accounting_index": 44.3,
+          "strategy_and_ops_index": 43.5,
+          "legal_index": 41.6,
+          "healthcare_and_medical_index": 40.8,
+          "engineering_index": 38.9,
+          "economics_index": 43.4,
+          "cyber_index": null,
+          "openness_index": 38.9,
+          "multilingual_index": null,
+          "decision_index": null
+        }
+      },
+      "reasoning": {
+        "mandatory": true,
+        "default_enabled": true,
+        "supported_efforts": ["max", "high", "medium", "low", "minimal"],
+        "default_effort": "high"
+      }
+    },
+    {
+      "id": "liquid/lfm-3-1.7b:free",
+      "canonical_slug": "liquid/lfm-3-1.7b-20261106",
+      "hugging_face_id": "LiquidAI/LFM3-1.7B",
+      "name": "LiquidAI: LFM3-1.7B (free)",
+      "created": 1794009477,
+      "context_length": 262144,
+      "architecture": {
+        "modality": "text->text",
+        "input_modalities": ["text"],
+        "output_modalities": ["text"],
+        "tokenizer": "Other",
+        "instruct_type": null
+      },
+      "pricing": {
+        "prompt": "0",
+        "completion": "0"
+      },
+      "top_provider": {
+        "context_length": 262144,
+        "max_completion_tokens": 8192,
+        "is_moderated": false
+      },
+      "per_request_limits": null,
+      "supported_parameters": [
+        "frequency_penalty",
+        "include_reasoning",
+        "logprobs",
+        "max_completion_tokens",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "reasoning",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_logprobs",
+        "top_p"
+      ],
+      "default_parameters": {
+        "temperature": 0.1,
+        "top_k": 50,
+        "repetition_penalty": 1.1
+      },
+      "supported_voices": null,
+      "knowledge_cutoff": null,
+      "expiration_date": null,
+      "links": {
+        "details": "/api/v1/models/liquid/lfm-3-1.7b-20261106/endpoints"
+      },
+      "endpoints": [
+        "/api/v1/chat/completions",
+        "/api/v1/completions",
+        "/api/v1/messages",
+        "/api/v1/responses"
+      ],
+      "benchmarks": {
+        "design_arena": [],
+        "artificial_analysis": {
+          "intelligence_index": 6,
+          "coding_index": null,
+          "agentic_index": null,
+          "finance_and_accounting_index": 16.8,
+          "strategy_and_ops_index": 8.7,
+          "legal_index": 16.1,
+          "healthcare_and_medical_index": null,
+          "engineering_index": 16.3,
+          "economics_index": 16,
+          "cyber_index": null,
+          "openness_index": null,
+          "multilingual_index": null,
+          "decision_index": null
+        }
+      },
+      "reasoning": {
+        "mandatory": true
+      }
+    },
+    {
+      "id": "particle-ai/particle-1:free",
+      "canonical_slug": "particle-ai/particle-1-20261027",
+      "hugging_face_id": null,
+      "name": "Particle AI: Particle-1 (free)",
+      "created": 1793207893,
+      "context_length": 1048576,
+      "architecture": {
+        "modality": "text+image->text",
+        "input_modalities": ["text", "image"],
+        "output_modalities": ["text"],
+        "tokenizer": "Other",
+        "instruct_type": null
+      },
+      "pricing": {
+        "prompt": "0",
+        "completion": "0"
+      },
+      "top_provider": {
+        "context_length": 1048576,
+        "max_completion_tokens": 131072,
+        "is_moderated": false
+      },
+      "per_request_limits": null,
+      "supported_parameters": [
+        "frequency_penalty",
+        "include_reasoning",
+        "logprobs",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "reasoning",
+        "reasoning_effort",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_logprobs",
+        "top_p"
+      ],
+      "default_parameters": {},
+      "supported_voices": null,
+      "knowledge_cutoff": null,
+      "expiration_date": null,
+      "links": {
+        "details": "/api/v1/models/particle-ai/particle-1-20261027/endpoints"
+      },
+      "endpoints": [
+        "/api/v1/chat/completions",
+        "/api/v1/completions",
+        "/api/v1/messages",
+        "/api/v1/responses"
+      ],
+      "reasoning": {
+        "mandatory": false,
+        "default_enabled": true,
+        "supported_efforts": [
+          "max",
+          "xhigh",
+          "high",
+          "medium",
+          "low",
+          "minimal",
+          "none"
+        ],
+        "default_effort": "high"
+      }
+    },
+    {
+      "id": "recursive/flint-v1.0:free",
+      "canonical_slug": "recursive/flint-v1.0-20261021",
+      "hugging_face_id": "RecursiveSI/flint",
+      "name": "Recursive: Flint (free)",
+      "created": 1792622765,
+      "context_length": 262144,
+      "architecture": {
+        "modality": "text->text",
+        "input_modalities": ["text"],
+        "output_modalities": ["text"],
+        "tokenizer": "Other",
+        "instruct_type": null
+      },
+      "pricing": {
+        "prompt": "0",
+        "completion": "0"
+      },
+      "top_provider": {
+        "context_length": 262144,
+        "max_completion_tokens": 235929,
+        "is_moderated": false
+      },
+      "per_request_limits": null,
+      "supported_parameters": [
+        "include_reasoning",
+        "logprobs",
+        "max_tokens",
+        "reasoning",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tools",
+        "top_logprobs",
+        "top_p"
+      ],
+      "default_parameters": {},
+      "supported_voices": null,
+      "knowledge_cutoff": null,
+      "expiration_date": null,
+      "links": {
+        "details": "/api/v1/models/recursive/flint-v1.0-20261021/endpoints"
+      },
+      "endpoints": [
+        "/api/v1/chat/completions",
+        "/api/v1/completions",
+        "/api/v1/messages",
+        "/api/v1/responses"
+      ],
+      "reasoning": {
+        "mandatory": true
+      }
+    },
+    {
+      "id": "nvidia/nemotron-3.5-super-vl:free",
+      "canonical_slug": "nvidia/nemotron-3.5-super-vl-20261015",
+      "hugging_face_id": "nvidia/NVIDIA-Nemotron-3.5-Super-VL-120B-A12B-BF16",
+      "name": "NVIDIA: Nemotron 3.5 Super VL (free)",
+      "created": 1792076662,
+      "context_length": 1000000,
+      "architecture": {
+        "modality": "text+image+video->text",
+        "input_modalities": ["text", "image", "video"],
+        "output_modalities": ["text"],
+        "tokenizer": "Other",
+        "instruct_type": null
+      },
+      "pricing": {
+        "prompt": "0",
+        "completion": "0"
+      },
+      "top_provider": {
+        "context_length": 1000000,
+        "max_completion_tokens": 131072,
+        "is_moderated": false
+      },
+      "per_request_limits": null,
+      "supported_parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "response_format",
+        "seed",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p"
+      ],
+      "default_parameters": {},
+      "supported_voices": null,
+      "knowledge_cutoff": null,
+      "expiration_date": null,
+      "links": {
+        "details": "/api/v1/models/nvidia/nemotron-3.5-super-vl-20261015/endpoints"
+      },
+      "endpoints": [
+        "/api/v1/chat/completions",
+        "/api/v1/completions",
+        "/api/v1/messages",
+        "/api/v1/responses"
+      ],
+      "benchmarks": {
+        "design_arena": [
+          {
+            "arena": "agents",
+            "category": "pdf",
+            "elo": 939,
+            "win_rate": 21.1,
+            "rank": 41
+          },
+          {
+            "arena": "models",
+            "category": "3d",
+            "elo": 1111,
+            "win_rate": 30.3,
+            "rank": 86
+          },
+          {
+            "arena": "models",
+            "category": "codecategories",
+            "elo": 1135,
+            "win_rate": 32.3,
+            "rank": 95
+          },
+          {
+            "arena": "models",
+            "category": "dataviz",
+            "elo": 1085,
+            "win_rate": 26.2,
+            "rank": 106
+          },
+          {
+            "arena": "models",
+            "category": "gamedev",
+            "elo": 1078,
+            "win_rate": 27.6,
+            "rank": 106
+          },
+          {
+            "arena": "models",
+            "category": "uicomponent",
+            "elo": 1156,
+            "win_rate": 33.1,
+            "rank": 79
+          },
+          {
+            "arena": "models",
+            "category": "website",
+            "elo": 1154,
+            "win_rate": 34.5,
+            "rank": 92
+          }
+        ],
+        "artificial_analysis": {
+          "intelligence_index": 13.6,
+          "coding_index": null,
+          "agentic_index": null,
+          "finance_and_accounting_index": 26.7,
+          "strategy_and_ops_index": 21.8,
+          "legal_index": 25.3,
+          "healthcare_and_medical_index": 21,
+          "engineering_index": 23.5,
+          "economics_index": 26.1,
+          "cyber_index": null,
+          "openness_index": 83.3,
+          "multilingual_index": null,
+          "decision_index": null
+        }
+      },
+      "reasoning": {
+        "mandatory": false
+      }
+    },
+    {
+      "id": "dots-studio/dots-3-note-preview:free",
+      "canonical_slug": "dots-studio/dots-3-note-preview-20260813",
+      "hugging_face_id": "dots-studio/dots3-note-prev",
+      "name": "Dots Studio: Dots3-Note Preview (free)",
+      "created": 1786680361,
+      "context_length": 512000,
+      "architecture": {
+        "modality": "text+image->text",
+        "input_modalities": ["text", "image"],
+        "output_modalities": ["text"],
+        "tokenizer": "Other",
+        "instruct_type": null
+      },
+      "pricing": {
+        "prompt": "0",
+        "completion": "0"
+      },
+      "top_provider": {
+        "context_length": 512000,
+        "max_completion_tokens": 460800,
+        "is_moderated": false
+      },
+      "per_request_limits": null,
+      "supported_parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "response_format",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p"
+      ],
+      "default_parameters": {},
+      "supported_voices": null,
+      "knowledge_cutoff": null,
+      "expiration_date": "2026-12-31",
+      "links": {
+        "details": "/api/v1/models/dots-studio/dots-3-note-preview-20260813/endpoints"
+      },
+      "endpoints": [
+        "/api/v1/chat/completions",
+        "/api/v1/completions",
+        "/api/v1/messages",
+        "/api/v1/responses"
+      ],
+      "reasoning": {
+        "mandatory": false
+      }
+    },
+    {
+      "id": "nvidia/nemotron-3.5-lightning:free",
+      "canonical_slug": "nvidia/nemotron-3.5-lightning-20260807",
+      "hugging_face_id": "nvidia/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-BF16",
+      "name": "NVIDIA: Nemotron 3.5 Lightning (free)",
+      "created": 1786452751,
+      "context_length": 1000000,
+      "architecture": {
+        "modality": "text->text",
+        "input_modalities": ["text"],
+        "output_modalities": ["text"],
+        "tokenizer": "Other",
+        "instruct_type": null
+      },
+      "pricing": {
+        "prompt": "0",
+        "completion": "0"
+      },
+      "top_provider": {
+        "context_length": 1000000,
+        "max_completion_tokens": 65536,
+        "is_moderated": false
+      },
+      "per_request_limits": null,
+      "supported_parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "seed",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p"
+      ],
+      "default_parameters": {},
+      "supported_voices": null,
+      "knowledge_cutoff": null,
+      "expiration_date": null,
+      "links": {
+        "details": "/api/v1/models/nvidia/nemotron-3.5-lightning-20260807/endpoints"
+      },
+      "endpoints": [
+        "/api/v1/chat/completions",
+        "/api/v1/completions",
+        "/api/v1/messages",
+        "/api/v1/responses"
+      ],
+      "benchmarks": {
+        "design_arena": [],
+        "artificial_analysis": {
+          "intelligence_index": 5.5,
+          "coding_index": 26.8,
+          "agentic_index": 3.5,
+          "finance_and_accounting_index": 14.9,
+          "strategy_and_ops_index": 7.1,
+          "legal_index": 14.2,
+          "healthcare_and_medical_index": 9,
+          "engineering_index": 15.5,
+          "economics_index": 14.8,
+          "cyber_index": null,
+          "openness_index": 83.3,
+          "multilingual_index": null,
+          "decision_index": null
+        }
+      },
+      "reasoning": {
+        "mandatory": false
+      }
+    },
+    {
+      "id": "cohere/north-mini-code:free",
+      "canonical_slug": "cohere/north-mini-code-20260617",
+      "hugging_face_id": "CohereLabs/North-Mini-Code-1.0",
+      "name": "Cohere: North Mini Code (free)",
+      "created": 1781723748,
+      "context_length": 256000,
+      "architecture": {
+        "modality": "text->text",
+        "input_modalities": ["text"],
+        "output_modalities": ["text"],
+        "tokenizer": "Cohere",
+        "instruct_type": null
+      },
+      "pricing": {
+        "prompt": "0",
+        "completion": "0"
+      },
+      "top_provider": {
+        "context_length": 256000,
+        "max_completion_tokens": 64000,
+        "is_moderated": true
+      },
+      "per_request_limits": null,
+      "supported_parameters": [
+        "frequency_penalty",
+        "include_reasoning",
+        "max_tokens",
+        "presence_penalty",
+        "reasoning",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p"
+      ],
+      "default_parameters": {
+        "temperature": null,
+        "top_p": null,
+        "top_k": null,
+        "frequency_penalty": null,
+        "presence_penalty": null,
+        "repetition_penalty": null
+      },
+      "supported_voices": null,
+      "knowledge_cutoff": null,
+      "expiration_date": null,
+      "links": {
+        "details": "/api/v1/models/cohere/north-mini-code-20260617/endpoints"
+      },
+      "endpoints": [
+        "/api/v1/chat/completions",
+        "/api/v1/completions",
+        "/api/v1/messages",
+        "/api/v1/responses"
+      ],
+      "benchmarks": {
+        "design_arena": [],
+        "artificial_analysis": {
+          "intelligence_index": 3.4,
+          "coding_index": 36.5,
+          "agentic_index": 1.1,
+          "finance_and_accounting_index": 9.3,
+          "strategy_and_ops_index": 6.2,
+          "legal_index": 7.9,
+          "healthcare_and_medical_index": 6.3,
+          "engineering_index": 9.9,
+          "economics_index": 9.9,
+          "cyber_index": null,
+          "openness_index": 41.7,
+          "multilingual_index": null,
+          "decision_index": null
+        }
+      },
+      "reasoning": {
+        "mandatory": false
+      }
+    },
+    {
+      "id": "nvidia/nemotron-3-ultra-550b-a55b:free",
+      "canonical_slug": "nvidia/nemotron-3-ultra-550b-a55b-20260604",
+      "hugging_face_id": "nvidia/NVIDIA-Nemotron-3-Ultra-550B-A55B-BF16",
+      "name": "NVIDIA: Nemotron 3 Ultra (free)",
+      "created": 1780551208,
+      "context_length": 1000000,
+      "architecture": {
+        "modality": "text->text",
+        "input_modalities": ["text"],
+        "output_modalities": ["text"],
+        "tokenizer": "Other",
+        "instruct_type": null
+      },
+      "pricing": {
+        "prompt": "0",
+        "completion": "0"
+      },
+      "top_provider": {
+        "context_length": 1000000,
+        "max_completion_tokens": 65536,
+        "is_moderated": false
+      },
+      "per_request_limits": null,
+      "supported_parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "reasoning_effort",
+        "seed",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p"
+      ],
+      "default_parameters": {
+        "temperature": 1,
+        "top_p": 0.95,
+        "top_k": null,
+        "frequency_penalty": null,
+        "presence_penalty": null,
+        "repetition_penalty": null
+      },
+      "supported_voices": null,
+      "knowledge_cutoff": null,
+      "expiration_date": null,
+      "links": {
+        "details": "/api/v1/models/nvidia/nemotron-3-ultra-550b-a55b-20260604/endpoints"
+      },
+      "endpoints": [
+        "/api/v1/chat/completions",
+        "/api/v1/completions",
+        "/api/v1/messages",
+        "/api/v1/responses"
+      ],
+      "benchmarks": {
+        "design_arena": [
+          {
+            "arena": "agents",
+            "category": "pdf",
+            "elo": 1138,
+            "win_rate": 40.9,
+            "rank": 32
+          },
+          {
+            "arena": "models",
+            "category": "3d",
+            "elo": 1103,
+            "win_rate": 37.9,
+            "rank": 90
+          },
+          {
+            "arena": "models",
+            "category": "asciiart",
+            "elo": 1079,
+            "win_rate": 36.3,
+            "rank": 68
+          },
+          {
+            "arena": "models",
+            "category": "codecategories",
+            "elo": 1127,
+            "win_rate": 35.3,
+            "rank": 100
+          },
+          {
+            "arena": "models",
+            "category": "dataviz",
+            "elo": 1135,
+            "win_rate": 37.1,
+            "rank": 88
+          },
+          {
+            "arena": "models",
+            "category": "gamedev",
+            "elo": 1120,
+            "win_rate": 35.3,
+            "rank": 89
+          },
+          {
+            "arena": "models",
+            "category": "svg",
+            "elo": 1060,
+            "win_rate": 32,
+            "rank": 80
+          },
+          {
+            "arena": "models",
+            "category": "uicomponent",
+            "elo": 1124,
+            "win_rate": 35.2,
+            "rank": 96
+          },
+          {
+            "arena": "models",
+            "category": "website",
+            "elo": 1126,
+            "win_rate": 34.3,
+            "rank": 104
+          }
+        ],
+        "artificial_analysis": {
+          "intelligence_index": 11.8,
+          "coding_index": 49.3,
+          "agentic_index": 20.1,
+          "finance_and_accounting_index": 24.2,
+          "strategy_and_ops_index": 15.3,
+          "legal_index": 22.6,
+          "healthcare_and_medical_index": 18,
+          "engineering_index": 22.8,
+          "economics_index": 24.1,
+          "cyber_index": 13.1,
+          "openness_index": 83.3,
+          "multilingual_index": null,
+          "decision_index": null
+        }
+      },
+      "reasoning": {
+        "mandatory": false,
+        "default_enabled": true,
+        "supports_max_tokens": true,
+        "supported_efforts": ["high", "medium", "none"],
+        "default_effort": "high"
+      }
+    },
+    {
+      "id": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+      "canonical_slug": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning-20260428",
+      "hugging_face_id": "nvidia/Nemotron-3-Nano-Omni-30B-A3B-Reasoning-BF16",
+      "name": "NVIDIA: Nemotron 3 Nano Omni (free)",
+      "created": 1777393095,
+      "context_length": 256000,
+      "architecture": {
+        "modality": "text+image+audio+video->text",
+        "input_modalities": ["text", "audio", "image", "video"],
+        "output_modalities": ["text"],
+        "tokenizer": "Other",
+        "instruct_type": null
+      },
+      "pricing": {
+        "prompt": "0",
+        "completion": "0"
+      },
+      "top_provider": {
+        "context_length": 256000,
+        "max_completion_tokens": 65536,
+        "is_moderated": false
+      },
+      "per_request_limits": null,
+      "supported_parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "seed",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p"
+      ],
+      "default_parameters": {
+        "temperature": 0.6,
+        "top_p": 0.95,
+        "top_k": null,
+        "frequency_penalty": null,
+        "presence_penalty": null,
+        "repetition_penalty": null
+      },
+      "supported_voices": null,
+      "knowledge_cutoff": null,
+      "expiration_date": null,
+      "links": {
+        "details": "/api/v1/models/nvidia/nemotron-3-nano-omni-30b-a3b-reasoning-20260428/endpoints"
+      },
+      "endpoints": [
+        "/api/v1/chat/completions",
+        "/api/v1/completions",
+        "/api/v1/messages",
+        "/api/v1/responses"
+      ],
+      "benchmarks": {
+        "design_arena": [],
+        "artificial_analysis": {
+          "intelligence_index": null,
+          "coding_index": 13.8,
+          "agentic_index": null,
+          "finance_and_accounting_index": null,
+          "strategy_and_ops_index": null,
+          "legal_index": null,
+          "healthcare_and_medical_index": null,
+          "engineering_index": null,
+          "economics_index": null,
+          "cyber_index": null,
+          "openness_index": 55.6,
+          "multilingual_index": null,
+          "decision_index": null
+        }
+      },
+      "reasoning": {
+        "mandatory": false,
+        "default_enabled": true,
+        "supports_max_tokens": true
+      }
+    },
+    {
+      "id": "google/gemma-4-26b-a4b-it:free",
+      "canonical_slug": "google/gemma-4-26b-a4b-it-20260403",
+      "hugging_face_id": "google/gemma-4-26B-A4B-it",
+      "name": "Google: Gemma 4 26B A4B  (free)",
+      "created": 1775227989,
+      "context_length": 262144,
+      "architecture": {
+        "modality": "text+image+video->text",
+        "input_modalities": ["image", "text", "video"],
+        "output_modalities": ["text"],
+        "tokenizer": "Gemma",
+        "instruct_type": null
+      },
+      "pricing": {
+        "prompt": "0",
+        "completion": "0"
+      },
+      "top_provider": {
+        "context_length": 262144,
+        "max_completion_tokens": 32768,
+        "is_moderated": false
+      },
+      "per_request_limits": null,
+      "supported_parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "response_format",
+        "seed",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p"
+      ],
+      "default_parameters": {
+        "temperature": 1,
+        "top_p": 0.95,
+        "top_k": 64
+      },
+      "supported_voices": null,
+      "knowledge_cutoff": null,
+      "expiration_date": null,
+      "links": {
+        "details": "/api/v1/models/google/gemma-4-26b-a4b-it-20260403/endpoints"
+      },
+      "endpoints": [
+        "/api/v1/chat/completions",
+        "/api/v1/completions",
+        "/api/v1/messages",
+        "/api/v1/responses"
+      ],
+      "benchmarks": {
+        "design_arena": [],
+        "artificial_analysis": {
+          "intelligence_index": null,
+          "coding_index": 39.3,
+          "agentic_index": 2.9,
+          "finance_and_accounting_index": null,
+          "strategy_and_ops_index": null,
+          "legal_index": null,
+          "healthcare_and_medical_index": null,
+          "engineering_index": null,
+          "economics_index": null,
+          "cyber_index": null,
+          "openness_index": 38.9,
+          "multilingual_index": null,
+          "decision_index": null
+        }
+      },
+      "reasoning": {
+        "mandatory": false,
+        "default_enabled": false
+      }
+    },
+    {
+      "id": "google/gemma-4-31b-it:free",
+      "canonical_slug": "google/gemma-4-31b-it-20260402",
+      "hugging_face_id": "google/gemma-4-31B-it",
+      "name": "Google: Gemma 4 31B (free)",
+      "created": 1775148486,
+      "context_length": 262144,
+      "architecture": {
+        "modality": "text+image+video->text",
+        "input_modalities": ["image", "text", "video"],
+        "output_modalities": ["text"],
+        "tokenizer": "Gemma",
+        "instruct_type": null
+      },
+      "pricing": {
+        "prompt": "0",
+        "completion": "0"
+      },
+      "top_provider": {
+        "context_length": 262144,
+        "max_completion_tokens": 32768,
+        "is_moderated": false
+      },
+      "per_request_limits": null,
+      "supported_parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "response_format",
+        "seed",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p"
+      ],
+      "default_parameters": {
+        "temperature": 1,
+        "top_p": 0.95,
+        "top_k": 64,
+        "frequency_penalty": null,
+        "presence_penalty": null,
+        "repetition_penalty": null
+      },
+      "supported_voices": null,
+      "knowledge_cutoff": null,
+      "expiration_date": null,
+      "links": {
+        "details": "/api/v1/models/google/gemma-4-31b-it-20260402/endpoints"
+      },
+      "endpoints": [
+        "/api/v1/chat/completions",
+        "/api/v1/completions",
+        "/api/v1/messages",
+        "/api/v1/responses"
+      ],
+      "benchmarks": {
+        "design_arena": [],
+        "artificial_analysis": {
+          "intelligence_index": 4.4,
+          "coding_index": 43.4,
+          "agentic_index": 4.2,
+          "finance_and_accounting_index": 8.2,
+          "strategy_and_ops_index": 6.9,
+          "legal_index": 7.3,
+          "healthcare_and_medical_index": null,
+          "engineering_index": 11.9,
+          "economics_index": 9.5,
+          "cyber_index": null,
+          "openness_index": 38.9,
+          "multilingual_index": null,
+          "decision_index": null
+        }
+      },
+      "reasoning": {
+        "mandatory": false,
+        "default_enabled": false
+      }
+    }
+  ],
+  "total_count": 478,
+  "links": {
+    "next": null
+  }
+}

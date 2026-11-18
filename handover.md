@@ -239,6 +239,16 @@ POSTs from curl need `-H "Origin: http://localhost:3000"`.
     both `MAX_SELL_DAYS` (90; they were 60 and 30, so a 1-sale item counted slower than an
     unsold one). Real data: Covert Aggressive best $27.77 to $19.08, Restricted Safe $1.23
     to $1.10, Classified unchanged; many contracts now take 40 to 70 days.
+  - **D3 real responses (partly):** `npm run record-fixtures` (`tools/record-fixtures.mjs`)
+    saves one real response per API into `src/lib/fixtures/`, trimmed, keys never written,
+    other people's account fields (sellers, Steam ids, avatars) removed.
+    `api-fixtures.test.ts` parses each with the app's own zod schemas (now exported from
+    `ai.ts`) and skips fixtures that don't exist. Only `openrouter-models` is recorded so
+    far (public). Gemini, Groq, OpenRouter chat and CSFloat need keys: run the script once
+    keys are in `.env.local`, then commit the new files. Finding: OpenRouter has only 14
+    free models and none are Llama, Qwen, DeepSeek or Mistral, so `pickModel` falls back
+    to the highest version number (`nvidia/nemotron-3.5-lightning:free`). Gemma is
+    skipped by `pickModel` even though Gemma 4 is a usable chat model.
 - **Next:** the owner continues tomorrow. Open items: test the AI (Find box, Ask AI) and
   CSFloat with real keys, then pick from `docs/roadmap.md`. taste-skill and impeccable were
   not installed, so M17 was done by hand; run them later if wanted.
