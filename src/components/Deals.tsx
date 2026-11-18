@@ -12,6 +12,7 @@ import {
 } from "@/lib/fees";
 import { useMoney } from "./Money";
 import { FloatSnipes } from "./FloatSnipes";
+import { CrossMarketGaps } from "./CrossMarketGaps";
 import { SizedCost, useBankroll } from "./Bankroll";
 import { RiskPicker, useRiskProfile } from "./RiskPicker";
 import { isRiskProfileId, RISK_PROFILES } from "@/lib/risk";
@@ -291,6 +292,8 @@ export function Deals() {
           </table>
         </div>
       )}
+      <CrossMarketGaps />
+
       <FloatSnipes />
 
       {chart && (

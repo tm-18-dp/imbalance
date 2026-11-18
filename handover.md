@@ -202,6 +202,13 @@ POSTs from curl need `-H "Origin: http://localhost:3000"`.
     listing. Sequential calls with a 400 ms gap, reusing listings saved in the last 10
     minutes, and it stops (keeping results) on the first CSFloat error. UI:
     `FloatSnipes.tsx` at the bottom of Deals. Premiums are deliberately not priced.
+  - **E3 cross-market gaps:** `/api/gaps` compares saved prices only (`savedQuotes`:
+    Skinport always; Steam and CSFloat when saved in the last hour) with `findGaps`
+    (every buy-here, sell-there pair after the selling fee). The page
+    (`CrossMarketGaps.tsx`) first looks up `missingSteam` through `/api/steam-price`
+    3.5 s apart, and CSFloat listings through `/api/listings` when a key is set, then asks
+    again. Selling on Steam is opt-in and scaled by a wallet value (% of cash). Steam
+    purchases are still counted at full cash.
 - **Next:** the owner continues tomorrow. Open items: test the AI (Find box, Ask AI) and
   CSFloat with real keys, then pick from `docs/roadmap.md`. taste-skill and impeccable were
   not installed, so M17 was done by hand; run them later if wanted.

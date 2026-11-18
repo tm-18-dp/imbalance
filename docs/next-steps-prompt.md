@@ -104,10 +104,13 @@ Sizes: S = an hour or two, M = a session, L = more than a session.
       sales at the exact float. Tested end to end with synthetic listings; **still to do:**
       a run with a real CSFloat key.
 
-- [ ] **E3. Cross-market gaps (M).** Buy on Skinport, sell on CSFloat (2% fee) or the other
-      way round. Show the gap after both fees and the trade lock. Note in the UI that Steam
-      Market money stays in the Steam wallet and can't be withdrawn as cash, so a Steam
-      price is worth less than its number.
+- [x] **E3. Cross-market gaps (M).** Built: "Cross-market gaps" on the Deals page.
+      Skinport and Steam (no key, looked up slowly) plus CSFloat with a key. Selling on
+      Steam is opt-in and valued at a user-set share of cash. Real result: Skinport to
+      Steam shows +29 to 38% on cases in wallet money, which disappears once wallet money
+      is valued at 70% of cash; no cash-only gap between Skinport and Steam. Possible
+      follow-up: value Steam purchases made with wallet money the same way.
+
 - [ ] **E4. Pattern premiums (L).** Case Hardened blue gems and Fade percentages. Start
       with a small hand-made table of known premium patterns and only flag them; don't
       price them automatically.
