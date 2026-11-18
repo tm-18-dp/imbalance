@@ -215,6 +215,13 @@ POSTs from curl need `-H "Origin: http://localhost:3000"`.
     with zod and returns a readable error for a broken file; `/api/patterns` serves it.
     `PatternBadge` shows on Skins-page CSFloat listings, Float snipes and trade-up
     outcomes. Patterns are never priced, and fade % is not calculated.
+  - **E5 more mixes:** `findContracts` now runs, after the simple search, a three-skin
+    step (best target+filler pairs with every split and a second filler) and a swap
+    search (`bestSwap`, first improvement, up to 20 steps per seed), memoised by mix key.
+    `deadline` (route: start + 2.5 s) stops both; `accept` (route: `withinProfile` when
+    hiding risky) filters seeds, swaps and the returned list. Without `accept`, risky
+    high-profit mixes crowded every allowed contract out of the top 2000. Covert scans
+    spend the whole budget on the simple search, so they gain nothing yet.
 - **Next:** the owner continues tomorrow. Open items: test the AI (Find box, Ask AI) and
   CSFloat with real keys, then pick from `docs/roadmap.md`. taste-skill and impeccable were
   not installed, so M17 was done by hand; run them later if wanted.

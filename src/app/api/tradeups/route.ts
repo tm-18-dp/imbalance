@@ -13,8 +13,12 @@ import {
   withinProfile,
 } from "@/lib/risk";
 
-/** Scans one tier for the most profitable contracts. Takes about a second. */
+/** The search (swap search included) stops by this, leaving time to prepare the answer. */
+const SEARCH_BUDGET_MS = 2500;
+
+/** Scans one tier for the most profitable contracts, in about 3 seconds at most. */
 export async function GET(req: Request) {
+  const started = Date.now();
   const p = new URL(req.url).searchParams;
   const tier = p.get("tier");
   const market = p.get("market") ?? "skinport";
@@ -51,6 +55,20 @@ export async function GET(req: Request) {
     market: MARKETPLACES[market],
     budgetCents: budget > 0 ? Math.round(budget * 100) : undefined,
     limit: 2000,
+    // The swap search gets whatever time is left after loading and the simple search.
+    deadline: started + SEARCH_BUDGET_MS,
+    // Hidden contracts must not crowd out the ones the risk level allows.
+    accept: hideRisky
+      ? (r) =>
+          withinProfile(
+            r.outcomes.map((o) => ({
+              ...o,
+              volume30d: data.volume30d(o.skin, o.wear),
+            })),
+            r.evCents,
+            profile,
+          )
+      : undefined,
   })
     .map((c) => {
       const outcomes = c.result.outcomes.map((o) => ({

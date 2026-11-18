@@ -120,6 +120,73 @@ describe("findContracts", () => {
   });
 });
 
+describe("swap search", () => {
+  // GOLD's outcome is worth far more in Minimal Wear (average float position under 15%).
+  // Only 5 cheap fillers are listed. Best two-skin mix: 7 GOLD + 3 low-float (+20.43).
+  // Best overall: 6 GOLD + 2 low-float + 2 cheap (+21.29), whose average 0.148 just
+  // reaches Minimal Wear. No single swap gets from the first to the second.
+  const outcomes = new Map([
+    ["GOLD", [out("prize", "GOLD")]],
+    ["JUNK", [out("dud1", "JUNK"), out("dud2", "JUNK")]],
+  ]);
+  const price = (s: OutcomeSkin, wear: string | null) =>
+    s.id === "prize" ? (wear === "Minimal Wear" ? 40000 : 15000) : 10;
+  const options = [
+    opt("GOLD", 1500, 0.2),
+    {
+      ...opt("JUNK", 10, 0.12),
+      quantity: 5,
+      skinId: "cheap",
+      marketHashName: "Cheap filler",
+    },
+    {
+      ...opt("JUNK", 3000, 0.02),
+      skinId: "low",
+      marketHashName: "Low-float filler",
+    },
+  ];
+  const run = (improveSeeds?: number) =>
+    findContracts(options, outcomes, price, {
+      tier: "Restricted",
+      market: noFee,
+      improveSeeds,
+    });
+
+  it("finds a three-skin mix that beats every two-skin one", () => {
+    const simple = run(0)[0];
+    const swapped = run()[0];
+    expect(simple.inputs).toHaveLength(2);
+    expect(swapped.inputs).toHaveLength(3);
+    expect(swapped.result.profitCents).toBeGreaterThan(
+      simple.result.profitCents,
+    );
+    expect(swapped.result.avgNormFloat).toBeLessThan(0.15);
+    expect(
+      Object.fromEntries(swapped.inputs.map((i) => [i.option.skinId, i.count])),
+    ).toEqual({ "GOLD-Field-Tested": 6, low: 2, cheap: 2 });
+  });
+
+  it("keeps and swaps to only contracts the rule accepts", () => {
+    // Reject anything costing over 150: the 6 + 2 + 2 mix (150.20) is out.
+    const found = findContracts(options, outcomes, price, {
+      tier: "Restricted",
+      market: noFee,
+      accept: (r) => r.costCents <= 15000,
+    });
+    expect(found.length).toBeGreaterThan(0);
+    expect(found.every((c) => c.result.costCents <= 15000)).toBe(true);
+  });
+
+  it("stops at the deadline", () => {
+    const found = findContracts(options, outcomes, price, {
+      tier: "Restricted",
+      market: noFee,
+      deadline: Date.now() - 1,
+    });
+    expect(found[0].inputs.length).toBeLessThanOrEqual(2);
+  });
+});
+
 describe("loadTierData", () => {
   it("builds options at the worst float of each wear and prices outcomes by variant", () => {
     const db = openDb(":memory:");

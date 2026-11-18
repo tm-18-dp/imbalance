@@ -118,9 +118,12 @@ Sizes: S = an hour or two, M = a session, L = more than a session.
       387, Five-SeveN CH 278) plus your own in `data/patterns.json` (example in
       `docs/patterns.example.json`). Fade % is not calculated.
 
-- [ ] **E5. Search more mixes (M).** The finder tries one target plus one filler. Add
-      three-way mixes and a greedy improve step (swap one input at a time while profit
-      rises), with a time limit so a scan stays under about 3 seconds.
+- [x] **E5. Search more mixes (M).** Done: after the simple target-plus-filler search, a
+      three-skin step (every split of the best pairs with a second filler) and a swap
+      search (one copy at a time while profit rises), both stopping 2.5 s into the scan
+      and both kept within the chosen risk level. Real data: Restricted Safe best
+      $0.99 to $1.23, Balanced $0.99 to $1.40; most top-50 contracts now use 3+ skins.
+      Knife scans gain nothing yet: their simple search uses the whole budget.
 
 ### D. Data quality (better numbers, fewer fake profits)
 
