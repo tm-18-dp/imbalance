@@ -38,7 +38,10 @@ export function Header() {
           <img src="/logo.svg" alt="" width={32} height={32} />
           Imbalance
         </Link>
-        <nav aria-label="Main" className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
+        <nav
+          aria-label="Main"
+          className="flex flex-wrap gap-x-4 gap-y-1 text-sm"
+        >
           {LINKS.map((l) => (
             <Link
               key={l.href}
