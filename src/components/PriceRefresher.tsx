@@ -113,7 +113,9 @@ export function PriceRefresher() {
         onChange={(e) => saveOn(e.target.checked)}
         aria-label="Update prices automatically"
       />
-      <span role="status">{status}</span>
+      <span role="status" className="whitespace-nowrap">
+        {status}
+      </span>
     </label>
   );
 }

@@ -82,7 +82,10 @@ export function KeysModal() {
 
   return (
     <>
-      <button className="btn" onClick={() => dialog.current?.showModal()}>
+      <button
+        className="btn whitespace-nowrap"
+        onClick={() => dialog.current?.showModal()}
+      >
         API keys
         {!anySet && (
           <span

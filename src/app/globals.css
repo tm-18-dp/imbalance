@@ -67,3 +67,25 @@ body {
 .input {
   @apply rounded-lg border border-line bg-bg px-3 py-1.5 text-sm focus-visible:outline-2 focus-visible:outline-accent;
 }
+
+/*
+ * Phones: wide tables scroll sideways instead of squeezing. Without this the first column
+ * (item names) shrank to a word per line and numbers ran into it. Desktop is unchanged.
+ */
+@media (max-width: 640px) {
+  .overflow-x-auto :is(td, th) {
+    white-space: nowrap;
+  }
+  /* Some tables have no cell padding; unwrapped numbers would run together. */
+  .overflow-x-auto :is(td, th):not(:last-child) {
+    padding-right: 0.75rem;
+  }
+  /* The item column keeps room to wrap: the first one, or the one after a tick box. */
+  .overflow-x-auto
+    tr
+    > :first-child:not(:has(input[type="checkbox"], .sr-only)),
+  .overflow-x-auto tr > :first-child:has(input[type="checkbox"], .sr-only) + * {
+    white-space: normal;
+    min-width: 11rem;
+  }
+}

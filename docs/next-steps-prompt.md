@@ -159,7 +159,8 @@ Sizes: S = an hour or two, M = a session, L = more than a session.
 - [x] **U2. Export contract shopping list (S).** Done: Copy or Download on a contract
       gives the items, counts, max floats, expected prices and Skinport, CSFloat and Steam
       search links, plus the exact-float listings when picked.
-- [ ] **U3. Mobile layout pass (S).** Check every page at 390 px wide.
+- [x] **U3. Mobile layout pass (S).** Done: every page checked at 390 px; wide tables
+      now scroll sideways with readable item names, and the header wraps.
 
 ---
 
