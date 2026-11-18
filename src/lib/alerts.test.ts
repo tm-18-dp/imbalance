@@ -77,15 +77,16 @@ describe("alerts", () => {
     expect(next.seen).toHaveLength(500);
   });
 
-  it("links to the page with the search filled in", () => {
+  it("links to the page with the search filled in, money limits in US dollars", () => {
     expect(
       alertUrl({
         kind: "tradeups",
         query: "tier=Covert&risk=aggressive&budget=50&sort=roi&owned=0",
       }),
-    ).toBe("/tradeups?tier=Covert&risk=aggressive");
-    expect(alertUrl({ kind: "deals", query: "q=AK&dips=1" })).toBe(
-      "/deals?q=AK&dips=1",
+    ).toBe("/tradeups?tier=Covert&risk=aggressive&maxUsd=50");
+    // The Deals page reads "max" in the shown currency, so it must not carry dollars.
+    expect(alertUrl({ kind: "deals", query: "q=AK&max=99.93&dips=1" })).toBe(
+      "/deals?q=AK&dips=1&maxUsd=99.93",
     );
   });
 

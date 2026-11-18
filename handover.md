@@ -318,6 +318,14 @@ POSTs from curl need `-H "Origin: http://localhost:3000"`.
     makes money, risk levels, Trade-ups, Deals, Tracker, alerts and watchlist, keys,
     safety). Linked as "Guide" in the header and from the Dashboard intro. Update it when
     a feature's buttons or wording change.
+  - **Bug pass (19 Nov 2026), each reproduced before fixing:** (1) alert links carried the
+    USD limit as `max`, which the Deals page reads in the shown currency (a 367 AED limit
+    reopened as 99.93 AED); links now use `maxUsd` and `shownAmount` (filters.ts) converts
+    it once rates load. (2) and (3): Skinport lists 120 items (Doppler knives) only by
+    phase, so a watchlist star or Tracker entry without a phase had no price; `listWatch`
+    and `priceLookup` now fall back to the cheapest listed phase. Checked and not a bug:
+    repeated alert checks on unchanged prices raised no false finds (Restricted 3 runs,
+    Covert 5 runs).
 - **Next:** the owner continues tomorrow. Open items: test the AI (Find box, Ask AI) and
   CSFloat with real keys, then pick from `docs/roadmap.md`. taste-skill and impeccable were
   not installed, so M17 was done by hand; run them later if wanted.

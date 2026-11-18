@@ -18,7 +18,7 @@ import { RiskPicker, useRiskProfile } from "./RiskPicker";
 import { isRiskProfileId, RISK_PROFILES } from "@/lib/risk";
 import { AskAi } from "./AskAi";
 import { useSearchParams } from "next/navigation";
-import { urlFlag, urlNumber } from "@/lib/filters";
+import { shownAmount, urlFlag, urlNumber } from "@/lib/filters";
 import { PriceHistory, TrendBadge } from "./PriceHistory";
 import { AlertMe } from "./Alerts";
 import { WatchStar } from "./Watchlist";
@@ -40,7 +40,9 @@ export function Deals() {
   const [minVolume, setMinVolume] = useState(() =>
     urlNumber(params, "minVolume", String(start.dealMinVolume30d)),
   );
-  const [max, setMax] = useState(() => urlNumber(params, "max", ""));
+  // Null until the user types: the URL's amount shows in the current currency.
+  const [maxTyped, setMax] = useState<string | null>(null);
+  const max = shownAmount(maxTyped, params, rates[currency] ?? 1);
   const [q, setQ] = useState(() => params.get("q")?.slice(0, 100) ?? "");
   const [weapons, setWeapons] = useState(() =>
     urlFlag(params, "weapons", !start.dealIncludeNonWeapons),

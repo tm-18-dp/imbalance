@@ -184,6 +184,14 @@ export function WatchlistPanel() {
                           <span>
                             {i.marketHashName}
                             {i.version ? ` (${i.version})` : ""}
+                            {i.pricedVersion && (
+                              <span
+                                className="block text-xs text-muted"
+                                title="Skinport only lists this item by phase. Prices are for the cheapest phase listed now."
+                              >
+                                Cheapest phase now: {i.pricedVersion}
+                              </span>
+                            )}
                             <WatchStar
                               name={i.marketHashName}
                               version={i.version}

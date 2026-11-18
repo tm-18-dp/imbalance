@@ -416,11 +416,28 @@ function ownedOptions(
   return options;
 }
 
-/** Current sell price and 30-day sales for any market item, for the tracker. */
+/**
+ * Current sell price and 30-day sales for any market item, for the tracker. Items logged
+ * without a phase that Skinport only lists by phase (Doppler knives, often a trade-up's
+ * result) are valued at their cheapest phase: the least they are worth.
+ */
 export function priceLookup(db: DatabaseSync) {
   const prices = loadPrices(db);
+  const phases = new Map<string, PriceRow[]>();
+  for (const r of prices.values())
+    if (r.version) {
+      const list = phases.get(r.market_hash_name) ?? [];
+      list.push(r);
+      phases.set(r.market_hash_name, list);
+    }
   return (marketHashName: string, version = "") => {
-    const r = prices.get(`${marketHashName}|${version}`);
+    let r = prices.get(`${marketHashName}|${version}`);
+    if (!r && !version) {
+      const priced = (phases.get(marketHashName) ?? []).filter(
+        (p) => sellPrice(p) != null,
+      );
+      r = priced.sort((a, b) => sellPrice(a)! - sellPrice(b)!)[0];
+    }
     return { sellCents: sellPrice(r), volume30d: r?.volume_30d ?? 0 };
   };
 }

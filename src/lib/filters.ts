@@ -93,3 +93,20 @@ export const urlNumber = (p: URLSearchParams, k: string, fallback: string) => {
   const v = p.get(k);
   return v && /^\d+(\.\d+)?$/.test(v) ? v : fallback;
 };
+
+/**
+ * A money filter as shown on the page, in the user's currency. `typed` is what the user
+ * typed (null until they do). Links can carry it two ways: `max` already in the shown
+ * currency (the ask box), or `maxUsd` in US dollars (alert links: the server can't know
+ * the user's currency), converted once the exchange rate is known.
+ */
+export function shownAmount(
+  typed: string | null,
+  p: URLSearchParams,
+  rate: number,
+): string {
+  if (typed != null) return typed;
+  const usd = Number(p.get("maxUsd"));
+  if (usd > 0) return String(Math.round(usd * rate * 100) / 100);
+  return urlNumber(p, "max", "");
+}

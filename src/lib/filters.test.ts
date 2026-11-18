@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { filtersUrl, parseFilters, urlFlag, urlNumber } from "./filters";
+import {
+  filtersUrl,
+  parseFilters,
+  shownAmount,
+  urlFlag,
+  urlNumber,
+} from "./filters";
 
 describe("filters", () => {
   it("turns an AI reply into a trade-ups URL", () => {
@@ -39,5 +45,21 @@ describe("filters", () => {
     expect(urlNumber(p, "minVolume", "10")).toBe("10");
     expect(urlFlag(p, "dips", false)).toBe(true);
     expect(urlFlag(p, "weapons", true)).toBe(true);
+  });
+});
+
+describe("money limits from links", () => {
+  const p = (q: string) => new URLSearchParams(q);
+  it("converts a US dollar limit from an alert link into the shown currency", () => {
+    // $99.93 at 3.6725 AED per dollar.
+    expect(shownAmount(null, p("maxUsd=99.93"), 3.6725)).toBe("366.99");
+    expect(shownAmount(null, p("maxUsd=50"), 1)).toBe("50");
+  });
+
+  it("keeps a limit already in the shown currency, and what the user typed", () => {
+    expect(shownAmount(null, p("max=20"), 3.6725)).toBe("20");
+    expect(shownAmount("12", p("maxUsd=50"), 3.6725)).toBe("12");
+    expect(shownAmount("", p("maxUsd=50"), 1)).toBe("");
+    expect(shownAmount(null, p("maxUsd=abc"), 1)).toBe("");
   });
 });

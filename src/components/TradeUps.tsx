@@ -26,7 +26,7 @@ import {
 } from "@/lib/rank";
 import { RiskPicker, useRiskProfile } from "./RiskPicker";
 import { useSearchParams } from "next/navigation";
-import { urlFlag, urlNumber } from "@/lib/filters";
+import { shownAmount, urlFlag } from "@/lib/filters";
 import { AskAi } from "./AskAi";
 import type { ContractTimeline } from "@/lib/timeline";
 import { FloatBadges } from "./FloatBadges";
@@ -95,7 +95,9 @@ export function TradeUps() {
     const m = params.get("market");
     return m && isMarketplaceId(m) ? m : "skinport";
   });
-  const [budget, setBudget] = useState(() => urlNumber(params, "max", ""));
+  // Null until the user types: the URL's amount shows in the current currency.
+  const [budgetTyped, setBudget] = useState<string | null>(null);
+  const budget = shownAmount(budgetTyped, params, rates[currency] ?? 1);
   const [sort, setSort] = useState<ContractSort>(() => {
     const r = params.get("risk");
     return isRiskProfileId(r) ? RISK_PROFILES[r].contractSort : "profit";

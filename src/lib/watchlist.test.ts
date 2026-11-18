@@ -33,6 +33,7 @@ describe("watchlist", () => {
       {
         marketHashName: AK,
         version: "",
+        pricedVersion: null,
         image: null,
         addedAt: 100,
         addedCents: 1500,
@@ -66,5 +67,49 @@ describe("watchlist", () => {
     expect(() => addWatch(db, "One more")).toThrow(/full/);
     // Starring one already there is still fine.
     expect(() => addWatch(db, "Item 0")).not.toThrow();
+  });
+
+  it("shows the cheapest phase for an item Skinport only lists by phase", () => {
+    // Doppler knives have no price without a phase; the Skins page stars them that way.
+    const db = openDb(":memory:");
+    const KNIFE = "★ Karambit | Doppler (Factory New)";
+    saveSkinport(db, {
+      items: [
+        {
+          market_hash_name: KNIFE,
+          version: "Ruby",
+          min_price: 7300,
+          quantity: 2,
+        },
+        {
+          market_hash_name: KNIFE,
+          version: "Phase 3",
+          min_price: 1047,
+          quantity: 9,
+        },
+        {
+          market_hash_name: KNIFE,
+          version: "Black Pearl",
+          min_price: null,
+          quantity: 0,
+        },
+      ],
+      history: [],
+    });
+    addWatch(db, KNIFE, "", 1);
+    expect(listWatch(db)[0]).toMatchObject({
+      version: "",
+      pricedVersion: "Phase 3",
+      addedCents: 104700,
+      nowCents: 104700,
+      listed: 9,
+    });
+    // A star on one phase keeps that phase's prices.
+    addWatch(db, KNIFE, "Ruby", 2);
+    expect(listWatch(db)[0]).toMatchObject({
+      version: "Ruby",
+      pricedVersion: null,
+      nowCents: 730000,
+    });
   });
 });

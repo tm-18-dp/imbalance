@@ -8,6 +8,11 @@ export const MAX_WATCHED = 100;
 export type WatchedItem = {
   marketHashName: string;
   version: string;
+  /**
+   * The phase whose prices are shown when the item was starred without one but Skinport
+   * only lists it by phase (Doppler knives): the cheapest, like the Skins page shows.
+   */
+  pricedVersion: string | null;
   image: string | null;
   addedAt: number;
   /** Lowest Skinport listing when starred, to show the change since. */
@@ -21,11 +26,8 @@ export type WatchedItem = {
   trend: TrendSignal;
 };
 
-type Row = {
-  market_hash_name: string;
+type PriceRow = {
   version: string;
-  added_at: number;
-  added_cents: number | null;
   min_cents: number | null;
   quantity: number | null;
   median_24h: number | null;
@@ -35,14 +37,28 @@ type Row = {
   volume_30d: number | null;
 };
 
-const lowestListing = (db: DatabaseSync, name: string, version: string) =>
-  (
-    db
-      .prepare(
-        "SELECT min_cents FROM prices WHERE source = 'skinport' AND market_hash_name = ? AND version = ?",
-      )
-      .get(name, version) as { min_cents: number | null } | undefined
-  )?.min_cents ?? null;
+/**
+ * Skinport's prices for an item. Some items (Doppler knives) are only listed by phase,
+ * so a star without a phase falls back to the cheapest listed phase, as the Skins page does.
+ */
+function priceRow(
+  db: DatabaseSync,
+  name: string,
+  version: string,
+): PriceRow | undefined {
+  const rows = db
+    .prepare(
+      `SELECT p.version, p.min_cents, p.quantity, h.median_24h, h.median_7d, h.median_30d,
+              h.median_90d, h.volume_30d
+       FROM prices p LEFT JOIN price_history h
+         ON h.source = p.source AND h.market_hash_name = p.market_hash_name AND h.version = p.version
+       WHERE p.source = 'skinport' AND p.market_hash_name = ?
+         AND (p.version = ? OR ? = '')
+       ORDER BY p.version = ? DESC, p.min_cents IS NULL, p.min_cents`,
+    )
+    .all(name, version, version, version) as PriceRow[];
+  return rows[0];
+}
 
 /** Stars an item. Starring it again keeps the original date and price. */
 export function addWatch(
@@ -70,7 +86,7 @@ export function addWatch(
     marketHashName,
     version,
     now,
-    lowestListing(db, marketHashName, version),
+    priceRow(db, marketHashName, version)?.min_cents ?? null,
   );
 }
 
@@ -86,40 +102,42 @@ export function removeWatch(
 
 /** Starred items with today's Skinport prices and trend, newest star first. */
 export function listWatch(db: DatabaseSync): WatchedItem[] {
-  const rows = db
+  const stars = db
     .prepare(
-      `SELECT w.market_hash_name, w.version, w.added_at, w.added_cents, p.min_cents, p.quantity,
-              h.median_24h, h.median_7d, h.median_30d, h.median_90d, h.volume_30d
-       FROM watchlist w
-       LEFT JOIN prices p ON p.source = 'skinport' AND p.market_hash_name = w.market_hash_name
-         AND p.version = w.version
-       LEFT JOIN price_history h ON h.source = 'skinport' AND h.market_hash_name = w.market_hash_name
-         AND h.version = w.version
-       ORDER BY w.added_at DESC`,
+      "SELECT market_hash_name, version, added_at, added_cents FROM watchlist ORDER BY added_at DESC",
     )
-    .all() as Row[];
+    .all() as {
+    market_hash_name: string;
+    version: string;
+    added_at: number;
+    added_cents: number | null;
+  }[];
   const image = db.prepare("SELECT image FROM skins WHERE name = ? LIMIT 1");
-  return rows.map((r) => ({
-    marketHashName: r.market_hash_name,
-    version: r.version,
-    image:
-      (
-        image.get(baseSkinName(r.market_hash_name)) as
-          { image: string | null } | undefined
-      )?.image ?? null,
-    addedAt: Number(r.added_at),
-    addedCents: r.added_cents,
-    nowCents: r.min_cents,
-    listed: r.quantity ?? 0,
-    median7d: r.median_7d,
-    median30d: r.median_30d,
-    volume30d: r.volume_30d ?? 0,
-    trend: classifyTrend({
-      nowCents: r.min_cents,
-      median24h: r.median_24h,
-      median7d: r.median_7d,
-      median30d: r.median_30d,
-      median90d: r.median_90d,
-    }),
-  }));
+  return stars.map((w) => {
+    const r = priceRow(db, w.market_hash_name, w.version);
+    return {
+      marketHashName: w.market_hash_name,
+      version: w.version,
+      pricedVersion: r && r.version !== w.version ? r.version : null,
+      image:
+        (
+          image.get(baseSkinName(w.market_hash_name)) as
+            { image: string | null } | undefined
+        )?.image ?? null,
+      addedAt: Number(w.added_at),
+      addedCents: w.added_cents,
+      nowCents: r?.min_cents ?? null,
+      listed: r?.quantity ?? 0,
+      median7d: r?.median_7d ?? null,
+      median30d: r?.median_30d ?? null,
+      volume30d: r?.volume_30d ?? 0,
+      trend: classifyTrend({
+        nowCents: r?.min_cents ?? null,
+        median24h: r?.median_24h ?? null,
+        median7d: r?.median_7d ?? null,
+        median30d: r?.median_30d ?? null,
+        median90d: r?.median_90d ?? null,
+      }),
+    };
+  });
 }

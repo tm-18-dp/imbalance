@@ -7,6 +7,7 @@ import { saveSkinport } from "./prices/skinport";
 import {
   floorEstimate,
   loadTierData,
+  priceLookup,
   salesPrice,
   sellPrice,
 } from "./tradeup-data";
@@ -381,5 +382,46 @@ describe("loadTierData", () => {
     const plain = (_: string | undefined, wear: string | null) =>
       wear === "Field-Tested" ? 9000 : null;
     expect(floorEstimate(plain, undefined, "Factory New")).toBe(9000);
+  });
+});
+
+describe("priceLookup (tracker values)", () => {
+  it("values an item logged without a phase at its cheapest listed phase", () => {
+    const db = openDb(":memory:");
+    const KNIFE = "★ Karambit | Doppler (Factory New)";
+    saveSkinport(db, {
+      items: [
+        {
+          market_hash_name: KNIFE,
+          version: "Ruby",
+          min_price: 7300,
+          quantity: 2,
+        },
+        {
+          market_hash_name: KNIFE,
+          version: "Phase 3",
+          min_price: 1047,
+          quantity: 9,
+        },
+        {
+          market_hash_name: KNIFE,
+          version: "Black Pearl",
+          min_price: null,
+          quantity: 0,
+        },
+        {
+          market_hash_name: "AK-47 | Redline (Field-Tested)",
+          min_price: 15,
+          quantity: 4,
+        },
+      ],
+      history: [],
+    });
+    const lookup = priceLookup(db);
+    // Skinport only lists it by phase; the tracker can't know which one you have.
+    expect(lookup(KNIFE).sellCents).toBe(104700);
+    expect(lookup(KNIFE, "Ruby").sellCents).toBe(730000);
+    expect(lookup("AK-47 | Redline (Field-Tested)").sellCents).toBe(1500);
+    expect(lookup("Nothing | Here (Field-Tested)").sellCents).toBeNull();
   });
 });

@@ -132,13 +132,18 @@ export function newHits(
   };
 }
 
-/** The page a result came from, with the same search filled in. */
+/**
+ * The page a result came from, with the same search filled in. The pages read `max` in
+ * the currency the user sees, but alerts save US dollars, so the limit goes as `maxUsd`
+ * for the page to convert. (Passed as `max`, a $100 limit opened as 100 AED.)
+ */
 export function alertUrl(a: Pick<Alert, "kind" | "query">): string {
   const p = new URLSearchParams(a.query);
-  if (a.kind === "deals") return `/deals?${p}`;
-  // The Trade-ups page reads "max" in the shown currency; the API's budget is USD.
+  const usd = p.get(a.kind === "deals" ? "max" : "budget");
+  p.delete("max");
   p.delete("budget");
   p.delete("sort");
   p.delete("owned");
-  return `/tradeups?${p}`;
+  if (usd) p.set("maxUsd", usd);
+  return `/${a.kind}?${p}`;
 }
