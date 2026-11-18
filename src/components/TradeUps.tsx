@@ -13,6 +13,13 @@ import {
   THIN_MARKET,
 } from "@/lib/risk";
 import { useMoney } from "./Money";
+import {
+  CONTRACT_SORTS,
+  profitPerDay,
+  rankContracts,
+  SORT_LABELS,
+  type ContractSort,
+} from "@/lib/rank";
 import { RiskPicker, useRiskProfile } from "./RiskPicker";
 import { useSearchParams } from "next/navigation";
 import { urlFlag, urlNumber } from "@/lib/filters";
@@ -54,7 +61,6 @@ type ApiContract = Omit<FoundContract, "result"> & {
     outcomes: ApiOutcome[];
   };
 };
-type SortKey = "profit" | "roi" | "odds";
 
 const pct = (x: number) => `${(x * 100).toFixed(x < 0.1 ? 1 : 0)}%`;
 
@@ -77,7 +83,7 @@ export function TradeUps() {
     return m && isMarketplaceId(m) ? m : "skinport";
   });
   const [budget, setBudget] = useState(() => urlNumber(params, "max", ""));
-  const [sort, setSort] = useState<SortKey>(() => {
+  const [sort, setSort] = useState<ContractSort>(() => {
     const r = params.get("risk");
     return isRiskProfileId(r) ? RISK_PROFILES[r].contractSort : "profit";
   });
@@ -96,7 +102,7 @@ export function TradeUps() {
   }>({ loading: false });
   const [selected, setSelected] = useState<ApiContract | null>(null);
 
-  async function scan() {
+  async function scan(sortBy: ContractSort = sort) {
     setState({ loading: true });
     try {
       // Budget is typed in the shown currency; the server works in USD.
@@ -107,6 +113,7 @@ export function TradeUps() {
         stattrak: stattrak ? "1" : "0",
         hideRisky: hideRisky ? "1" : "0",
         risk: risk.profile.id,
+        sort: sortBy,
         budget: String(usd || ""),
       });
       const res = await fetch(`/api/tradeups?${q}`);
@@ -129,15 +136,17 @@ export function TradeUps() {
     }
   }
 
-  const sorted = useMemo(() => {
-    const list = [...(state.contracts ?? [])];
-    const by: Record<SortKey, (c: ApiContract) => number> = {
-      profit: (c) => c.result.profitCents,
-      roi: (c) => c.result.roiPercent,
-      odds: (c) => c.result.oddsToProfit,
-    };
-    return list.sort((a, b) => by[sort](b) - by[sort](a));
-  }, [state.contracts, sort]);
+  // Same ranking as the server, so the order is right while a re-scan is on its way.
+  const sorted = useMemo(
+    () => rankContracts(state.contracts ?? [], sort),
+    [state.contracts, sort],
+  );
+
+  /** Each sort has its own top 50 on the server, so a new sort scans again. */
+  function changeSort(next: ContractSort) {
+    setSort(next);
+    if (state.contracts && !state.loading) void scan(next);
+  }
 
   return (
     <div className="space-y-4">
@@ -232,12 +241,19 @@ export function TradeUps() {
           <select
             className="input"
             value={sort}
-            onChange={(e) => setSort(e.target.value as SortKey)}
+            onChange={(e) => changeSort(e.target.value as ContractSort)}
           >
-            <option value="profit">Expected profit</option>
-            <option value="roi">Return (ROI)</option>
-            <option value="odds">Chance to profit</option>
+            {CONTRACT_SORTS.map((k) => (
+              <option key={k} value={k}>
+                {SORT_LABELS[k]}
+              </option>
+            ))}
           </select>
+          {sort !== "profit" && (
+            <span className="text-xs text-muted">
+              Only contracts that make money on average
+            </span>
+          )}
         </label>
       </div>
 
@@ -271,6 +287,12 @@ export function TradeUps() {
                   title="Trade hold plus expected time to sell"
                 >
                   Days
+                </th>
+                <th
+                  className="p-2 font-normal"
+                  title="Expected profit for each day your money is tied up"
+                >
+                  Per day
                 </th>
                 <th className="p-2 font-normal">Risk</th>
               </tr>
@@ -348,6 +370,9 @@ export function TradeUps() {
                     <td className="p-2">{c.result.roiPercent.toFixed(0)}%</td>
                     <td className="p-2">{pct(c.result.oddsToProfit)}</td>
                     <td className="p-2">{Math.ceil(c.timeline.totalDays)}</td>
+                    <td className="p-2">
+                      {money(Math.round(profitPerDay(c)))}
+                    </td>
                     <td className="p-2">
                       {risks.length ? (
                         <span className="text-bad" title={risks.join(". ")}>

@@ -5,6 +5,7 @@ import { isMarketplaceId, MARKETPLACES } from "@/lib/fees";
 import { findContracts } from "@/lib/finder";
 import { isTier } from "@/lib/tradeup";
 import { loadTierData } from "@/lib/tradeup-data";
+import { isContractSort, rankContracts } from "@/lib/rank";
 import {
   isRiskProfileId,
   RISK_PROFILES,
@@ -43,7 +44,9 @@ export async function GET(req: Request) {
     p.get("owned") !== "0",
     market === "steam",
   );
-  const contracts = findContracts(data.options, data.outcomes, data.price, {
+  const sortParam = p.get("sort");
+  const sort = isContractSort(sortParam) ? sortParam : profile.contractSort;
+  const found = findContracts(data.options, data.outcomes, data.price, {
     tier,
     market: MARKETPLACES[market],
     budgetCents: budget > 0 ? Math.round(budget * 100) : undefined,
@@ -68,13 +71,15 @@ export async function GET(req: Request) {
         result: { ...c.result, outcomes },
       };
     })
-    .filter((c) => !hideRisky || c.allowed)
-    .slice(0, 50);
+    .filter((c) => !hideRisky || c.allowed);
+  // Rank every candidate, not just the most profitable 50, so each sort finds its own best.
+  const contracts = rankContracts(found, sort).slice(0, 50);
   return Response.json({
     tier,
     variant,
     market,
     risk: profile.id,
+    sort,
     options: data.options.length,
     contracts,
   });

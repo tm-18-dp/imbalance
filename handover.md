@@ -167,6 +167,10 @@ POSTs from curl need `-H "Origin: http://localhost:3000"`.
     chance to at least double). Unpriced outcomes count as 0, so a contract with one has
     a worst case of minus the full cost. Shown as tiles in the contract panel
     (`SpreadSummary`) and a "Worst / best" column.
+  - **R3 sorts:** `rankContracts` in `rank.ts` (profit, ROI, odds, profit per day, best
+    case, chance to double), used by `/api/tradeups` (`sort` param, default from the risk
+    profile) before the top-50 cut and by the page. Every sort except expected profit
+    drops contracts that lose money on average. Changing the sort scans again.
 - **Next:** the owner continues tomorrow. Open items: test the AI (Find box, Ask AI) and
   CSFloat with real keys, then pick from `docs/roadmap.md`. taste-skill and impeccable were
   not installed, so M17 was done by hand; run them later if wanted.

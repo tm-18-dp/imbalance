@@ -71,9 +71,10 @@ Sizes: S = an hour or two, M = a session, L = more than a session.
       `src/lib/tradeup.ts` (worst case, best case, standard deviation, chance to lose over
       50%, chance to at least double), four tiles in the contract panel, a "Worst / best"
       table column, and passed to the AI.
-- [ ] **R3. Sort by upside (S).** New sort options: best case, chance to double, and
-      "EV per day" (profit divided by `timeline.totalDays`) so quick small wins can beat
-      slow big ones.
+- [x] **R3. Sort by upside (S).** Done: `src/lib/rank.ts` adds profit per day, best case
+      and chance to double. The API ranks every candidate before the top-50 cut, sorts
+      other than expected profit keep only contracts that make money on average, and the
+      table has a "Per day" column.
 - [ ] **R4. Bankroll and sizing (S).** Bankroll setting on the Tracker page. Warn when a
       single buy is over 10% of it. Show "tries needed": roughly how many repeats before the
       average result is likely positive, from the mean and standard deviation.

@@ -1,3 +1,5 @@
+import type { ContractSort } from "./rank";
+
 export type RiskOutcome = {
   probability: number;
   netCents: number;
@@ -7,8 +9,6 @@ export type RiskOutcome = {
 
 export const RISK_PROFILE_IDS = ["safe", "balanced", "aggressive"] as const;
 export type RiskProfileId = (typeof RISK_PROFILE_IDS)[number];
-
-export type ContractSort = "profit" | "roi" | "odds";
 
 export type RiskProfile = {
   id: RiskProfileId;
