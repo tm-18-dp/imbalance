@@ -275,6 +275,28 @@ describe("loadTierData", () => {
     expect(
       loadTierData(db, "Restricted", "stattrak").price(outSkin, "Field-Tested"),
     ).toBe(3000);
+
+    // Falling for weeks: 90 days at $40, 30 days at $36, this week $32. The sell price
+    // (the 7-day median) is lowered by the 30-day to 7-day drop, on Steam's price too.
+    db.prepare(
+      `INSERT INTO price_history (market_hash_name, source, version, median_24h, volume_24h,
+         median_7d, volume_7d, median_30d, volume_30d, median_90d, volume_90d, updated_at)
+       VALUES (?, 'skinport', '', 3200, 2, 3200, 6, 3600, 20, 4000, 60, ?)`,
+    ).run("StatTrak™ AK-47 | Output (Field-Tested)", Date.now());
+    const falling = loadTierData(db, "Restricted", "stattrak");
+    expect(falling.trend(outSkin, "Field-Tested")).toEqual({
+      signal: "falling",
+      cut: expect.closeTo(1 / 9),
+    });
+    expect(falling.price(outSkin, "Field-Tested")).toBe(
+      Math.round((3200 * 8) / 9),
+    );
+    expect(
+      loadTierData(db, "Restricted", "stattrak", false, true).price(
+        outSkin,
+        "Field-Tested",
+      ),
+    ).toBe(Math.round((3500 * 8) / 9));
   });
 
   it("uses the most recent sales median with enough sales", () => {

@@ -127,8 +127,9 @@ Sizes: S = an hour or two, M = a session, L = more than a session.
 
 ### D. Data quality (better numbers, fewer fake profits)
 
-- [ ] **D1. Use the price trend in trade-ups (S).** `classifyTrend` exists for deals. Apply
-      it to outcomes: lower the expected sell price for "falling" items and show the badge.
+- [x] **D1. Use the price trend in trade-ups (S).** Done: falling outcomes (5+ sales in 30
+      days) are lowered by their 30-day to 7-day median drop, at most 25%, with the trend
+      badge and a "lowered X%" note in the outcome table.
 - [ ] **D2. Liquidity-aware sell price (S).** For thin items, sell price should lean
       towards the lower of median and lowest listing, and `daysToSell` should grow.
 - [ ] **D3. Real API response tests (S).** Record one real response each from CSFloat,

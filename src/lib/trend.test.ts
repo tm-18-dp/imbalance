@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { openDb } from "./db";
-import { classifyTrend, pruneSnapshots, snapshotSeries } from "./trend";
+import {
+  classifyTrend,
+  MAX_TREND_CUT,
+  pruneSnapshots,
+  snapshotSeries,
+  TREND_MIN_SALES_30D,
+  trendCut,
+} from "./trend";
 
 const t = (
   nowCents: number | null,
@@ -50,5 +57,32 @@ describe("snapshots", () => {
     expect(count(90, 7)).toBe(83);
     expect(count(200, 90)).toBeLessThanOrEqual(17);
     expect(series[0].at).toBeLessThan(series[1].at);
+  });
+});
+
+describe("trend cut for trade-up sell prices", () => {
+  const falling = { median7d: 8000, median30d: 9000 };
+
+  it("lowers falling items by the 30-day to 7-day drop", () => {
+    expect(trendCut("falling", falling, 20)).toBeCloseTo(1 / 9);
+  });
+
+  it("caps the cut at 25%", () => {
+    expect(trendCut("falling", { median7d: 4000, median30d: 9000 }, 20)).toBe(
+      MAX_TREND_CUT,
+    );
+  });
+
+  it("leaves other trends, thin markets and odd medians alone", () => {
+    expect(trendCut("rising", falling, 20)).toBe(0);
+    expect(trendCut("dip", falling, 20)).toBe(0);
+    expect(trendCut("falling", falling, TREND_MIN_SALES_30D - 1)).toBe(0);
+    // Falling against the 90-day price but up this week: no extra cut.
+    expect(trendCut("falling", { median7d: 9500, median30d: 9000 }, 20)).toBe(
+      0,
+    );
+    expect(trendCut("falling", { median7d: null, median30d: 9000 }, 20)).toBe(
+      0,
+    );
   });
 });

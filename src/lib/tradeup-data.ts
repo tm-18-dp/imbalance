@@ -9,6 +9,7 @@ import {
 } from "./tradeup";
 import { marketHashName, WEARS, type WearName } from "./wear";
 import { listHoldings } from "./tracker";
+import { classifyTrend, trendCut, type TrendSignal } from "./trend";
 
 export type Variant = "normal" | "stattrak";
 /** "estimate" is a cautious floor from a related item, see `floorEstimate`. */
@@ -73,6 +74,7 @@ type PriceRow = {
   version: string;
   min_cents: number | null;
   quantity: number;
+  median_24h?: number | null;
   median_7d: number | null;
   volume_7d: number | null;
   median_30d: number | null;
@@ -85,7 +87,7 @@ type PriceRow = {
 function loadPrices(db: DatabaseSync) {
   const rows = db
     .prepare(
-      `SELECT p.market_hash_name, p.version, p.min_cents, p.quantity, h.median_7d, h.volume_7d,
+      `SELECT p.market_hash_name, p.version, p.min_cents, p.quantity, h.median_24h, h.median_7d, h.volume_7d,
               h.median_30d, h.volume_30d, h.median_90d, h.volume_90d
        FROM prices p LEFT JOIN price_history h
          ON h.market_hash_name = p.market_hash_name AND h.source = p.source AND h.version = p.version
@@ -212,9 +214,33 @@ export function loadTierData(
     skin.phase
       ? undefined
       : steam.get(marketHashName(skin.name, wear, variant));
-  /** A real price: Steam (when selling there) or Skinport. */
-  const realPrice = (skin: OutcomeSkin, wear: WearName | null) =>
-    steamCents(skin, wear) ?? sellPrice(priceRow(skin, wear));
+  /** Skinport's price shape for an outcome, and how much a falling price lowers it. */
+  const trend = (
+    skin: OutcomeSkin,
+    wear: WearName | null,
+  ): { signal: TrendSignal; cut: number } => {
+    const r = priceRow(skin, wear);
+    if (!r) return { signal: "unknown", cut: 0 };
+    const input = {
+      nowCents: r.min_cents,
+      median24h: r.median_24h ?? null,
+      median7d: r.median_7d,
+      median30d: r.median_30d,
+      median90d: r.median_90d,
+    };
+    const signal = classifyTrend(input);
+    return { signal, cut: trendCut(signal, input, r.volume_30d ?? 0) };
+  };
+  /**
+   * A real price: Steam (when selling there) or Skinport, lowered when the item has been
+   * falling for weeks (the slide is market wide, so it applies to Steam's price too).
+   */
+  const realPrice = (skin: OutcomeSkin, wear: WearName | null) => {
+    const cents = steamCents(skin, wear) ?? sellPrice(priceRow(skin, wear));
+    if (cents == null) return null;
+    const { cut } = trend(skin, wear);
+    return cut > 0 ? Math.round(cents * (1 - cut)) : cents;
+  };
   const estimate = (skin: OutcomeSkin, wear: WearName | null) =>
     floorEstimate(
       (phase, w) => realPrice({ ...skin, phase }, w),
@@ -292,6 +318,7 @@ export function loadTierData(
     priceSource,
     outcomeName,
     volume30d,
+    trend,
   };
 }
 

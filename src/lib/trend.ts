@@ -82,3 +82,25 @@ export function pruneSnapshots(db: DatabaseSync, now = Date.now()): number {
     thin(now - 7 * DAY, now - 90 * DAY, DAY) + thin(now - 90 * DAY, 0, 7 * DAY)
   );
 }
+
+/** Below this many sales in 30 days the medians are too noisy to read a slide from. */
+export const TREND_MIN_SALES_30D = 5;
+/** The most a falling trend lowers a sell price. */
+export const MAX_TREND_CUT = 0.25;
+
+/**
+ * How much to lower the sell price of an item that is falling. A trade-up's result is
+ * trade locked for a week and then has to sell, so assume the slide keeps going about as
+ * far again: the drop from the 30-day to the 7-day median, capped at `MAX_TREND_CUT`. Only
+ * falling items are lowered; nothing is raised for rising ones, since rises are less
+ * reliable and a high price is the risky mistake.
+ */
+export function trendCut(
+  signal: TrendSignal,
+  t: Pick<TrendInput, "median7d" | "median30d">,
+  volume30d: number,
+): number {
+  if (signal !== "falling" || volume30d < TREND_MIN_SALES_30D) return 0;
+  if (t.median7d == null || t.median30d == null || t.median30d <= 0) return 0;
+  return Math.min(MAX_TREND_CUT, Math.max(0, 1 - t.median7d / t.median30d));
+}

@@ -222,6 +222,14 @@ POSTs from curl need `-H "Origin: http://localhost:3000"`.
     hiding risky) filters seeds, swaps and the returned list. Without `accept`, risky
     high-profit mixes crowded every allowed contract out of the top 2000. Covert scans
     spend the whole budget on the simple search, so they gain nothing yet.
+  - **D1 trend in trade-ups:** `trendCut` (trend.ts) lowers a falling outcome's sell
+    price by the 30-day to 7-day median drop, capped at 25%, only with 5+ sales in 30
+    days. Applied in `loadTierData`'s `realPrice`, so Steam prices, floor estimates and
+    exact-float plans inherit it; rising items are never raised. Outcomes carry
+    `trend: { signal, cut }`; the table shows `TrendBadge` and "lowered X%, falling".
+    Real data: about 1 in 7 priced outcomes is cut (7 to 12% on average), but the best
+    contract per tier and risk level barely moved: top contracts rarely lean on falling
+    items.
 - **Next:** the owner continues tomorrow. Open items: test the AI (Find box, Ask AI) and
   CSFloat with real keys, then pick from `docs/roadmap.md`. taste-skill and impeccable were
   not installed, so M17 was done by hand; run them later if wanted.

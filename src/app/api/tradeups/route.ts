@@ -75,6 +75,7 @@ export async function GET(req: Request) {
         ...o,
         volume30d: data.volume30d(o.skin, o.wear),
         priceSource: data.priceSource(o.skin, o.wear),
+        trend: data.trend(o.skin, o.wear),
         marketHashName: o.skin.phase ? null : data.outcomeName(o.skin, o.wear),
       }));
       // Warnings always use the Safe rules; the profile only decides what is hidden.

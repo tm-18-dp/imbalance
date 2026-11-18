@@ -30,6 +30,8 @@ import { urlFlag, urlNumber } from "@/lib/filters";
 import { AskAi } from "./AskAi";
 import type { ContractTimeline } from "@/lib/timeline";
 import { FloatBadges } from "./FloatBadges";
+import { TrendBadge } from "./PriceHistory";
+import type { TrendSignal } from "@/lib/trend";
 
 const TIER_COLORS: Record<Tier, string> = {
   "Consumer Grade": "#b0c3d9",
@@ -51,6 +53,8 @@ const TIER_SHORT: Record<Tier, string> = {
 type ApiOutcome = Outcome & {
   volume30d: number;
   priceSource: "steam" | "skinport" | "estimate" | null;
+  /** Price shape; `cut` is how much a falling price lowered the sell price (0 to 0.25). */
+  trend: { signal: TrendSignal; cut: number };
   /** Null for Doppler phases, which Steam doesn't list separately. */
   marketHashName: string | null;
 };
@@ -577,6 +581,7 @@ function ContractDetail({
                         {o.skin.name}
                         {o.skin.phase ? ` ${o.skin.phase}` : ""}{" "}
                         <span className="text-muted">{o.wear ?? ""}</span>
+                        <TrendBadge trend={o.trend.signal} />
                         {/* The price is an average: a lucky pattern is worth more. */}
                         <PatternBadge
                           name={o.skin.name}
@@ -618,6 +623,14 @@ function ContractDetail({
                       </span>
                     ) : (
                       money(o.priceCents)
+                    )}
+                    {o.priceCents != null && o.trend.cut > 0 && (
+                      <span
+                        className="block text-xs text-bad"
+                        title="This item has been falling for weeks. A trade-up's result is trade locked for a week before you can sell, so the price is lowered by the drop from its 30-day to its 7-day median, assuming the slide goes on (at most 25%)."
+                      >
+                        lowered {Math.round(o.trend.cut * 100)}%, falling
+                      </span>
                     )}
                     {sellOnSteam && o.priceSource === "skinport" && (
                       <span
