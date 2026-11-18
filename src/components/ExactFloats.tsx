@@ -32,7 +32,15 @@ type Plan = {
   }[];
 };
 
+/** The best plan's listings, for the shopping list. */
+export type ExactBuyPlan = {
+  buys: Plan["buys"];
+  costCents: number;
+  profitCents: number;
+};
+
 export type ExactFloatsProps = {
+  onBest?: (plan: ExactBuyPlan | null) => void;
   tier: Tier;
   stattrak: boolean;
   market: MarketplaceId;
@@ -51,6 +59,7 @@ const pct = (x: number) => `${(x * 100).toFixed(x < 0.1 ? 1 : 0)}%`;
  * a better-wear threshold, and compares the plans with the scanned (worst-float) contract.
  */
 export function ExactFloats({
+  onBest,
   tier,
   stattrak,
   market,
@@ -99,6 +108,16 @@ export function ExactFloats({
           needsKey: json.needsKey,
         });
       setState({ loading: false, plans: json.plans ?? [], note: json.note });
+      const best = json.plans?.[0];
+      onBest?.(
+        best
+          ? {
+              buys: best.buys,
+              costCents: best.costCents,
+              profitCents: best.profitCents,
+            }
+          : null,
+      );
     } catch {
       setState({ loading: false, error: "CSFloat didn't answer. Try again." });
     }

@@ -298,6 +298,15 @@ POSTs from curl need `-H "Origin: http://localhost:3000"`.
     (Deals rows, Skins price rows, Trade-up outcomes, held Tracker items) and
     `WatchlistPanel` on the Dashboard (this week = 7-day vs 30-day median, since starred,
     chart in its own row; reloads on `imbalance:prices-updated`). Not in tracker backups.
+  - **U2 shopping list:** `shopping-list.ts` (pure): `shoppingListText` (tick box per
+    input, first copy at the cheapest listing then the going price, max float rounded
+    down by `floorFloat` so 0.449999 never reads 0.450, owned inputs marked, the CSFloat
+    exact-float plan appended when picked) and `searchLinks`. Links checked Nov 2026:
+    Skinport `market?search=` and CSFloat `search?market_hash_name=&max_float=` work
+    (CSFloat needs sign-in to show results); Steam item pages by name redirected and
+    returned 500, so Steam uses `market/search?appid=730&q=`. `ShoppingListButtons`
+    (Copy, Download .txt) next to "1. Buy these"; when the clipboard is blocked the text
+    shows selected in a textarea. `ExactFloats` reports its best plan via `onBest`.
 - **Next:** the owner continues tomorrow. Open items: test the AI (Find box, Ask AI) and
   CSFloat with real keys, then pick from `docs/roadmap.md`. taste-skill and impeccable were
   not installed, so M17 was done by hand; run them later if wanted.

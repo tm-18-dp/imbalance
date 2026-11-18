@@ -31,6 +31,9 @@ import { AskAi } from "./AskAi";
 import type { ContractTimeline } from "@/lib/timeline";
 import { FloatBadges } from "./FloatBadges";
 import { AlertMe } from "./Alerts";
+import { ShoppingListButtons } from "./ShoppingList";
+import { floorFloat, shoppingListText } from "@/lib/shopping-list";
+import type { ExactBuyPlan } from "./ExactFloats";
 import { TrendBadge } from "./PriceHistory";
 import type { TrendSignal } from "@/lib/trend";
 import { WatchStar } from "./Watchlist";
@@ -109,8 +112,8 @@ export function TradeUps() {
     error?: string;
     contracts?: ApiContract[];
     market?: MarketplaceId;
-    /** What was scanned, for follow-up requests about one contract. */
-    scanned?: { tier: Tier; stattrak: boolean };
+    /** What was scanned, and when, for follow-up requests about one contract. */
+    scanned?: { tier: Tier; stattrak: boolean; at: number };
   }>({ loading: false });
   const [selected, setSelected] = useState<ApiContract | null>(null);
   const bankrollCents = useBankroll();
@@ -148,7 +151,11 @@ export function TradeUps() {
         contracts: json.contracts,
         market: json.market,
         scanned: json.tier
-          ? { tier: json.tier, stattrak: json.variant === "stattrak" }
+          ? {
+              tier: json.tier,
+              stattrak: json.variant === "stattrak",
+              at: Date.now(),
+            }
           : undefined,
       });
     } catch (err) {
@@ -456,11 +463,36 @@ function ContractDetail({
   bankrollCents: number | null;
   sellOnSteam: boolean;
   market: MarketplaceId;
-  scanned?: { tier: Tier; stattrak: boolean };
+  scanned?: { tier: Tier; stattrak: boolean; at: number };
   onRescan: () => void;
   onClose: () => void;
 }) {
   const { money } = useMoney();
+  // The CSFloat exact-float plan, once picked, joins the shopping list.
+  const [exact, setExact] = useState<ExactBuyPlan | null>(null);
+  const shoppingList = () =>
+    shoppingListText({
+      title:
+        `${scanned?.stattrak ? "StatTrak " : ""}${scanned?.tier ?? ""} trade-up`.trim(),
+      inputs: c.inputs.map((i) => ({
+        count: i.count,
+        marketHashName: i.option.marketHashName,
+        maxFloat: i.option.float,
+        firstCents: i.option.costCents,
+        nextCents: i.option.nextCostCents ?? null,
+        listed: i.option.quantity,
+        owned: Boolean(i.option.owned),
+      })),
+      costCents: c.result.costCents,
+      evCents: c.result.evCents,
+      profitCents: c.result.profitCents,
+      roiPercent: c.result.roiPercent,
+      money: (cents) => money(cents),
+      pricesFrom: scanned
+        ? `the scan at ${new Date(scanned.at).toLocaleString()}`
+        : "the last scan",
+      exact: exact ?? undefined,
+    });
   const risks = contractRisks(c);
   const notOnSteam = c.result.outcomes.filter(
     (o) => o.priceSource !== "steam" && o.marketHashName,
@@ -518,7 +550,13 @@ function ContractDetail({
           <AskAi topic="contract" data={contractForAi(c, risks)} />
         </div>
 
-        <h3 className="mt-4 mb-2 font-semibold">1. Buy these</h3>
+        <h3 className="mt-4 mb-2 flex flex-wrap items-center gap-3 font-semibold">
+          1. Buy these
+          <ShoppingListButtons
+            build={shoppingList}
+            filename={`imbalance-trade-up-${new Date().toISOString().slice(0, 10)}.txt`}
+          />
+        </h3>
         <ul className="space-y-2 text-sm">
           {c.inputs.map((i) => (
             <li
@@ -548,7 +586,7 @@ function ContractDetail({
                 )}
                 <br />
                 <span className="text-muted">
-                  Any float up to {i.option.float.toFixed(3)} works.{" "}
+                  Any float up to {floorFloat(i.option.float)} works.{" "}
                   {i.option.quantity} listed on Skinport.
                 </span>
               </span>
@@ -676,6 +714,7 @@ function ContractDetail({
           <>
             <h3 className="mt-4 mb-2 font-semibold">3. Exact floats</h3>
             <ExactFloats
+              onBest={setExact}
               tier={scanned.tier}
               stattrak={scanned.stattrak}
               market={market}
