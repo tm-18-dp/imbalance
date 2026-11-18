@@ -6,14 +6,29 @@ import { RISK_PROFILE_IDS } from "./risk";
 
 export const DAY = 86_400_000;
 
-export const settingsSchema = z.object({
+const settingFields = {
   /** Days a newly bought item can't be traded or sold elsewhere (CS2 trade protection). */
-  holdDays: z.number().int().min(0).max(30).default(7),
-  sellMarket: z.enum(MARKETPLACE_IDS).default("skinport"),
+  holdDays: z.number().int().min(0).max(30),
+  sellMarket: z.enum(MARKETPLACE_IDS),
   /** How much risk Trade-ups and Deals let through. Safe is how the app always worked. */
-  riskProfile: z.enum(RISK_PROFILE_IDS).default("safe"),
+  riskProfile: z.enum(RISK_PROFILE_IDS),
+  /** Money set aside for trading, in USD cents. Null when not set: no sizing warnings. */
+  bankrollCents: z.number().int().min(0).max(1e10).nullable(),
+};
+
+export const settingsSchema = z.object({
+  holdDays: settingFields.holdDays.default(7),
+  sellMarket: settingFields.sellMarket.default("skinport"),
+  riskProfile: settingFields.riskProfile.default("safe"),
+  bankrollCents: settingFields.bankrollCents.default(null),
 });
 export type Settings = z.infer<typeof settingsSchema>;
+
+/**
+ * A change to some settings. No defaults on purpose: `settingsSchema.partial()` would fill
+ * in every missing field with its default and quietly reset the user's other settings.
+ */
+export const settingsPatchSchema = z.object(settingFields).partial();
 
 export function getSettings(db: DatabaseSync): Settings {
   const raw = getMeta(db, "settings");
@@ -208,7 +223,7 @@ export function portfolio(
 const exportSchema = z.object({
   app: z.literal("imbalance"),
   version: z.literal(1),
-  settings: settingsSchema.partial().optional(),
+  settings: settingsPatchSchema.optional(),
   holdings: z.array(
     z.object({
       id: z.number().int(),

@@ -13,6 +13,8 @@ import {
   THIN_MARKET,
 } from "@/lib/risk";
 import { useMoney } from "./Money";
+import { SizedCost, useBankroll } from "./Bankroll";
+import { sizingWarning, triesText, triesToBeAhead } from "@/lib/sizing";
 import {
   CONTRACT_SORTS,
   profitPerDay,
@@ -101,6 +103,7 @@ export function TradeUps() {
     market?: MarketplaceId;
   }>({ loading: false });
   const [selected, setSelected] = useState<ApiContract | null>(null);
+  const bankrollCents = useBankroll();
 
   async function scan(sortBy: ContractSort = sort) {
     setState({ loading: true });
@@ -339,7 +342,14 @@ export function TradeUps() {
                         ))}
                       </button>
                     </td>
-                    <td className="p-2">{money(c.result.costCents)}</td>
+                    <td className="p-2">
+                      <SizedCost
+                        costCents={c.result.costCents}
+                        bankrollCents={bankrollCents}
+                      >
+                        {money(c.result.costCents)}
+                      </SizedCost>
+                    </td>
                     <td className="p-2">{money(c.result.evCents)}</td>
                     <td
                       className={`p-2 font-medium ${c.result.profitCents >= 0 ? "text-good" : "text-bad"}`}
@@ -393,6 +403,7 @@ export function TradeUps() {
       {selected && (
         <ContractDetail
           contract={selected}
+          bankrollCents={bankrollCents}
           sellOnSteam={state.market === "steam"}
           onRescan={() => {
             setSelected(null);
@@ -407,11 +418,13 @@ export function TradeUps() {
 
 function ContractDetail({
   contract: c,
+  bankrollCents,
   sellOnSteam,
   onRescan,
   onClose,
 }: {
   contract: ApiContract;
+  bankrollCents: number | null;
   sellOnSteam: boolean;
   onRescan: () => void;
   onClose: () => void;
@@ -447,7 +460,7 @@ function ContractDetail({
           </span>
           , chance to profit {pct(c.result.oddsToProfit)}.
         </p>
-        <SpreadSummary contract={c} />
+        <SpreadSummary contract={c} bankrollCents={bankrollCents} />
         <p className="mt-1 text-sm">
           Takes about <strong>{Math.ceil(c.timeline.totalDays)} days</strong>: a{" "}
           {c.timeline.holdDays}-day trade hold before you can sell what you get
@@ -601,7 +614,13 @@ function ContractDetail({
  * The downside next to the upside: one try lands on a single outcome, not the average.
  * Plain-English line plus four tiles.
  */
-function SpreadSummary({ contract: c }: { contract: ApiContract }) {
+function SpreadSummary({
+  contract: c,
+  bankrollCents,
+}: {
+  contract: ApiContract;
+  bankrollCents: number | null;
+}) {
   const { money } = useMoney();
   const s = c.result.spread;
   const swingy = s.stdDevCents > c.result.costCents / 2;
@@ -650,6 +669,61 @@ function SpreadSummary({ contract: c }: { contract: ApiContract }) {
           ? ", which is a big swing for the cost: the profit only shows up over many tries."
           : "."}
       </p>
+      <SizingNotes
+        costCents={c.result.costCents}
+        profitCents={c.result.profitCents}
+        stdDevCents={s.stdDevCents}
+        days={c.timeline.totalDays}
+        bankrollCents={bankrollCents}
+      />
+    </div>
+  );
+}
+
+/**
+ * How many tries the average needs to show up, what that ties up, and whether one try is
+ * too big for the bankroll. The tries number is rough: it treats results as bell-shaped.
+ */
+function SizingNotes({
+  costCents,
+  profitCents,
+  stdDevCents,
+  days,
+  bankrollCents,
+}: {
+  costCents: number;
+  profitCents: number;
+  stdDevCents: number;
+  days: number;
+  bankrollCents: number | null;
+}) {
+  const { money } = useMoney();
+  const tries = triesToBeAhead(profitCents, stdDevCents);
+  const warning = sizingWarning(costCents, bankrollCents);
+  const repeatable = tries != null && tries !== Infinity && tries > 1;
+  return (
+    <div className="mt-2 space-y-1 text-sm">
+      <p
+        className={tries == null || tries === Infinity ? "text-bad" : ""}
+        title="Rough guide: it treats results as bell-shaped, which contracts with one big prize are not"
+      >
+        {triesText(tries)}
+        {repeatable && (
+          <span className="text-muted">
+            {" "}
+            That&apos;s {money(tries * costCents)} in total if run side by side,
+            or about {Math.ceil(tries * days).toLocaleString("en-US")} days one
+            after another.
+          </span>
+        )}
+      </p>
+      {warning && <p className="text-bad">{warning}</p>}
+      {bankrollCents == null && (
+        <p className="text-muted">
+          Set a bankroll on the Tracker page to get a warning when one try is
+          too big a share of your money.
+        </p>
+      )}
     </div>
   );
 }
@@ -667,6 +741,10 @@ function contractForAi(c: ApiContract, risks: string[]) {
     standardDeviationCents: c.result.spread.stdDevCents,
     chanceToLoseOverHalf: c.result.spread.chanceLoseHalf,
     chanceToAtLeastDouble: c.result.spread.chanceDouble,
+    roughTriesToBeAheadAt90Percent: triesToBeAhead(
+      c.result.profitCents,
+      c.result.spread.stdDevCents,
+    ),
     days: c.timeline,
     warnings: risks,
     inputs: c.inputs.map((i) => ({

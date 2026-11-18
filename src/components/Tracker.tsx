@@ -644,6 +644,7 @@ function SettingsAndBackup({
   onImport: (data: unknown) => Promise<boolean>;
 }) {
   const [holdDays, setHoldDays] = useState(String(settings.holdDays));
+  const { currency } = useMoney();
   return (
     <section className="panel flex flex-wrap items-end gap-4 p-4 text-sm">
       <h2 className="w-full font-semibold">Settings and backup</h2>
@@ -673,6 +674,12 @@ function SettingsAndBackup({
           ))}
         </select>
       </label>
+      {/* Remounts when the currency is known, so the amount shows converted. */}
+      <BankrollInput
+        key={currency}
+        bankrollCents={settings.bankrollCents}
+        onSave={(bankrollCents) => onSave({ bankrollCents })}
+      />
       <a className="btn" href="/api/tracker/export">
         Download backup
       </a>
@@ -700,5 +707,45 @@ function SettingsAndBackup({
         />
       </label>
     </section>
+  );
+}
+
+/**
+ * Money set aside for trading, typed in the shown currency and saved in USD cents.
+ * Trade-ups and Deals warn when one buy is a big share of it.
+ */
+function BankrollInput({
+  bankrollCents,
+  onSave,
+}: {
+  bankrollCents: number | null;
+  onSave: (cents: number | null) => Promise<boolean>;
+}) {
+  const { currency, rates } = useMoney();
+  const rate = rates[currency] ?? 1;
+  const [value, setValue] = useState(() =>
+    bankrollCents == null
+      ? ""
+      : String(Math.round((bankrollCents / 100) * rate)),
+  );
+  return (
+    <label className="flex flex-col gap-1">
+      <span
+        className="text-muted"
+        title="Money you have set aside for trading. Trade-ups and Deals warn when one buy is more than 10% of it."
+      >
+        Bankroll ({currency})
+      </span>
+      <input
+        className="input w-28"
+        inputMode="decimal"
+        placeholder="Not set"
+        value={value}
+        onChange={(e) => setValue(e.target.value.replace(/[^\d.]/g, ""))}
+        onBlur={() =>
+          void onSave(value ? Math.round((Number(value) / rate) * 100) : null)
+        }
+      />
+    </label>
   );
 }

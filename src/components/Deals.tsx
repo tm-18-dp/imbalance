@@ -11,6 +11,7 @@ import {
   type MarketplaceId,
 } from "@/lib/fees";
 import { useMoney } from "./Money";
+import { SizedCost, useBankroll } from "./Bankroll";
 import { RiskPicker, useRiskProfile } from "./RiskPicker";
 import { isRiskProfileId, RISK_PROFILES } from "@/lib/risk";
 import { AskAi } from "./AskAi";
@@ -46,6 +47,7 @@ export function Deals() {
     params.has(k),
   );
   /** A profile fills in the filters; they stay editable afterwards. */
+  const bankrollCents = useBankroll();
   const risk = useRiskProfile(params.get("risk"), (p, source) => {
     if (source === "saved" && urlHasFilters) return;
     setMinDiscount(String(p.dealMinDiscountPercent));
@@ -255,7 +257,14 @@ export function Deals() {
                       </span>
                     </div>
                   </td>
-                  <td className="p-2">{money(d.buyCents)}</td>
+                  <td className="p-2">
+                    <SizedCost
+                      costCents={d.buyCents}
+                      bankrollCents={bankrollCents}
+                    >
+                      {money(d.buyCents)}
+                    </SizedCost>
+                  </td>
                   <td className="p-2">{money(d.usualCents)}</td>
                   <td className="p-2">{Math.round(d.discount * 100)}%</td>
                   <td className="p-2">{money(d.resaleCents)}</td>

@@ -156,6 +156,9 @@ The AI only comments on numbers Imbalance worked out. It never does the maths.
   money. Risky contracts are always marked **Check** in red, whatever level you pick.
   Contracts whose value comes mostly from skins that hardly ever sell look great on paper
   and often lose money in real life.
+- **Set a bankroll on the Tracker page** (the money you've set aside for trading). Costs
+  over 10% of it turn red, and each contract says roughly how many tries it needs before
+  you're likely to be ahead. Knife trade-ups often need hundreds.
 - **Charts fill up over time.** The app saves prices every 6 hours while you use it.
 - **New items are trade locked for 7 days.** Change this on the Tracker page if it changes.
 

@@ -12,6 +12,7 @@ import {
   portfolio,
   recordTradeUp,
   saveSettings,
+  settingsPatchSchema,
 } from "./tracker";
 
 const buy = (
@@ -28,12 +29,29 @@ describe("tracker", () => {
       holdDays: 7,
       sellMarket: "skinport",
       riskProfile: "safe",
+      bankrollCents: null,
     });
     saveSettings(db, { holdDays: 3 });
     const id = buy(db, "AK-47 | Redline (Field-Tested)", 1500);
     expect(listHoldings(db).find((h) => h.id === id)?.tradableAt).toBe(
       1003 * DAY,
     );
+  });
+
+  it("changes one setting without resetting the others", () => {
+    const db = openDb(":memory:");
+    saveSettings(db, { holdDays: 3, bankrollCents: 50000 });
+    // What the API does with a request body that only names one setting.
+    saveSettings(db, settingsPatchSchema.parse({ riskProfile: "aggressive" }));
+    expect(getSettings(db)).toEqual({
+      holdDays: 3,
+      sellMarket: "skinport",
+      riskProfile: "aggressive",
+      bankrollCents: 50000,
+    });
+    saveSettings(db, settingsPatchSchema.parse({ bankrollCents: null }));
+    expect(getSettings(db).bankrollCents).toBeNull();
+    expect(getSettings(db).holdDays).toBe(3);
   });
 
   it("records sales after fees and computes the portfolio", () => {

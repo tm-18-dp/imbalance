@@ -171,6 +171,14 @@ POSTs from curl need `-H "Origin: http://localhost:3000"`.
     case, chance to double), used by `/api/tradeups` (`sort` param, default from the risk
     profile) before the top-50 cut and by the page. Every sort except expected profit
     drops contracts that lose money on average. Changing the sort scans again.
+  - **R4 sizing:** `bankrollCents` setting (Tracker page, typed in the shown currency).
+    `sizingWarning` flags buys over 10% of it (`SizedCost` on Trade-ups and Deals);
+    `triesToBeAhead` = (1.2816 x sd / profit)^2, shown in the contract panel as a rough
+    guide (bell-curve assumption, capped at 1,000).
+  - **Bug fixed: settings resets.** `settingsSchema.partial()` filled every missing field
+    with its default, so saving one setting reset the rest (changing the sell market reset
+    the trade hold to 7). API routes and backup restore now use `settingsPatchSchema`,
+    which has no defaults.
 - **Next:** the owner continues tomorrow. Open items: test the AI (Find box, Ask AI) and
   CSFloat with real keys, then pick from `docs/roadmap.md`. taste-skill and impeccable were
   not installed, so M17 was done by hand; run them later if wanted.

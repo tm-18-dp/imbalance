@@ -16,7 +16,7 @@ import {
   portfolio,
   recordTradeUp,
   saveSettings,
-  settingsSchema,
+  settingsPatchSchema,
 } from "@/lib/tracker";
 import { nextSteps } from "@/lib/timeline";
 import { errorResponse, forbidden } from "../errors";
@@ -75,7 +75,7 @@ const actionSchema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("delete"), id }),
   z.object({
     action: z.literal("settings"),
-    settings: settingsSchema.partial(),
+    settings: settingsPatchSchema,
   }),
   z.object({ action: z.literal("import"), data: z.unknown() }),
 ]);

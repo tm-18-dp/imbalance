@@ -75,9 +75,11 @@ Sizes: S = an hour or two, M = a session, L = more than a session.
       and chance to double. The API ranks every candidate before the top-50 cut, sorts
       other than expected profit keep only contracts that make money on average, and the
       table has a "Per day" column.
-- [ ] **R4. Bankroll and sizing (S).** Bankroll setting on the Tracker page. Warn when a
-      single buy is over 10% of it. Show "tries needed": roughly how many repeats before the
-      average result is likely positive, from the mean and standard deviation.
+- [x] **R4. Bankroll and sizing (S).** Done: bankroll on the Tracker page (saved in USD
+      cents), costs over 10% of it turn red on Trade-ups and Deals, and the contract panel
+      shows rough tries needed to be 9 in 10 likely ahead (`src/lib/sizing.ts`). Also
+      fixed: saving one setting used to reset all the others to their defaults.
+
 - [ ] **R5. Covert to knife/gloves focus (M).** These have the biggest swings. Make sure
       rare-pool prices cover every Doppler phase and glove wear, flag outcomes with no price
       as unknown (not zero) in Aggressive mode, and show which knives drive the EV.
