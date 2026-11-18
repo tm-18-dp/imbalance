@@ -186,6 +186,15 @@ POSTs from curl need `-H "Origin: http://localhost:3000"`.
     coverage 84% to 98%; the rest (mostly Battle-Scarred) stay unpriced and count as $0.
     `riskNotes` reports the chance of unpriced and estimated outcomes. `valueDrivers`
     groups outcomes by knife type for the "Where the value comes from" bars.
+  - **E1 exact floats:** `/api/tradeups/exact` (needs `CSFLOAT_API_KEY`) loads CSFloat
+    listings for each input's wear and the next better wear (`fetchFloatListings`: cheapest
+    plus `lowest_float`, merged, cached 10 min), then `planExactFloats` tries "any float"
+    and every better-wear threshold of the outcomes. `floatSolver` is a DP over
+    (listings picked, normalized float sum on a 1/1000 grid, rounded up so plans never
+    overshoot), built once per contract; thresholds keep a 0.001 safety margin for the
+    game's 32-bit floats. UI: `ExactFloats.tsx`, section 3 of the contract panel.
+    **Unverified:** no CSFloat key was available, so the real response shape and the
+    `lowest_float` sort value were never checked (tested with synthetic saved listings).
 - **Next:** the owner continues tomorrow. Open items: test the AI (Find box, Ask AI) and
   CSFloat with real keys, then pick from `docs/roadmap.md`. taste-skill and impeccable were
   not installed, so M17 was done by hand; run them later if wanted.

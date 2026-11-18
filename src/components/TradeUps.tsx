@@ -13,6 +13,7 @@ import {
   THIN_MARKET,
 } from "@/lib/risk";
 import { useMoney } from "./Money";
+import { ExactFloats } from "./ExactFloats";
 import { SizedCost, useBankroll } from "./Bankroll";
 import { sizingWarning, triesText, triesToBeAhead } from "@/lib/sizing";
 import {
@@ -101,6 +102,8 @@ export function TradeUps() {
     error?: string;
     contracts?: ApiContract[];
     market?: MarketplaceId;
+    /** What was scanned, for follow-up requests about one contract. */
+    scanned?: { tier: Tier; stattrak: boolean };
   }>({ loading: false });
   const [selected, setSelected] = useState<ApiContract | null>(null);
   const bankrollCents = useBankroll();
@@ -124,12 +127,17 @@ export function TradeUps() {
         error?: string;
         contracts?: ApiContract[];
         market?: MarketplaceId;
+        tier?: Tier;
+        variant?: string;
       };
       if (!res.ok) throw new Error(json.error ?? "Scan failed.");
       setState({
         loading: false,
         contracts: json.contracts,
         market: json.market,
+        scanned: json.tier
+          ? { tier: json.tier, stattrak: json.variant === "stattrak" }
+          : undefined,
       });
     } catch (err) {
       setState({
@@ -405,6 +413,8 @@ export function TradeUps() {
           contract={selected}
           bankrollCents={bankrollCents}
           sellOnSteam={state.market === "steam"}
+          market={state.market ?? "skinport"}
+          scanned={state.scanned}
           onRescan={() => {
             setSelected(null);
             void scan();
@@ -420,12 +430,16 @@ function ContractDetail({
   contract: c,
   bankrollCents,
   sellOnSteam,
+  market,
+  scanned,
   onRescan,
   onClose,
 }: {
   contract: ApiContract;
   bankrollCents: number | null;
   sellOnSteam: boolean;
+  market: MarketplaceId;
+  scanned?: { tier: Tier; stattrak: boolean };
   onRescan: () => void;
   onClose: () => void;
 }) {
@@ -622,6 +636,31 @@ function ContractDetail({
             </tbody>
           </table>
         </div>
+
+        {scanned && (
+          <>
+            <h3 className="mt-4 mb-2 font-semibold">3. Exact floats</h3>
+            <ExactFloats
+              tier={scanned.tier}
+              stattrak={scanned.stattrak}
+              market={market}
+              inputs={c.inputs.map((i) => ({
+                skinId: i.option.skinId,
+                wear: i.option.wear,
+                count: i.count,
+                owned: Boolean(i.option.owned),
+              }))}
+              baseline={{
+                profitCents: c.result.profitCents,
+                outcomes: c.result.outcomes.map((o) => ({
+                  name: o.skin.name,
+                  phase: o.skin.phase ?? null,
+                  wear: o.wear,
+                })),
+              }}
+            />
+          </>
+        )}
       </div>
     </div>
   );

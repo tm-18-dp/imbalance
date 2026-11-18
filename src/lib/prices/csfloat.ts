@@ -35,11 +35,15 @@ export type Listing = {
 export async function fetchListings(
   apiKey: string,
   marketHashName: string,
-  opts: { maxFloat?: number; limit?: number } = {},
+  opts: {
+    maxFloat?: number;
+    limit?: number;
+    sortBy?: "lowest_price" | "lowest_float";
+  } = {},
 ): Promise<Listing[]> {
   const q = new URLSearchParams({
     market_hash_name: marketHashName,
-    sort_by: "lowest_price",
+    sort_by: opts.sortBy ?? "lowest_price",
     type: "buy_now",
     limit: String(opts.limit ?? 50),
   });
@@ -59,6 +63,23 @@ export async function fetchListings(
     paintSeed: r.item.paint_seed ?? null,
     url: `https://csfloat.com/item/${r.id}`,
   }));
+}
+
+/**
+ * For exact-float trade-ups: the cheapest listings plus the lowest-float ones (often not
+ * among the cheapest), merged. The lowest-float request is best effort: if CSFloat rejects
+ * it, the cheapest listings still come back.
+ */
+export async function fetchFloatListings(
+  apiKey: string,
+  marketHashName: string,
+): Promise<Listing[]> {
+  const cheapest = await fetchListings(apiKey, marketHashName);
+  const lowFloat = await fetchListings(apiKey, marketHashName, {
+    sortBy: "lowest_float",
+  }).catch(() => [] as Listing[]);
+  const byId = new Map([...cheapest, ...lowFloat].map((l) => [l.id, l]));
+  return [...byId.values()].sort((a, b) => a.priceCents - b.priceCents);
 }
 
 /** Replaces the saved listings for one item, so sold listings disappear. */

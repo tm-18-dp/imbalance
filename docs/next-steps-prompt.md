@@ -89,12 +89,14 @@ Sizes: S = an hour or two, M = a session, L = more than a session.
 
 ### E. Real edge (where bigger, more reliable profit comes from)
 
-- [ ] **E1. Exact-float trade-ups from CSFloat listings (L).** Today inputs assume the worst
-      float of their wear. Real profit often comes from buying specific low-float inputs so
-      outcomes land in a better wear (for example Field-Tested to Minimal Wear, often 2x the
-      price). Use CSFloat listings (with a key) to pick real inputs by float and price, solve
-      for the cheapest set whose average normalized float hits the `betterWear.maxAvgNorm`
-      target, and show the exact listings to buy.
+- [x] **E1. Exact-float trade-ups from CSFloat listings (L).** Built: section 3 of the
+      contract panel. `src/lib/exact-float.ts` solves, for every better-wear threshold,
+      the cheapest set of real listings (input wear plus the next better wear, cheapest
+      and lowest-float) that keeps the average float under it, then prices the contract
+      with the real floats. Tested end to end with synthetic listings. **Still to do:**
+      check against real CSFloat responses once a key is added (response shape and the
+      `lowest_float` sort were never seen).
+
 - [ ] **E2. Float sniping deals (M).** Find CSFloat listings priced like an average float
       but with a special float (`floatFlags`: 0.00x, best in wear, lowest possible). Price
       the premium from past sales of similar floats where data exists, and label it as an
