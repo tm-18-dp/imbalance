@@ -2,6 +2,7 @@ import { z } from "zod";
 import type { DatabaseSync } from "node:sqlite";
 import { getMeta, setMeta, transaction } from "./db";
 import { MARKETPLACE_IDS, MARKETPLACES, type MarketplaceId } from "./fees";
+import { RISK_PROFILE_IDS } from "./risk";
 
 export const DAY = 86_400_000;
 
@@ -9,6 +10,8 @@ export const settingsSchema = z.object({
   /** Days a newly bought item can't be traded or sold elsewhere (CS2 trade protection). */
   holdDays: z.number().int().min(0).max(30).default(7),
   sellMarket: z.enum(MARKETPLACE_IDS).default("skinport"),
+  /** How much risk Trade-ups and Deals let through. Safe is how the app always worked. */
+  riskProfile: z.enum(RISK_PROFILE_IDS).default("safe"),
 });
 export type Settings = z.infer<typeof settingsSchema>;
 

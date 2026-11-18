@@ -18,6 +18,14 @@ describe("filters", () => {
     expect(f && filtersUrl(f)).toBe("/deals?q=AK-47&minVolume=20&dips=1");
   });
 
+  it("carries a risk level and rejects unknown ones", () => {
+    const f = parseFilters(
+      '{"page":"tradeups","tier":"Covert","risk":"aggressive"}',
+    );
+    expect(f && filtersUrl(f)).toBe("/tradeups?tier=Covert&risk=aggressive");
+    expect(parseFilters('{"page":"deals","risk":"yolo"}')).toBeNull();
+  });
+
   it("rejects junk, unknown tiers and non-searches", () => {
     expect(parseFilters("no idea")).toBeNull();
     expect(parseFilters('{"page":"tradeups","tier":"Gold"}')).toBeNull();

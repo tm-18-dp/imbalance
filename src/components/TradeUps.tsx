@@ -6,8 +6,14 @@ import type { FoundContract } from "@/lib/finder";
 import type { Outcome } from "@/lib/tradeup";
 import { isTier, TIERS, type Tier } from "@/lib/tradeup";
 import { isMarketplaceId, MARKETPLACES, type MarketplaceId } from "@/lib/fees";
-import { riskNotes, THIN_MARKET } from "@/lib/risk";
+import {
+  isRiskProfileId,
+  RISK_PROFILES,
+  riskNotes,
+  THIN_MARKET,
+} from "@/lib/risk";
 import { useMoney } from "./Money";
+import { RiskPicker, useRiskProfile } from "./RiskPicker";
 import { useSearchParams } from "next/navigation";
 import { urlFlag, urlNumber } from "@/lib/filters";
 import { AskAi } from "./AskAi";
@@ -42,6 +48,8 @@ type ApiOutcome = Outcome & {
 const STEAM_CHECK_GAP_MS = 3500;
 type ApiContract = Omit<FoundContract, "result"> & {
   timeline: ContractTimeline;
+  /** Has warnings by the Safe rules. */
+  risky: boolean;
   result: Omit<FoundContract["result"], "outcomes"> & {
     outcomes: ApiOutcome[];
   };
@@ -69,9 +77,16 @@ export function TradeUps() {
     return m && isMarketplaceId(m) ? m : "skinport";
   });
   const [budget, setBudget] = useState(() => urlNumber(params, "max", ""));
-  const [sort, setSort] = useState<SortKey>("profit");
+  const [sort, setSort] = useState<SortKey>(() => {
+    const r = params.get("risk");
+    return isRiskProfileId(r) ? RISK_PROFILES[r].contractSort : "profit";
+  });
   const [hideRisky, setHideRisky] = useState(() =>
     urlFlag(params, "hideRisky", true),
+  );
+  // Each profile has a natural sort: Aggressive looks for return, not just profit.
+  const risk = useRiskProfile(params.get("risk"), (p) =>
+    setSort(p.contractSort),
   );
   const [state, setState] = useState<{
     loading: boolean;
@@ -91,6 +106,7 @@ export function TradeUps() {
         market,
         stattrak: stattrak ? "1" : "0",
         hideRisky: hideRisky ? "1" : "0",
+        risk: risk.profile.id,
         budget: String(usd || ""),
       });
       const res = await fetch(`/api/tradeups?${q}`);
@@ -141,6 +157,8 @@ export function TradeUps() {
           <strong>Scan</strong>.
         </p>
       )}
+
+      <RiskPicker profile={risk.profile} onChange={risk.choose} />
 
       <fieldset className="flex flex-wrap gap-2">
         <legend className="mb-1 text-sm text-muted">Rarity to put in</legend>
@@ -207,7 +225,7 @@ export function TradeUps() {
             checked={hideRisky}
             onChange={(e) => setHideRisky(e.target.checked)}
           />
-          Hide risky contracts
+          Hide contracts above my risk level
         </label>
         <label className="ml-auto flex flex-col gap-1">
           <span className="text-muted">Sort by</span>

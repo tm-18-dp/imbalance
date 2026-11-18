@@ -5,6 +5,7 @@ import {
   evaluateContract,
   normalizeFloat,
   outcomeProbabilities,
+  phaseShares,
   outputFloat,
   type ContractInput,
   type OutcomeSkin,
@@ -61,6 +62,56 @@ describe("floats", () => {
     expect(normalizeFloat(0.4, 0.1, 0.7)).toBeCloseTo(0.5);
     expect(normalizeFloat(0.5, 0.5, 0.5)).toBe(0);
     expect(outputFloat(0.5, 0, 0.08)).toBeCloseTo(0.04);
+  });
+});
+
+describe("Doppler phases", () => {
+  // Like the real data: every phase has its own id, the name is shared.
+  const knife = (name: string, phase?: string) => ({
+    id: `${name}-${phase ?? "plain"}-${Math.random()}`,
+    name,
+    collectionId: "K",
+    minFloat: 0,
+    maxFloat: 0.08,
+    hasWear: true,
+    phase,
+  });
+
+  it("counts a phased knife as one draw, with rare gems", () => {
+    const pool = new Map([
+      [
+        "K",
+        [
+          ...[
+            "Phase 1",
+            "Phase 2",
+            "Phase 3",
+            "Phase 4",
+            "Ruby",
+            "Sapphire",
+          ].map((p) => knife("kara-doppler", p)),
+          knife("kara-fade"),
+        ],
+      ],
+    ]);
+    const p = outcomeProbabilities(Array(5).fill("K"), pool);
+    const chance = (name: string, phase?: string) =>
+      p
+        .filter(
+          (x) => x.skin.name === name && (!phase || x.skin.phase === phase),
+        )
+        .reduce((s, x) => s + x.probability, 0);
+    // Two knives, not seven: each is half.
+    expect(chance("kara-doppler")).toBeCloseTo(0.5);
+    expect(chance("kara-fade")).toBeCloseTo(0.5);
+    expect(chance("kara-doppler", "Ruby")).toBeCloseTo(0.5 * 0.015);
+    expect(chance("kara-doppler", "Phase 2")).toBeCloseTo((0.5 * 0.97) / 4);
+    expect(p.reduce((s, x) => s + x.probability, 0)).toBeCloseTo(1);
+  });
+
+  it("splits evenly when the pool lists only gems", () => {
+    expect(phaseShares(["Ruby", "Sapphire"])).toEqual([0.5, 0.5]);
+    expect(phaseShares([undefined])).toEqual([1]);
   });
 });
 

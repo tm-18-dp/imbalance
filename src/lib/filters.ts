@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { MARKETPLACE_IDS } from "./fees";
+import { RISK_PROFILE_IDS } from "./risk";
 import { TIERS } from "./tradeup";
 
 /**
@@ -7,6 +8,7 @@ import { TIERS } from "./tradeup";
  * user sees, exactly as they typed them: the page converts, the AI never does.
  */
 const amount = z.number().positive().max(1e7).nullish();
+const risk = z.enum(RISK_PROFILE_IDS).nullish();
 export const filtersSchema = z.discriminatedUnion("page", [
   z.object({
     page: z.literal("tradeups"),
@@ -15,6 +17,7 @@ export const filtersSchema = z.discriminatedUnion("page", [
     market: z.enum(MARKETPLACE_IDS).nullish(),
     maxCost: amount,
     hideRisky: z.boolean().nullish(),
+    risk,
   }),
   z.object({
     page: z.literal("deals"),
@@ -25,6 +28,7 @@ export const filtersSchema = z.discriminatedUnion("page", [
     minSold30d: z.number().int().min(0).max(10000).nullish(),
     dipsOnly: z.boolean().nullish(),
     weaponsOnly: z.boolean().nullish(),
+    risk,
   }),
   z.object({ page: z.literal("none") }),
 ]);
@@ -32,9 +36,11 @@ export type Filters = z.infer<typeof filtersSchema>;
 
 export const FILTERS_PROMPT = `Turn the user's request into page filters for a CS2 trading app.
 Reply with one JSON object and nothing else. Shapes:
-{"page":"tradeups","tier":one of ${JSON.stringify(TIERS)} (the rarity the user puts IN),"stattrak":bool,"market":"skinport"|"csfloat"|"steam","maxCost":number,"hideRisky":bool}
-{"page":"deals","search":"item name words","market":"skinport"|"csfloat"|"steam","maxPrice":number,"minPercentBelow":number,"minSold30d":integer,"dipsOnly":bool,"weaponsOnly":bool}
+{"page":"tradeups","tier":one of ${JSON.stringify(TIERS)} (the rarity the user puts IN),"stattrak":bool,"market":"skinport"|"csfloat"|"steam","maxCost":number,"hideRisky":bool,"risk":"safe"|"balanced"|"aggressive"}
+{"page":"deals","search":"item name words","market":"skinport"|"csfloat"|"steam","maxPrice":number,"minPercentBelow":number,"minSold30d":integer,"dipsOnly":bool,"weaponsOnly":bool,"risk":"safe"|"balanced"|"aggressive"}
 {"page":"none"} when it is not a search for trade-ups or deals.
+Set "risk" only when the user asks for it: "aggressive" for risky, high risk, big upside or
+yolo; "balanced" for medium risk; "safe" for safe or low risk.
 Leave out any field the user did not ask for. Copy amounts exactly as the user wrote them,
 never convert currencies or do maths. Colours: grey Consumer, light blue Industrial, dark blue
 Mil-Spec, purple Restricted, pink Classified, red Covert.`;
@@ -65,6 +71,7 @@ export function filtersUrl(f: Filters): string | null {
     put("market", f.market);
     put("max", f.maxCost);
     put("hideRisky", f.hideRisky);
+    put("risk", f.risk);
   } else {
     put("q", f.search);
     put("market", f.market);
@@ -73,6 +80,7 @@ export function filtersUrl(f: Filters): string | null {
     put("minVolume", f.minSold30d);
     put("dips", f.dipsOnly);
     put("weapons", f.weaponsOnly);
+    put("risk", f.risk);
   }
   const s = q.toString();
   return `/${f.page}${s ? `?${s}` : ""}`;

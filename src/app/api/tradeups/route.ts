@@ -5,7 +5,12 @@ import { isMarketplaceId, MARKETPLACES } from "@/lib/fees";
 import { findContracts } from "@/lib/finder";
 import { isTier } from "@/lib/tradeup";
 import { loadTierData } from "@/lib/tradeup-data";
-import { riskNotes } from "@/lib/risk";
+import {
+  isRiskProfileId,
+  RISK_PROFILES,
+  riskNotes,
+  withinProfile,
+} from "@/lib/risk";
 
 /** Scans one tier for the most profitable contracts. Takes about a second. */
 export async function GET(req: Request) {
@@ -24,7 +29,13 @@ export async function GET(req: Request) {
 
   const hideRisky = p.get("hideRisky") === "1";
   const db = getDb();
-  const { holdDays } = getSettings(db);
+  const settings = getSettings(db);
+  const { holdDays } = settings;
+  const riskParam = p.get("risk");
+  const profile =
+    RISK_PROFILES[
+      isRiskProfileId(riskParam) ? riskParam : settings.riskProfile
+    ];
   const data = loadTierData(
     db,
     tier,
@@ -45,16 +56,25 @@ export async function GET(req: Request) {
         priceSource: data.priceSource(o.skin, o.wear),
         marketHashName: o.skin.phase ? null : data.outcomeName(o.skin, o.wear),
       }));
+      // Warnings always use the Safe rules; the profile only decides what is hidden.
       const risky = riskNotes(outcomes, c.result.evCents).length > 0;
+      const allowed = withinProfile(outcomes, c.result.evCents, profile);
       const timeline = contractTimeline(holdDays, outcomes);
-      return { ...c, risky, timeline, result: { ...c.result, outcomes } };
+      return {
+        ...c,
+        risky,
+        allowed,
+        timeline,
+        result: { ...c.result, outcomes },
+      };
     })
-    .filter((c) => !hideRisky || !c.risky)
+    .filter((c) => !hideRisky || c.allowed)
     .slice(0, 50);
   return Response.json({
     tier,
     variant,
     market,
+    risk: profile.id,
     options: data.options.length,
     contracts,
   });

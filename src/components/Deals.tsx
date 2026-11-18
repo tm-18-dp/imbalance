@@ -11,6 +11,8 @@ import {
   type MarketplaceId,
 } from "@/lib/fees";
 import { useMoney } from "./Money";
+import { RiskPicker, useRiskProfile } from "./RiskPicker";
+import { isRiskProfileId, RISK_PROFILES } from "@/lib/risk";
 import { AskAi } from "./AskAi";
 import { useSearchParams } from "next/navigation";
 import { urlFlag, urlNumber } from "@/lib/filters";
@@ -24,18 +26,32 @@ export function Deals() {
     const m = params.get("market");
     return m && isMarketplaceId(m) ? m : "skinport";
   });
+  // A risk level in the URL supplies the defaults for filters the URL leaves out.
+  const urlRisk = params.get("risk");
+  const start = RISK_PROFILES[isRiskProfileId(urlRisk) ? urlRisk : "safe"];
   const [minDiscount, setMinDiscount] = useState(() =>
-    urlNumber(params, "minDiscount", "10"),
+    urlNumber(params, "minDiscount", String(start.dealMinDiscountPercent)),
   );
   const [minVolume, setMinVolume] = useState(() =>
-    urlNumber(params, "minVolume", "10"),
+    urlNumber(params, "minVolume", String(start.dealMinVolume30d)),
   );
   const [max, setMax] = useState(() => urlNumber(params, "max", ""));
   const [q, setQ] = useState(() => params.get("q")?.slice(0, 100) ?? "");
   const [weapons, setWeapons] = useState(() =>
-    urlFlag(params, "weapons", true),
+    urlFlag(params, "weapons", !start.dealIncludeNonWeapons),
   );
   const [dips, setDips] = useState(() => urlFlag(params, "dips", false));
+  // Filters that came in the URL win over the saved profile's defaults on arrival.
+  const urlHasFilters = ["minDiscount", "minVolume", "weapons"].some((k) =>
+    params.has(k),
+  );
+  /** A profile fills in the filters; they stay editable afterwards. */
+  const risk = useRiskProfile(params.get("risk"), (p, source) => {
+    if (source === "saved" && urlHasFilters) return;
+    setMinDiscount(String(p.dealMinDiscountPercent));
+    setMinVolume(String(p.dealMinVolume30d));
+    setWeapons(!p.dealIncludeNonWeapons);
+  });
   const [chart, setChart] = useState<Deal | null>(null);
   const [state, setState] = useState<{
     loading: boolean;
@@ -91,6 +107,8 @@ export function Deals() {
           <strong>Find deals</strong>.
         </p>
       )}
+
+      <RiskPicker profile={risk.profile} onChange={risk.choose} />
 
       <div className="flex flex-wrap items-end gap-3 text-sm">
         <label className="flex flex-col gap-1">
@@ -241,7 +259,16 @@ export function Deals() {
                   <td className="p-2">{money(d.usualCents)}</td>
                   <td className="p-2">{Math.round(d.discount * 100)}%</td>
                   <td className="p-2">{money(d.resaleCents)}</td>
-                  <td className="p-2">{d.volume30d}</td>
+                  <td
+                    className={`p-2 ${d.volume30d < RISK_PROFILES.safe.dealMinVolume30d ? "text-bad" : ""}`}
+                    title={
+                      d.volume30d < RISK_PROFILES.safe.dealMinVolume30d
+                        ? "Sells rarely: the usual price is less reliable and it may take a while to resell"
+                        : undefined
+                    }
+                  >
+                    {d.volume30d}
+                  </td>
                   <td className="p-2 font-medium text-good">
                     {money(d.flipProfitCents)}
                   </td>

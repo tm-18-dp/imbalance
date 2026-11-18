@@ -150,8 +150,12 @@ The AI only comments on numbers Imbalance worked out. It never does the maths.
 
 ## Good to know
 
-- **"Hide risky contracts" is on by default.** Contracts whose value comes mostly from
-  skins that hardly ever sell look great on paper and lose money in real life.
+- **Pick a risk level on Trade-ups and Deals.** Safe (the default) only trusts prices
+  backed by regular sales. Balanced and Aggressive let through contracts and deals that
+  lean on skins that sell less often: more and bigger results, but a real chance of losing
+  money. Risky contracts are always marked **Check** in red, whatever level you pick.
+  Contracts whose value comes mostly from skins that hardly ever sell look great on paper
+  and often lose money in real life.
 - **Charts fill up over time.** The app saves prices every 6 hours while you use it.
 - **New items are trade locked for 7 days.** Change this on the Tracker page if it changes.
 

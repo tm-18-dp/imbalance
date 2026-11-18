@@ -151,6 +151,17 @@ POSTs from curl need `-H "Origin: http://localhost:3000"`.
     `'unsafe-inline'` (no nonces); all outside calls happen on the server.
   - Deals resell at `resalePrice`: the 30-day median, pulled down by the 7-day or 24-hour
     median when lower with 3+ sales.
+  - **R1 risk profiles** (`RISK_PROFILES` in `risk.ts`): Safe, Balanced, Aggressive, saved
+    as `riskProfile` in settings (`/api/settings`), picked with `RiskPicker` on Trade-ups
+    and Deals, and settable from the plain-English search (`risk` in filters). A profile
+    only decides what `withinProfile` lets through; `riskNotes` warnings always use Safe's
+    rules. On Deals a profile fills in the filters, which stay editable.
+  - **Bug fixed: Doppler phases.** The rare pool lists each phase (with its own skin id)
+    as a separate knife, so Ruby was as likely as Phase 2 and knife pools looked twice as
+    big. `outcomeProbabilities` now groups phased knives by name into one draw and splits
+    it with `phaseShares`: gems (Ruby, Sapphire, Black Pearl, Emerald) get
+    `GEM_PHASE_CHANCE` = 1.5% each, a cautious community estimate (Valve publishes none).
+    Covert best ROI fell from about 100 to 158% (fake) to 9% Safe, 35% Aggressive.
 - **Next:** the owner continues tomorrow. Open items: test the AI (Find box, Ask AI) and
   CSFloat with real keys, then pick from `docs/roadmap.md`. taste-skill and impeccable were
   not installed, so M17 was done by hand; run them later if wanted.

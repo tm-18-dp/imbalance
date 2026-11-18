@@ -77,9 +77,35 @@ export function outputFloat(avgNorm: number, min: number, max: number): number {
 }
 
 /**
+ * Rare Doppler phases (Ruby, Sapphire, Black Pearl, Emerald). Valve doesn't publish phase
+ * odds; about 1.5% each is a cautious community estimate. The other phases share the rest.
+ */
+export const GEM_PHASES = ["Ruby", "Sapphire", "Black Pearl", "Emerald"];
+export const GEM_PHASE_CHANCE = 0.015;
+
+/**
+ * The skin without its phase: every Doppler phase is one draw in the game. Phases have
+ * their own ids in the skin data, so phased skins group by name.
+ */
+const baseSkinId = (s: OutcomeSkin) => (s.phase ? `name:${s.name}` : s.id);
+
+/** Chance of each phase of one skin, given the phases the pool lists for it. */
+export function phaseShares(phases: readonly (string | undefined)[]): number[] {
+  const gems = phases.filter((p) => p && GEM_PHASES.includes(p)).length;
+  const normal = phases.length - gems;
+  if (normal === 0) return phases.map(() => 1 / phases.length);
+  const gemChance = Math.min(GEM_PHASE_CHANCE, 1 / phases.length);
+  const normalChance = (1 - gems * gemChance) / normal;
+  return phases.map((p) =>
+    p && GEM_PHASES.includes(p) ? gemChance : normalChance,
+  );
+}
+
+/**
  * Chance of each outcome. Every input adds all next-tier skins of its own collection to a
  * pool, and the game picks one at random from that pool. So a skin from collection C has
  * chance (inputs from C) / (sum over all inputs of their collection's outcome count).
+ * A knife with Doppler phases counts once; its phases then split that chance.
  */
 export function outcomeProbabilities(
   inputCollections: string[],
@@ -87,15 +113,26 @@ export function outcomeProbabilities(
 ): { skin: OutcomeSkin; probability: number }[] {
   const counts = new Map<string, number>();
   for (const c of inputCollections) counts.set(c, (counts.get(c) ?? 0) + 1);
+  const grouped = new Map<string, OutcomeSkin[][]>();
+  for (const c of counts.keys()) {
+    const bySkin = new Map<string, OutcomeSkin[]>();
+    for (const skin of outcomesByCollection.get(c) ?? []) {
+      const k = baseSkinId(skin);
+      bySkin.set(k, [...(bySkin.get(k) ?? []), skin]);
+    }
+    grouped.set(c, [...bySkin.values()]);
+  }
   let tickets = 0;
-  for (const [c, k] of counts)
-    tickets += k * (outcomesByCollection.get(c)?.length ?? 0);
+  for (const [c, k] of counts) tickets += k * (grouped.get(c)?.length ?? 0);
   if (tickets === 0) return [];
   return [...counts].flatMap(([c, k]) =>
-    (outcomesByCollection.get(c) ?? []).map((skin) => ({
-      skin,
-      probability: k / tickets,
-    })),
+    (grouped.get(c) ?? []).flatMap((phases) => {
+      const shares = phaseShares(phases.map((s) => s.phase));
+      return phases.map((skin, i) => ({
+        skin,
+        probability: (k / tickets) * shares[i],
+      }));
+    }),
   );
 }
 

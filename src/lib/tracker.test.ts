@@ -24,7 +24,11 @@ const buy = (
 describe("tracker", () => {
   it("locks new items for the trade hold from settings", () => {
     const db = openDb(":memory:");
-    expect(getSettings(db)).toEqual({ holdDays: 7, sellMarket: "skinport" });
+    expect(getSettings(db)).toEqual({
+      holdDays: 7,
+      sellMarket: "skinport",
+      riskProfile: "safe",
+    });
     saveSettings(db, { holdDays: 3 });
     const id = buy(db, "AK-47 | Redline (Field-Tested)", 1500);
     expect(listHoldings(db).find((h) => h.id === id)?.tradableAt).toBe(
