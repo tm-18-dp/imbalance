@@ -162,6 +162,11 @@ POSTs from curl need `-H "Origin: http://localhost:3000"`.
     it with `phaseShares`: gems (Ruby, Sapphire, Black Pearl, Emerald) get
     `GEM_PHASE_CHANCE` = 1.5% each, a cautious community estimate (Valve publishes none).
     Covert best ROI fell from about 100 to 158% (fake) to 9% Safe, 35% Aggressive.
+  - **R2 outcome spread:** `ContractResult.spread` from `contractSpread` (worst and best
+    case as profit, standard deviation of the amount back, chance to lose over half,
+    chance to at least double). Unpriced outcomes count as 0, so a contract with one has
+    a worst case of minus the full cost. Shown as tiles in the contract panel
+    (`SpreadSummary`) and a "Worst / best" column.
 - **Next:** the owner continues tomorrow. Open items: test the AI (Find box, Ask AI) and
   CSFloat with real keys, then pick from `docs/roadmap.md`. taste-skill and impeccable were
   not installed, so M17 was done by hand; run them later if wanted.

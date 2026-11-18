@@ -258,6 +258,12 @@ export function TradeUps() {
                 <th className="p-2 font-normal">Cost</th>
                 <th className="p-2 font-normal">Expected back</th>
                 <th className="p-2 font-normal">Profit</th>
+                <th
+                  className="p-2 font-normal"
+                  title="Profit if you get the worst-paying outcome, and the best-paying one"
+                >
+                  Worst / best
+                </th>
                 <th className="p-2 font-normal">ROI</th>
                 <th className="p-2 font-normal">Chance to profit</th>
                 <th
@@ -317,6 +323,27 @@ export function TradeUps() {
                       className={`p-2 font-medium ${c.result.profitCents >= 0 ? "text-good" : "text-bad"}`}
                     >
                       {money(c.result.profitCents)}
+                    </td>
+                    <td className="p-2 whitespace-nowrap">
+                      <span
+                        className={
+                          c.result.spread.worstCents < 0
+                            ? "text-bad"
+                            : "text-good"
+                        }
+                      >
+                        {money(c.result.spread.worstCents)}
+                      </span>
+                      <span className="text-muted"> / </span>
+                      <span
+                        className={
+                          c.result.spread.bestCents >= 0
+                            ? "text-good"
+                            : "text-bad"
+                        }
+                      >
+                        {money(c.result.spread.bestCents)}
+                      </span>
                     </td>
                     <td className="p-2">{c.result.roiPercent.toFixed(0)}%</td>
                     <td className="p-2">{pct(c.result.oddsToProfit)}</td>
@@ -395,6 +422,7 @@ function ContractDetail({
           </span>
           , chance to profit {pct(c.result.oddsToProfit)}.
         </p>
+        <SpreadSummary contract={c} />
         <p className="mt-1 text-sm">
           Takes about <strong>{Math.ceil(c.timeline.totalDays)} days</strong>: a{" "}
           {c.timeline.holdDays}-day trade hold before you can sell what you get
@@ -544,6 +572,63 @@ function ContractDetail({
   );
 }
 
+/**
+ * The downside next to the upside: one try lands on a single outcome, not the average.
+ * Plain-English line plus four tiles.
+ */
+function SpreadSummary({ contract: c }: { contract: ApiContract }) {
+  const { money } = useMoney();
+  const s = c.result.spread;
+  const swingy = s.stdDevCents > c.result.costCents / 2;
+  const tiles: { label: string; value: string; tone: string; hint: string }[] =
+    [
+      {
+        label: "Worst case",
+        value: money(s.worstCents),
+        tone: s.worstCents < 0 ? "text-bad" : "text-good",
+        hint: "Profit if you get the worst-paying outcome",
+      },
+      {
+        label: "Best case",
+        value: money(s.bestCents),
+        tone: s.bestCents >= 0 ? "text-good" : "text-bad",
+        hint: "Profit if you get the best-paying outcome",
+      },
+      {
+        label: "Lose over half",
+        value: pct(s.chanceLoseHalf),
+        tone: s.chanceLoseHalf > 0 ? "text-bad" : "text-muted",
+        hint: "Chance of getting back less than half of what you paid",
+      },
+      {
+        label: "At least double",
+        value: pct(s.chanceDouble),
+        tone: s.chanceDouble > 0 ? "text-good" : "text-muted",
+        hint: "Chance of getting back at least twice what you paid",
+      },
+    ];
+  return (
+    <div className="mt-3">
+      <dl className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+        {tiles.map((t) => (
+          <div key={t.label} className="panel p-2" title={t.hint}>
+            <dt className="text-xs text-muted">{t.label}</dt>
+            <dd className={`text-base font-semibold ${t.tone}`}>{t.value}</dd>
+          </div>
+        ))}
+      </dl>
+      <p className="mt-2 text-sm text-muted">
+        One try gets you one outcome, not the average. A typical try lands about{" "}
+        {money(s.stdDevCents)} above or below the expected{" "}
+        {money(c.result.evCents)}
+        {swingy
+          ? ", which is a big swing for the cost: the profit only shows up over many tries."
+          : "."}
+      </p>
+    </div>
+  );
+}
+
 /** The computed facts about a contract, compact, for the AI to comment on. */
 function contractForAi(c: ApiContract, risks: string[]) {
   return {
@@ -552,6 +637,11 @@ function contractForAi(c: ApiContract, risks: string[]) {
     profitCents: c.result.profitCents,
     roiPercent: Math.round(c.result.roiPercent),
     chanceToProfit: c.result.oddsToProfit,
+    worstCaseProfitCents: c.result.spread.worstCents,
+    bestCaseProfitCents: c.result.spread.bestCents,
+    standardDeviationCents: c.result.spread.stdDevCents,
+    chanceToLoseOverHalf: c.result.spread.chanceLoseHalf,
+    chanceToAtLeastDouble: c.result.spread.chanceDouble,
     days: c.timeline,
     warnings: risks,
     inputs: c.inputs.map((i) => ({

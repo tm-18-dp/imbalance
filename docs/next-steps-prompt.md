@@ -67,9 +67,10 @@ Sizes: S = an hour or two, M = a session, L = more than a session.
       | Deals: min discount             | 10%    | 7%       | 5%         |
       | Include stickers, cases, charms | no     | yes      | yes        |
 
-- [ ] **R2. Outcome spread on every contract (S).** In `src/lib/tradeup.ts` add worst case,
-      best case, standard deviation, chance to lose over 50% and chance to at least double.
-      Show them in the contract panel and as optional table columns.
+- [x] **R2. Outcome spread on every contract (S).** Done: `contractSpread` in
+      `src/lib/tradeup.ts` (worst case, best case, standard deviation, chance to lose over
+      50%, chance to at least double), four tiles in the contract panel, a "Worst / best"
+      table column, and passed to the AI.
 - [ ] **R3. Sort by upside (S).** New sort options: best case, chance to double, and
       "EV per day" (profit divided by `timeline.totalDays`) so quick small wins can beat
       slow big ones.

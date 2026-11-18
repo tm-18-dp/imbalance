@@ -55,6 +55,53 @@ export type Outcome = {
   betterWear: { wear: WearName; maxAvgNorm: number } | null;
 };
 
+/** How far one try can land from the average: the downside next to the upside. */
+export type ContractSpread = {
+  /** Profit (can be negative) if you get the worst-paying outcome. */
+  worstCents: number;
+  /** Profit if you get the best-paying outcome. */
+  bestCents: number;
+  /** Standard deviation of what you get back: how widely single tries swing. */
+  stdDevCents: number;
+  /** Chance of getting back less than half the cost. */
+  chanceLoseHalf: number;
+  /** Chance of getting back at least twice the cost. */
+  chanceDouble: number;
+};
+
+/** Spread of one contract's result. Outcomes with no price count as 0, like the EV. */
+export function contractSpread(
+  outcomes: readonly { probability: number; netCents: number }[],
+  costCents: number,
+): ContractSpread {
+  const live = outcomes.filter((o) => o.probability > 0);
+  if (!live.length)
+    return {
+      worstCents: -costCents,
+      bestCents: -costCents,
+      stdDevCents: 0,
+      chanceLoseHalf: 1,
+      chanceDouble: 0,
+    };
+  const total = live.reduce((s, o) => s + o.probability, 0);
+  const mean = live.reduce((s, o) => s + o.probability * o.netCents, 0) / total;
+  const variance =
+    live.reduce((s, o) => s + o.probability * (o.netCents - mean) ** 2, 0) /
+    total;
+  const chance = (test: (net: number) => boolean) =>
+    live
+      .filter((o) => test(o.netCents))
+      .reduce((s, o) => s + o.probability, 0) / total;
+  const nets = live.map((o) => o.netCents);
+  return {
+    worstCents: Math.min(...nets) - costCents,
+    bestCents: Math.max(...nets) - costCents,
+    stdDevCents: Math.round(Math.sqrt(variance)),
+    chanceLoseHalf: chance((n) => n < costCents / 2),
+    chanceDouble: costCents > 0 ? chance((n) => n >= 2 * costCents) : 0,
+  };
+}
+
 export type ContractResult = {
   costCents: number;
   avgNormFloat: number;
@@ -63,6 +110,7 @@ export type ContractResult = {
   profitCents: number;
   roiPercent: number;
   oddsToProfit: number;
+  spread: ContractSpread;
   missingPrices: number;
 };
 
@@ -216,6 +264,7 @@ export function evaluateContract(
     profitCents: evCents - costCents,
     roiPercent: costCents > 0 ? ((evCents - costCents) / costCents) * 100 : 0,
     oddsToProfit: odds,
+    spread: contractSpread(outcomes, costCents),
     missingPrices,
   };
 }

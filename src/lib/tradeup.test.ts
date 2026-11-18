@@ -4,6 +4,7 @@ import {
   ContractError,
   evaluateContract,
   normalizeFloat,
+  contractSpread,
   outcomeProbabilities,
   phaseShares,
   outputFloat,
@@ -237,5 +238,42 @@ describe("evaluateContract", () => {
         noFee,
       ),
     ).toThrow(/outside/);
+  });
+});
+
+describe("contractSpread", () => {
+  const o = (probability: number, netCents: number) => ({
+    probability,
+    netCents,
+  });
+
+  it("shows worst, best, swing and the tails of a lottery-style contract", () => {
+    // Cost 1000: 10% chance of 5000, 30% of 1200, 60% of 300. EV = 1040.
+    const s = contractSpread([o(0.1, 5000), o(0.3, 1200), o(0.6, 300)], 1000);
+    expect(s.worstCents).toBe(-700);
+    expect(s.bestCents).toBe(4000);
+    expect(s.chanceLoseHalf).toBeCloseTo(0.6);
+    expect(s.chanceDouble).toBeCloseTo(0.1);
+    // sqrt(0.1*3960^2 + 0.3*160^2 + 0.6*740^2) = sqrt(1904400)
+    expect(s.stdDevCents).toBe(1380);
+  });
+
+  it("has no swing when every outcome pays the same", () => {
+    const s = contractSpread([o(0.5, 1100), o(0.5, 1100)], 1000);
+    expect(s).toEqual({
+      worstCents: 100,
+      bestCents: 100,
+      stdDevCents: 0,
+      chanceLoseHalf: 0,
+      chanceDouble: 0,
+    });
+  });
+
+  it("ignores impossible outcomes and survives an empty pool", () => {
+    expect(contractSpread([o(0, 99999), o(1, 500)], 1000).bestCents).toBe(-500);
+    expect(contractSpread([], 1000)).toMatchObject({
+      worstCents: -1000,
+      chanceLoseHalf: 1,
+    });
   });
 });
