@@ -74,6 +74,7 @@ export async function GET(req: Request) {
       const outcomes = c.result.outcomes.map((o) => ({
         ...o,
         volume30d: data.volume30d(o.skin, o.wear),
+        listed: data.listed(o.skin, o.wear),
         priceSource: data.priceSource(o.skin, o.wear),
         trend: data.trend(o.skin, o.wear),
         marketHashName: o.skin.phase ? null : data.outcomeName(o.skin, o.wear),

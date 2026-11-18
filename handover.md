@@ -230,6 +230,15 @@ POSTs from curl need `-H "Origin: http://localhost:3000"`.
     Real data: about 1 in 7 priced outcomes is cut (7 to 12% on average), but the best
     contract per tier and risk level barely moved: top contracts rarely lean on falling
     items.
+  - **D2 liquidity:** `liquidity.ts` (pure): `thinness` (0 at 10+ sales in 30 days, 1 at
+    none) and `liquidSellPrice`, which leans the price towards a cheaper lowest listing by
+    `thinness`. `tradeup-data.ts` splits `salesPrice` (the old median logic, still used
+    for `nextCostCents`) from `sellPrice` (liquidity-aware, used for outcomes and tracker
+    values). `daysToSell(volume30d, listed)` queues behind 3 sales, growing by `thinness`
+    towards a quarter of the Skinport listings; the cap and the never-sold count are now
+    both `MAX_SELL_DAYS` (90; they were 60 and 30, so a 1-sale item counted slower than an
+    unsold one). Real data: Covert Aggressive best $27.77 to $19.08, Restricted Safe $1.23
+    to $1.10, Classified unchanged; many contracts now take 40 to 70 days.
 - **Next:** the owner continues tomorrow. Open items: test the AI (Find box, Ask AI) and
   CSFloat with real keys, then pick from `docs/roadmap.md`. taste-skill and impeccable were
   not installed, so M17 was done by hand; run them later if wanted.

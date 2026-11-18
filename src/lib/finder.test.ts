@@ -4,7 +4,12 @@ import { findContracts, optionCost, type InputOption } from "./finder";
 import { openDb } from "./db";
 import { saveCatalog } from "./catalog";
 import { saveSkinport } from "./prices/skinport";
-import { floorEstimate, loadTierData, sellPrice } from "./tradeup-data";
+import {
+  floorEstimate,
+  loadTierData,
+  salesPrice,
+  sellPrice,
+} from "./tradeup-data";
 import { addHolding } from "./tracker";
 import type { OutcomeSkin } from "./tradeup";
 
@@ -334,6 +339,11 @@ describe("loadTierData", () => {
       sellPrice({ ...row, volume_7d: 0, volume_30d: 0, volume_90d: 0 }),
     ).toBe(100);
     expect(sellPrice(undefined)).toBeNull();
+    // Thin (4 sales in 30 days) with a listing under the 30-day median of 80: the price
+    // leans 60% of the way to the listing. The usual sales price is unchanged.
+    const thin = { ...row, min_cents: 50, volume_7d: 1, volume_30d: 4 };
+    expect(sellPrice(thin)).toBe(62);
+    expect(salesPrice(thin)).toBe(80);
     // No listing and only a couple of sales: the sparse median beats nothing.
     const rare = {
       ...row,

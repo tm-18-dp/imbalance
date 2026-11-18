@@ -9,6 +9,7 @@ import {
 } from "./tradeup";
 import { marketHashName, WEARS, type WearName } from "./wear";
 import { listHoldings } from "./tracker";
+import { liquidSellPrice } from "./liquidity";
 import { classifyTrend, trendCut, type TrendSignal } from "./trend";
 
 export type Variant = "normal" | "stattrak";
@@ -98,7 +99,7 @@ function loadPrices(db: DatabaseSync) {
 }
 
 /**
- * What a skin really sells for: the most recent sales median with at least 3 sales
+ * What a skin usually sells for: the most recent sales median with at least 3 sales
  * (7, then 30, then 90 days). Sales beat hopeful listings.
  * Without that, the lower of the lowest listing and the most recent median from even 1 or
  * 2 sales. A lone listing can be a wishful asking price many times the real value (seen:
@@ -107,7 +108,7 @@ function loadPrices(db: DatabaseSync) {
  * of times in 90 days; their 30-day volume stays low, so the risk checks still treat them
  * as thin markets.
  */
-export function sellPrice(r: PriceRow | undefined): number | null {
+export function salesPrice(r: PriceRow | undefined): number | null {
   if (!r) return null;
   if (r.median_7d != null && (r.volume_7d ?? 0) >= 3) return r.median_7d;
   if (r.median_30d != null && (r.volume_30d ?? 0) >= 3) return r.median_30d;
@@ -123,6 +124,16 @@ export function sellPrice(r: PriceRow | undefined): number | null {
   if (r.min_cents != null && sparse != null)
     return Math.min(r.min_cents, sparse);
   return r.min_cents ?? sparse;
+}
+
+/**
+ * What you can expect to sell a skin for: `salesPrice`, leaning towards a cheaper listing
+ * when the item sells rarely (see `liquidSellPrice`).
+ */
+export function sellPrice(r: PriceRow | undefined): number | null {
+  const sales = salesPrice(r);
+  if (sales == null || !r) return sales;
+  return liquidSellPrice(sales, r.min_cents, r.volume_30d ?? 0);
 }
 
 type SkinRow = {
@@ -264,6 +275,9 @@ export function loadTierData(
   /** Market name of an outcome, for looking up its Steam price. */
   const outcomeName = (skin: OutcomeSkin, wear: WearName | null) =>
     marketHashName(skin.name, wear, variant);
+  /** Copies listed on Skinport right now: the queue a thin item sells behind. */
+  const listed = (skin: OutcomeSkin, wear: WearName | null) =>
+    priceRow(skin, wear)?.quantity ?? 0;
   /** Sales in the last 30 days: low numbers mean the price may be fake or hard to sell at. */
   const volume30d = (skin: OutcomeSkin, wear: WearName | null) =>
     priceRow(skin, wear)?.volume_30d ?? 0;
@@ -302,7 +316,8 @@ export function loadTierData(
         maxFloat: r.max_float,
         costCents: p.min_cents,
         // Only one copy is at the lowest listing; the others cost about what it sells for.
-        nextCostCents: Math.max(p.min_cents, sellPrice(p) ?? p.min_cents),
+        // The usual sales price, not the thin-market sell price: buying isn't cheaper.
+        nextCostCents: Math.max(p.min_cents, salesPrice(p) ?? p.min_cents),
         quantity: p.quantity,
       });
     }
@@ -318,6 +333,7 @@ export function loadTierData(
     priceSource,
     outcomeName,
     volume30d,
+    listed,
     trend,
   };
 }
