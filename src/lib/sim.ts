@@ -65,6 +65,8 @@ export type PositionDetail =
       chance: number;
       /** What that result was worth after the fee when rolled. */
       rolledNetCents: number;
+      /** The exact items that went in, for marketplace links. Missing on older buys. */
+      inputItems?: { count: number; marketHashName: string }[];
     };
 
 export type SimPosition = {

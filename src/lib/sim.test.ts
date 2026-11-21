@@ -166,7 +166,15 @@ describe("practice bots", () => {
     );
     const queries: string[] = [];
     const contract = (cost: number, profit: number): SimContract => ({
-      inputs: [{ option: { skinName: "P250 | Sand Dune" }, count: 10 }],
+      inputs: [
+        {
+          option: {
+            skinName: "P250 | Sand Dune",
+            marketHashName: "P250 | Sand Dune (Field-Tested)",
+          },
+          count: 10,
+        },
+      ],
       result: {
         costCents: cost,
         evCents: cost + profit,
@@ -209,6 +217,9 @@ describe("practice bots", () => {
           evCents: 2300,
           chance: 0.2,
           rolledNetCents: 9000,
+          inputItems: [
+            { count: 10, marketHashName: "P250 | Sand Dune (Field-Tested)" },
+          ],
         },
       },
     ]);

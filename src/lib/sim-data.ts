@@ -164,7 +164,10 @@ export function listSnapshots(db: DatabaseSync, botId: number) {
 
 /** A trade-up contract as the Trade-ups search returns it (only what bots use). */
 export type SimContract = {
-  inputs: { option: { skinName: string }; count: number }[];
+  inputs: {
+    option: { skinName: string; marketHashName?: string };
+    count: number;
+  }[];
   result: {
     costCents: number;
     evCents: number;
@@ -321,6 +324,11 @@ export async function runBot(
           .map((i) => `${i.count}x ${i.option.skinName}`)
           .join(" + "),
         evCents: contract.result.evCents,
+        inputItems: contract.inputs.flatMap((i) =>
+          i.option.marketHashName
+            ? [{ count: i.count, marketHashName: i.option.marketHashName }]
+            : [],
+        ),
         chance: o.probability,
         rolledNetCents: o.netCents,
       };

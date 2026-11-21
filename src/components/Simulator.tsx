@@ -8,6 +8,7 @@ import type { BotSummary, SimBot, SimPosition } from "@/lib/sim";
 import { TIERS, type Tier } from "@/lib/tradeup";
 import { useMoney } from "./Money";
 import { PRICES_UPDATED } from "./PriceRefresher";
+import { searchLinks } from "@/lib/shopping-list";
 
 /** Fired on window when bots traded, so the page reloads. */
 const SIMS_UPDATED = "imbalance:sims-updated";
@@ -486,6 +487,27 @@ function BotCard({
                       <span className="block text-xs text-muted">
                         {describe(p)}
                       </span>
+                      <ItemLinks name={p.marketHashName} />
+                      {p.detail?.kind === "tradeup" &&
+                        (p.detail.inputItems?.length ?? 0) > 0 && (
+                          <span className="mt-1 block text-xs text-muted">
+                            Went in:{" "}
+                            {(p.detail.inputItems ?? []).map((i, n) => (
+                              <span key={i.marketHashName}>
+                                {n > 0 && ", "}
+                                {i.count}x{" "}
+                                <a
+                                  className="text-accent underline"
+                                  href={searchLinks(i.marketHashName).skinport}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                >
+                                  {i.marketHashName}
+                                </a>
+                              </span>
+                            ))}
+                          </span>
+                        )}
                     </td>
                     <td className="p-2">{day(p.boughtAt)}</td>
                     <td className="p-2">{money(p.costCents)}</td>
@@ -534,5 +556,31 @@ function Stat({
       <div className={`text-lg font-semibold ${cls}`}>{value}</div>
       {sub && <div className={`text-xs ${cls || "text-muted"}`}>{sub}</div>}
     </div>
+  );
+}
+
+/** Where to look at an item the bot bought: each marketplace's search for it. */
+function ItemLinks({ name }: { name: string }) {
+  const links = searchLinks(name);
+  return (
+    <span className="mt-0.5 flex gap-2 text-xs">
+      {(
+        [
+          ["Skinport", links.skinport],
+          ["CSFloat", links.csfloat],
+          ["Steam", links.steam],
+        ] as const
+      ).map(([label, href]) => (
+        <a
+          key={label}
+          className="text-accent underline"
+          href={href}
+          target="_blank"
+          rel="noreferrer"
+        >
+          {label}
+        </a>
+      ))}
+    </span>
   );
 }
