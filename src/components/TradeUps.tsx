@@ -32,6 +32,7 @@ import type { ContractTimeline } from "@/lib/timeline";
 import { FloatBadges } from "./FloatBadges";
 import { AlertMe } from "./Alerts";
 import { ShoppingListButtons } from "./ShoppingList";
+import { SortTh, useSort } from "./SortTable";
 import { floorFloat, shoppingListText } from "@/lib/shopping-list";
 import type { ExactBuyPlan } from "./ExactFloats";
 import { TrendBadge } from "./PriceHistory";
@@ -75,6 +76,18 @@ type ApiContract = Omit<FoundContract, "result"> & {
   };
 };
 
+/** Columns the results table can sort by. */
+const CONTRACT_COLUMNS = {
+  cost: (c: ApiContract) => c.result.costCents,
+  ev: (c: ApiContract) => c.result.evCents,
+  profit: (c: ApiContract) => c.result.profitCents,
+  worst: (c: ApiContract) => c.result.spread.worstCents,
+  roi: (c: ApiContract) => c.result.roiPercent,
+  odds: (c: ApiContract) => c.result.oddsToProfit,
+  days: (c: ApiContract) => c.timeline.totalDays,
+  perday: (c: ApiContract) => profitPerDay(c),
+};
+
 const pct = (x: number) => `${(x * 100).toFixed(x < 0.1 ? 1 : 0)}%`;
 
 const contractRisks = (c: ApiContract) =>
@@ -98,6 +111,8 @@ export function TradeUps() {
   // Null until the user types: the URL's amount shows in the current currency.
   const [budgetTyped, setBudget] = useState<string | null>(null);
   const budget = shownAmount(budgetTyped, params, rates[currency] ?? 1);
+  const [minTyped, setMinBudget] = useState<string | null>(null);
+  const minBudget = shownAmount(minTyped, params, rates[currency] ?? 1, "min");
   const [sort, setSort] = useState<ContractSort>(() => {
     const r = params.get("risk");
     return isRiskProfileId(r) ? RISK_PROFILES[r].contractSort : "profit";
@@ -124,6 +139,7 @@ export function TradeUps() {
   function scanQuery(sortBy: ContractSort = sort) {
     // Budget is typed in the shown currency; the server works in USD.
     const usd = budget ? Number(budget) / (rates[currency] ?? 1) : 0;
+    const minUsd = minBudget ? Number(minBudget) / (rates[currency] ?? 1) : 0;
     return new URLSearchParams({
       tier,
       market,
@@ -132,6 +148,7 @@ export function TradeUps() {
       risk: risk.profile.id,
       sort: sortBy,
       budget: String(usd || ""),
+      minBudget: String(minUsd || ""),
     });
   }
 
@@ -169,14 +186,18 @@ export function TradeUps() {
   }
 
   // Same ranking as the server, so the order is right while a re-scan is on its way.
-  const sorted = useMemo(
+  const ranked = useMemo(
     () => rankContracts(state.contracts ?? [], sort),
     [state.contracts, sort],
   );
+  // Headers sort what's on screen; the "Sort by" list picks which 50 the server sends.
+  const columnSort = useSort(ranked, CONTRACT_COLUMNS);
+  const sorted = columnSort.sorted;
 
   /** Each sort has its own top 50 on the server, so a new sort scans again. */
   function changeSort(next: ContractSort) {
     setSort(next);
+    columnSort.reset();
     if (state.contracts && !state.loading) void scan(next);
   }
 
@@ -244,6 +265,18 @@ export function TradeUps() {
           </select>
         </label>
         <label className="flex flex-col gap-1">
+          <span className="text-muted">Min cost ({currency})</span>
+          <input
+            className="input w-24"
+            inputMode="decimal"
+            value={minBudget}
+            onChange={(e) =>
+              setMinBudget(e.target.value.replace(/[^\d.]/g, ""))
+            }
+            placeholder="0"
+          />
+        </label>
+        <label className="flex flex-col gap-1">
           <span className="text-muted">Max cost ({currency})</span>
           <input
             className="input w-28"
@@ -308,29 +341,42 @@ export function TradeUps() {
             <thead className="text-left text-muted">
               <tr>
                 <th className="p-2 font-normal">Inputs</th>
-                <th className="p-2 font-normal">Cost</th>
-                <th className="p-2 font-normal">Expected back</th>
-                <th className="p-2 font-normal">Profit</th>
-                <th
-                  className="p-2 font-normal"
+                <SortTh k="cost" sort={columnSort}>
+                  Cost
+                </SortTh>
+                <SortTh k="ev" sort={columnSort}>
+                  Expected back
+                </SortTh>
+                <SortTh k="profit" sort={columnSort}>
+                  Profit
+                </SortTh>
+                <SortTh
+                  k="worst"
+                  sort={columnSort}
                   title="Profit if you get the worst-paying outcome, and the best-paying one"
                 >
                   Worst / best
-                </th>
-                <th className="p-2 font-normal">ROI</th>
-                <th className="p-2 font-normal">Chance to profit</th>
-                <th
-                  className="p-2 font-normal"
+                </SortTh>
+                <SortTh k="roi" sort={columnSort}>
+                  ROI
+                </SortTh>
+                <SortTh k="odds" sort={columnSort}>
+                  Chance to profit
+                </SortTh>
+                <SortTh
+                  k="days"
+                  sort={columnSort}
                   title="Trade hold plus expected time to sell"
                 >
                   Days
-                </th>
-                <th
-                  className="p-2 font-normal"
+                </SortTh>
+                <SortTh
+                  k="perday"
+                  sort={columnSort}
                   title="Expected profit for each day your money is tied up"
                 >
                   Per day
-                </th>
+                </SortTh>
                 <th className="p-2 font-normal">Risk</th>
               </tr>
             </thead>

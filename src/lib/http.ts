@@ -1,4 +1,5 @@
 import type { z } from "zod";
+import { throttle } from "./limiter";
 
 /** Fetches JSON, validates it with a zod schema, and throws a plain-English error on failure. */
 export async function fetchJson<T>(
@@ -8,6 +9,7 @@ export async function fetchJson<T>(
   timeoutMs = 60_000,
 ): Promise<T> {
   const host = new URL(url).host;
+  await throttle(host);
   let res: Response;
   try {
     res = await fetch(url, { ...init, signal: AbortSignal.timeout(timeoutMs) });

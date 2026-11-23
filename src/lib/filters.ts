@@ -104,9 +104,10 @@ export function shownAmount(
   typed: string | null,
   p: URLSearchParams,
   rate: number,
+  key: "max" | "min" = "max",
 ): string {
   if (typed != null) return typed;
-  const usd = Number(p.get("maxUsd"));
+  const usd = Number(p.get(`${key}Usd`));
   if (usd > 0) return String(Math.round(usd * rate * 100) / 100);
-  return urlNumber(p, "max", "");
+  return urlNumber(p, key, "");
 }

@@ -163,7 +163,8 @@ export default function GuidePage() {
             <strong>Worst / best</strong> is what one try can lose or win,{" "}
             <strong>Chance to profit</strong> is how often one try comes out
             ahead, and <strong>Days</strong> is the trade hold plus the time to
-            sell.
+            sell. Click a column heading to sort by it, and set a{" "}
+            <strong>Min cost</strong> to see bigger contracts.
           </li>
           <li>
             Click a contract to see everything: what to buy, every possible
@@ -203,7 +204,13 @@ export default function GuidePage() {
             The badges help: <strong>dip</strong> means cheaper than usual while
             the long-term price holds (often recovers); <strong>falling</strong>{" "}
             means it has been dropping for weeks and may keep going. Click{" "}
-            <strong>Chart</strong> to see the price history.
+            <strong>Chart</strong> to see the price history: daily sales back to
+            2020 and, when it is cheaper than usual, how often past drops like
+            this came back and how fast.
+          </li>
+          <li>
+            Click any column heading to sort by it (click again to flip), and
+            use <strong>Min price</strong> to skip cheap items.
           </li>
         </Steps>
       </Section>

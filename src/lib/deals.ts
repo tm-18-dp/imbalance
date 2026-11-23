@@ -16,6 +16,8 @@ export type Deal = {
   netResaleCents: number;
   flipProfitCents: number;
   trend: TrendSignal;
+  /** Skin rarity for the name colour; null for items not in the skin list. */
+  rarity: string | null;
 };
 
 export type DealOptions = {
@@ -23,6 +25,8 @@ export type DealOptions = {
   minVolume30d?: number;
   minDiscount?: number;
   maxBuyCents?: number;
+  /** Skip items listed under this, in USD cents. */
+  minBuyCents?: number;
   q?: string;
   weaponsOnly?: boolean;
   /** Only short drops against a steady long-term price, the ones that tend to correct. */
@@ -107,21 +111,22 @@ export function findDeals(db: DatabaseSync, opts: DealOptions): Deal[] {
       `%${opts.q ?? ""}%`,
     ) as Row[];
 
-  const images = new Map(
+  const skins = new Map(
     (
-      db.prepare("SELECT name, image FROM skins").all() as {
+      db.prepare("SELECT name, image, rarity_name FROM skins").all() as {
         name: string;
         image: string | null;
+        rarity_name: string;
       }[]
-    ).map((r) => [r.name, r.image]),
+    ).map((r) => [r.name, { image: r.image, rarity: r.rarity_name }]),
   );
 
   // A weapon skin is one in the skin list (weapons, knives, gloves). Name patterns alone
   // let 286 others through (case keys, agents, viewer passes). Before the first skin list
   // update there is no list, so the patterns are all there is.
   const isWeapon = (name: string) =>
-    images.size
-      ? images.has(baseSkinName(name)) || name.startsWith("★ ")
+    skins.size
+      ? skins.has(baseSkinName(name)) || name.startsWith("★ ")
       : !NOT_WEAPON.test(name);
 
   return rows
@@ -132,7 +137,8 @@ export function findDeals(db: DatabaseSync, opts: DealOptions): Deal[] {
       return {
         marketHashName: r.market_hash_name,
         version: r.version,
-        image: images.get(baseSkinName(r.market_hash_name)) ?? null,
+        image: skins.get(baseSkinName(r.market_hash_name))?.image ?? null,
+        rarity: skins.get(baseSkinName(r.market_hash_name))?.rarity ?? null,
         buyCents: r.min_cents,
         usualCents: r.median_30d,
         resaleCents,
@@ -153,6 +159,7 @@ export function findDeals(db: DatabaseSync, opts: DealOptions): Deal[] {
     .filter(
       (d) =>
         d.flipProfitCents > 0 &&
+        (opts.minBuyCents == null || d.buyCents >= opts.minBuyCents) &&
         (!opts.dipsOnly || d.trend === "dip" || d.trend === "rebounding"),
     )
     .sort((a, b) => b.flipProfitCents - a.flipProfitCents)

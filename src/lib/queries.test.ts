@@ -70,6 +70,35 @@ describe("queries", () => {
     ).toBeNull();
   });
 
+  it("filters by price range and sorts by price", () => {
+    const db = seeded();
+    expect(
+      searchSkins(db, { minCents: 1000 }).skins.map((s) => s.name),
+    ).toEqual(["AK-47 | Redline"]);
+    expect(searchSkins(db, { maxCents: 1000 }).total).toBe(0);
+    const desc = searchSkins(db, { sort: "price-desc" }).skins;
+    expect(desc[0].fromCents).toBe(1800);
+    expect(desc.at(-1)?.fromCents).toBeNull();
+  });
+
+  it("shows a skin stored once per Doppler phase as one card", () => {
+    const db = openDb(":memory:");
+    const phase = (id: string) => ({
+      id,
+      name: "★ Karambit | Doppler",
+      rarity: { id: "r", name: "Covert" },
+      wears: [{ id: "a", name: "Factory New" }],
+    });
+    saveCatalog(db, {
+      skins: [phase("k1"), phase("k2"), phase("k3")],
+      collections: [],
+      crates: [],
+    });
+    const r = searchSkins(db, { q: "Doppler" });
+    expect(r.total).toBe(1);
+    expect(r.skins.map((s) => s.name)).toEqual(["★ Karambit | Doppler"]);
+  });
+
   it("lists every wear and StatTrak price for one skin", () => {
     const d = skinDetail(seeded(), "s1")!;
     expect(d.prices).toHaveLength(4);

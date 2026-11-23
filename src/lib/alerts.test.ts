@@ -88,6 +88,13 @@ describe("alerts", () => {
     expect(alertUrl({ kind: "deals", query: "q=AK&max=99.93&dips=1" })).toBe(
       "/deals?q=AK&dips=1&maxUsd=99.93",
     );
+    // Minimums travel the same way.
+    expect(alertUrl({ kind: "deals", query: "q=AK&min=5&max=20" })).toBe(
+      "/deals?q=AK&maxUsd=20&minUsd=5",
+    );
+    expect(
+      alertUrl({ kind: "tradeups", query: "tier=Covert&minBudget=100" }),
+    ).toBe("/tradeups?tier=Covert&minUsd=100");
   });
 
   it("saves alerts and ignores a damaged list", () => {

@@ -182,6 +182,24 @@ const MIGRATIONS: string[] = [
     PRIMARY KEY (bot_id, at)
   );
   `,
+  // v7: daily sales history per item (CSFloat, public), for long price charts and how often
+  // past drops recovered. From the original repo's M19, where it was v3.
+  `
+  CREATE TABLE daily_history (
+    market_hash_name TEXT NOT NULL,
+    source TEXT NOT NULL,
+    day INTEGER NOT NULL,
+    avg_cents INTEGER NOT NULL,
+    sales INTEGER NOT NULL,
+    PRIMARY KEY (market_hash_name, source, day)
+  );
+  CREATE TABLE daily_history_fetch (
+    market_hash_name TEXT NOT NULL,
+    source TEXT NOT NULL,
+    fetched_at INTEGER NOT NULL,
+    PRIMARY KEY (market_hash_name, source)
+  );
+  `,
 ];
 
 export const SCHEMA_VERSION = MIGRATIONS.length;

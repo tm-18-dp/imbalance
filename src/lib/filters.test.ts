@@ -61,5 +61,7 @@ describe("money limits from links", () => {
     expect(shownAmount("12", p("maxUsd=50"), 3.6725)).toBe("12");
     expect(shownAmount("", p("maxUsd=50"), 1)).toBe("");
     expect(shownAmount(null, p("maxUsd=abc"), 1)).toBe("");
+    expect(shownAmount(null, p("minUsd=10"), 3.6725, "min")).toBe("36.73");
+    expect(shownAmount(null, p("maxUsd=10"), 3.6725, "min")).toBe("");
   });
 });

@@ -2,22 +2,15 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import type { SkinSummary, WearPrice } from "@/lib/queries";
+import type { SkinSort, SkinSummary, WearPrice } from "@/lib/queries";
 import type { Listing } from "@/lib/prices/csfloat";
+import { nameColor } from "@/lib/rarity";
+import { TIERS } from "@/lib/tradeup";
 import { useMoney } from "./Money";
 import { PriceHistory } from "./PriceHistory";
 import { FloatBadges } from "./FloatBadges";
 import { PatternBadge, useUserPatterns } from "./PatternBadge";
 import { WatchStar } from "./Watchlist";
-
-const RARITIES = [
-  "Consumer Grade",
-  "Industrial Grade",
-  "Mil-Spec Grade",
-  "Restricted",
-  "Classified",
-  "Covert",
-];
 
 type SearchResult = {
   total: number;
@@ -25,20 +18,82 @@ type SearchResult = {
   pageSize: number;
   skins: SkinSummary[];
 };
+type Facets = {
+  categories: string[];
+  weapons: string[];
+  collections: { id: string; name: string }[];
+};
+
+/** Filters for the skin list (adapted from the original repo's M19 filter bar). */
+const EMPTY = {
+  q: "",
+  rarity: "",
+  category: "",
+  weapon: "",
+  collection: "",
+  min: "",
+  max: "",
+  stattrak: false,
+  sort: "name" as SkinSort,
+};
+
+const numeric = (v: string) => v.replace(/[^\d.]/g, "");
+
+function Field({
+  label,
+  className = "",
+  children,
+}: {
+  label: string;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <label className={`flex min-w-0 flex-col gap-1 text-sm ${className}`}>
+      <span className="text-muted">{label}</span>
+      {children}
+    </label>
+  );
+}
 
 export function Catalog() {
-  const { money } = useMoney();
-  const [q, setQ] = useState("");
-  const [rarity, setRarity] = useState("");
+  const { money, rates, currency } = useMoney();
+  const [f, setF] = useState(EMPTY);
   const [page, setPage] = useState(1);
+  const [facets, setFacets] = useState<Facets | null>(null);
   const [result, setResult] = useState<SearchResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
+  const set = <K extends keyof typeof EMPTY>(k: K, v: (typeof EMPTY)[K]) => {
+    setF((old) => ({ ...old, [k]: v }));
+    setPage(1);
+  };
+
+  useEffect(() => {
+    fetch("/api/skins?facets=1")
+      .then((r) => r.json() as Promise<Facets>)
+      .then(setFacets)
+      .catch((err: unknown) => console.error(err));
+  }, []);
 
   useEffect(() => {
     const ctrl = new AbortController();
     const t = setTimeout(() => {
-      const params = new URLSearchParams({ q, rarity, page: String(page) });
+      // Price filters are typed in the shown currency; the server works in USD.
+      const usd = (v: string) =>
+        v ? String(Number(v) / (rates[currency] ?? 1)) : "";
+      const params = new URLSearchParams({
+        q: f.q,
+        rarity: f.rarity,
+        category: f.category,
+        weapon: f.weapon,
+        collection: f.collection,
+        min: usd(f.min),
+        max: usd(f.max),
+        stattrak: f.stattrak ? "1" : "",
+        sort: f.sort,
+        page: String(page),
+      });
       fetch(`/api/skins?${params}`, { signal: ctrl.signal })
         .then((r) => r.json() as Promise<SearchResult>)
         .then((r) => {
@@ -50,52 +105,140 @@ export function Catalog() {
             setError("Could not load skins. Is the app still running?");
           console.error(err);
         });
-    }, 200);
+    }, 250);
     return () => {
       clearTimeout(t);
       ctrl.abort();
     };
-  }, [q, rarity, page]);
+  }, [f, page, rates, currency]);
 
   const pages = result
     ? Math.max(1, Math.ceil(result.total / result.pageSize))
     : 1;
+  const changed = JSON.stringify(f) !== JSON.stringify(EMPTY);
 
   return (
     <div className="space-y-4">
       <h1 className="text-2xl font-bold">Skins</h1>
-      <div className="flex flex-wrap gap-2">
-        <label className="sr-only" htmlFor="skin-search">
-          Search skins or collections
-        </label>
-        <input
-          id="skin-search"
-          className="input min-w-0 flex-1"
-          placeholder="Search skins or collections"
-          value={q}
-          onChange={(e) => {
-            setQ(e.target.value);
-            setPage(1);
-          }}
-        />
-        <label className="sr-only" htmlFor="rarity">
-          Rarity
-        </label>
-        <select
-          id="rarity"
-          className="input"
-          value={rarity}
-          onChange={(e) => {
-            setRarity(e.target.value);
-            setPage(1);
-          }}
+      <div className="panel grid grid-cols-2 items-end gap-3 p-3 sm:grid-cols-4 lg:grid-cols-[2fr_repeat(4,1fr)]">
+        <Field
+          label="Search"
+          className="col-span-2 sm:col-span-4 lg:col-span-1"
         >
-          <option value="">All rarities</option>
-          {RARITIES.map((r) => (
-            <option key={r}>{r}</option>
-          ))}
-        </select>
+          <input
+            className="input"
+            placeholder="Skin or collection name"
+            value={f.q}
+            onChange={(e) => set("q", e.target.value)}
+          />
+        </Field>
+        <Field label="Rarity">
+          <select
+            className="input"
+            value={f.rarity}
+            onChange={(e) => set("rarity", e.target.value)}
+          >
+            <option value="">All rarities</option>
+            {TIERS.map((r) => (
+              <option key={r}>{r}</option>
+            ))}
+          </select>
+        </Field>
+        <Field label="Type">
+          <select
+            className="input"
+            value={f.category}
+            onChange={(e) => set("category", e.target.value)}
+          >
+            <option value="">All types</option>
+            {facets?.categories.map((c) => (
+              <option key={c}>{c}</option>
+            ))}
+          </select>
+        </Field>
+        <Field label="Weapon">
+          <select
+            className="input"
+            value={f.weapon}
+            onChange={(e) => set("weapon", e.target.value)}
+          >
+            <option value="">All weapons</option>
+            {facets?.weapons.map((w) => (
+              <option key={w}>{w}</option>
+            ))}
+          </select>
+        </Field>
+        <Field label="Collection">
+          <select
+            className="input"
+            value={f.collection}
+            onChange={(e) => set("collection", e.target.value)}
+          >
+            <option value="">All collections</option>
+            {facets?.collections.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+        </Field>
+        <Field label={`Min price (${currency})`}>
+          <input
+            className="input"
+            inputMode="decimal"
+            placeholder="0"
+            value={f.min}
+            onChange={(e) => set("min", numeric(e.target.value))}
+          />
+        </Field>
+        <Field label={`Max price (${currency})`}>
+          <input
+            className="input"
+            inputMode="decimal"
+            placeholder="Any"
+            value={f.max}
+            onChange={(e) => set("max", numeric(e.target.value))}
+          />
+        </Field>
+        <Field label="Sort by">
+          <select
+            className="input"
+            value={f.sort}
+            onChange={(e) => set("sort", e.target.value as SkinSort)}
+          >
+            <option value="name">Name A to Z</option>
+            <option value="price-asc">Price: low to high</option>
+            <option value="price-desc">Price: high to low</option>
+            <option value="rarity">Rarity: highest first</option>
+          </select>
+        </Field>
+        <label className="flex items-center gap-2 pb-2 text-sm">
+          <input
+            type="checkbox"
+            checked={f.stattrak}
+            onChange={(e) => set("stattrak", e.target.checked)}
+          />
+          StatTrak only
+        </label>
+        {changed && (
+          <button
+            type="button"
+            className="btn self-end"
+            onClick={() => {
+              setF(EMPTY);
+              setPage(1);
+            }}
+          >
+            Clear filters
+          </button>
+        )}
       </div>
+      {result && (
+        <p className="text-sm text-muted" role="status">
+          {result.total} skins. Prices are the cheapest normal (not StatTrak)
+          listing on Skinport.
+        </p>
+      )}
 
       {error && <p className="text-sm text-bad">{error}</p>}
       {result && result.total === 0 && (
@@ -125,7 +268,12 @@ export function Catalog() {
                   className="mx-auto h-24 w-auto object-contain"
                 />
               )}
-              <span className="mt-2 text-sm font-medium">{s.name}</span>
+              <span
+                className="mt-2 text-sm font-medium"
+                style={{ color: nameColor(s.name, s.rarity) }}
+              >
+                {s.name}
+              </span>
               <span className="text-xs text-muted">
                 {s.collections[0] ?? s.rarity}
               </span>

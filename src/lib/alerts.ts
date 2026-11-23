@@ -25,9 +25,19 @@ const QUERY_KEYS: Record<AlertKind, readonly string[]> = {
     "risk",
     "sort",
     "budget",
+    "minBudget",
     "owned",
   ],
-  deals: ["market", "minDiscount", "minVolume", "max", "q", "weapons", "dips"],
+  deals: [
+    "market",
+    "minDiscount",
+    "minVolume",
+    "max",
+    "min",
+    "q",
+    "weapons",
+    "dips",
+  ],
 };
 
 export function cleanQuery(kind: AlertKind, query: string): string {
@@ -140,10 +150,10 @@ export function newHits(
 export function alertUrl(a: Pick<Alert, "kind" | "query">): string {
   const p = new URLSearchParams(a.query);
   const usd = p.get(a.kind === "deals" ? "max" : "budget");
-  p.delete("max");
-  p.delete("budget");
-  p.delete("sort");
-  p.delete("owned");
+  const minUsd = p.get(a.kind === "deals" ? "min" : "minBudget");
+  for (const k of ["max", "budget", "min", "minBudget", "sort", "owned"])
+    p.delete(k);
   if (usd) p.set("maxUsd", usd);
+  if (minUsd) p.set("minUsd", minUsd);
   return `/${a.kind}?${p}`;
 }

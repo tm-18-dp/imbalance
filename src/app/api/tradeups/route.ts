@@ -24,6 +24,9 @@ export async function GET(req: Request) {
   const market = p.get("market") ?? "skinport";
   const variant = p.get("stattrak") === "1" ? "stattrak" : "normal";
   const budget = Number(p.get("budget"));
+  // Skip contracts cheaper than this (USD), for looking at bigger ones.
+  const minBudget = Number(p.get("minBudget"));
+  const minCents = minBudget > 0 ? Math.round(minBudget * 100) : 0;
   if (!isTier(tier))
     return Response.json(
       { error: "Pick a rarity to trade up." },
@@ -57,18 +60,23 @@ export async function GET(req: Request) {
     limit: 2000,
     // The swap search gets whatever time is left after loading and the simple search.
     deadline: started + SEARCH_BUDGET_MS,
-    // Hidden contracts must not crowd out the ones the risk level allows.
-    accept: hideRisky
-      ? (r) =>
-          withinProfile(
-            r.outcomes.map((o) => ({
-              ...o,
-              volume30d: data.volume30d(o.skin, o.wear),
-            })),
-            r.evCents,
-            profile,
-          )
-      : undefined,
+    // Hidden contracts must not crowd out the ones shown: the risk level and the minimum
+    // cost are checked inside the search, before it keeps its best 2000. (Filtered after,
+    // a minimum of $5 found nothing in Restricted: cheap mixes filled every place.)
+    accept:
+      hideRisky || minCents
+        ? (r) =>
+            r.costCents >= minCents &&
+            (!hideRisky ||
+              withinProfile(
+                r.outcomes.map((o) => ({
+                  ...o,
+                  volume30d: data.volume30d(o.skin, o.wear),
+                })),
+                r.evCents,
+                profile,
+              ))
+        : undefined,
   })
     .map((c) => {
       const outcomes = c.result.outcomes.map((o) => ({
@@ -91,7 +99,7 @@ export async function GET(req: Request) {
         result: { ...c.result, outcomes },
       };
     })
-    .filter((c) => !hideRisky || c.allowed);
+    .filter((c) => (!hideRisky || c.allowed) && c.result.costCents >= minCents);
   // Rank every candidate, not just the most profitable 50, so each sort finds its own best.
   const contracts = rankContracts(found, sort).slice(0, 50);
   return Response.json({

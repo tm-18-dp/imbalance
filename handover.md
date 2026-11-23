@@ -341,6 +341,22 @@ POSTs from curl need `-H "Origin: http://localhost:3000"`.
   - **Deals weapons filter:** "weapon skins only" now means "in the skin list, or a ★
     knife or glove"; name patterns let 286 non-weapons through (case keys, agents,
     viewer passes). Patterns remain the fallback before the first skin list update.
+  - **Ported from the original repo (4bdulllahh/imbalance, commit c9a76a1, M19)**, chosen
+    parts only, not a merge (12 files conflicted and it lacked our fixes):
+    `limiter.ts` (spacing per host: CSFloat 2 s, Steam 3 s, AI 2 s, used by `fetchJson`;
+    no settings page or request log), Skins filters (`queries.ts` `searchSkins` and
+    `skinFacets`, `/api/skins`, Catalog filter bar), `rarity.ts` name colours (Skins,
+    Deals), `SortTable.tsx` (`useSort`, `SortTh`) on Deals (plus a Return column) and
+    Trade-ups (headers sort the 50 shown; the "Sort by" list still picks which 50 and
+    clears a header sort), Deals "Min price" (`minBuyCents`) and Trade-ups "Min cost"
+    (`minBudget`, checked in the search's `accept`), and CSFloat daily history plus
+    recovery odds (`prices/csfloat-history.ts`, `recovery.ts`, `/api/history`,
+    `PriceHistory.tsx`) as migration v7 (their v3). The history endpoint is public, no
+    key (checked: 2008 days for an AK-47 Redline). Alert links carry `minUsd` too.
+    Bugs found while porting, each reproduced first: Skins listed each Doppler phase as
+    its own card (one per name now; Dashboard counts distinct names); a Trade-ups
+    minimum applied after the search found nothing above $5 in Restricted (now inside
+    the search); Doppler charts had no current price (cheapest phase fallback, noted).
 - **Next:** the owner continues tomorrow. Open items: test the AI (Find box, Ask AI) and
   CSFloat with real keys, then pick from `docs/roadmap.md`. taste-skill and impeccable were
   not installed, so M17 was done by hand; run them later if wanted.

@@ -22,6 +22,21 @@ import { shownAmount, urlFlag, urlNumber } from "@/lib/filters";
 import { PriceHistory, TrendBadge } from "./PriceHistory";
 import { AlertMe } from "./Alerts";
 import { WatchStar } from "./Watchlist";
+import { SortTh, useSort } from "./SortTable";
+import { nameColor } from "@/lib/rarity";
+
+const NO_DEALS: Deal[] = [];
+const dealRoi = (d: Deal) =>
+  d.buyCents > 0 ? d.flipProfitCents / d.buyCents : 0;
+const DEAL_COLUMNS = {
+  buy: (d: Deal) => d.buyCents,
+  usual: (d: Deal) => d.usualCents,
+  below: (d: Deal) => d.discount,
+  resell: (d: Deal) => d.resaleCents,
+  sold: (d: Deal) => d.volume30d,
+  profit: (d: Deal) => d.flipProfitCents,
+  roi: dealRoi,
+};
 
 export function Deals() {
   const { money, rates, currency } = useMoney();
@@ -43,6 +58,8 @@ export function Deals() {
   // Null until the user types: the URL's amount shows in the current currency.
   const [maxTyped, setMax] = useState<string | null>(null);
   const max = shownAmount(maxTyped, params, rates[currency] ?? 1);
+  const [minTyped, setMin] = useState<string | null>(null);
+  const min = shownAmount(minTyped, params, rates[currency] ?? 1, "min");
   const [q, setQ] = useState(() => params.get("q")?.slice(0, 100) ?? "");
   const [weapons, setWeapons] = useState(() =>
     urlFlag(params, "weapons", !start.dealIncludeNonWeapons),
@@ -66,15 +83,19 @@ export function Deals() {
     error?: string;
     deals?: Deal[];
   }>({ loading: false });
+  // Click a header to sort; the server's order (best flip profit first) until then.
+  const sort = useSort(state.deals ?? NO_DEALS, DEAL_COLUMNS);
 
   /** The API query for the filters on screen; alerts save it too. */
   function scanQuery() {
     const usdMax = max ? Number(max) / (rates[currency] ?? 1) : 0;
+    const usdMin = min ? Number(min) / (rates[currency] ?? 1) : 0;
     return new URLSearchParams({
       market,
       minDiscount,
       minVolume,
       max: String(usdMax || ""),
+      min: String(usdMin || ""),
       q,
       weapons: weapons ? "1" : "0",
       dips: dips ? "1" : "0",
@@ -166,6 +187,16 @@ export function Deals() {
           />
         </label>
         <label className="flex flex-col gap-1">
+          <span className="text-muted">Min price ({currency})</span>
+          <input
+            className="input w-24"
+            inputMode="decimal"
+            value={min}
+            onChange={num(setMin)}
+            placeholder="0"
+          />
+        </label>
+        <label className="flex flex-col gap-1">
           <span className="text-muted">Max price ({currency})</span>
           <input
             className="input w-24"
@@ -222,22 +253,40 @@ export function Deals() {
             <thead className="text-left text-muted">
               <tr>
                 <th className="p-2 font-normal">Item</th>
-                <th className="p-2 font-normal">Buy now</th>
-                <th className="p-2 font-normal">Usually</th>
-                <th className="p-2 font-normal">Below</th>
-                <th
-                  className="p-2 font-normal"
+                <SortTh k="buy" sort={sort}>
+                  Buy now
+                </SortTh>
+                <SortTh k="usual" sort={sort}>
+                  Usually
+                </SortTh>
+                <SortTh k="below" sort={sort}>
+                  Below
+                </SortTh>
+                <SortTh
+                  k="resell"
+                  sort={sort}
                   title="What it should resell for: the 30-day median, or lower if the last 7 days or 24 hours sold for less"
                 >
                   Resell at
-                </th>
-                <th className="p-2 font-normal">Sold 30d</th>
-                <th className="p-2 font-normal">Flip profit</th>
+                </SortTh>
+                <SortTh k="sold" sort={sort}>
+                  Sold 30d
+                </SortTh>
+                <SortTh k="profit" sort={sort}>
+                  Flip profit
+                </SortTh>
+                <SortTh
+                  k="roi"
+                  sort={sort}
+                  title="Flip profit as a share of the price you pay"
+                >
+                  Return
+                </SortTh>
                 <th className="p-2 font-normal">Steam</th>
               </tr>
             </thead>
             <tbody>
-              {state.deals.map((d) => (
+              {sort.sorted.map((d) => (
                 <tr
                   key={`${d.marketHashName}|${d.version}`}
                   className="border-t border-line"
@@ -256,6 +305,9 @@ export function Deals() {
                       <span>
                         <a
                           className="hover:underline"
+                          style={{
+                            color: nameColor(d.marketHashName, d.rarity),
+                          }}
                           href={`https://skinport.com/market?search=${encodeURIComponent(d.marketHashName)}`}
                           target="_blank"
                           rel="noreferrer"
@@ -301,6 +353,7 @@ export function Deals() {
                   <td className="p-2 font-medium text-good">
                     {money(d.flipProfitCents)}
                   </td>
+                  <td className="p-2">{Math.round(dealRoi(d) * 100)}%</td>
                   <td className="p-2">
                     <SteamCheck name={d.marketHashName} buyCents={d.buyCents} />
                   </td>

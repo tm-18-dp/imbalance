@@ -98,6 +98,14 @@ describe("findDeals", () => {
       trend: "falling",
     });
     expect(deals[0].discount).toBeCloseTo(0.25);
+    // A minimum price above the $15 listing leaves nothing.
+    expect(
+      findDeals(seeded(), {
+        market: MARKETPLACES.skinport,
+        weaponsOnly: true,
+        minBuyCents: 1501,
+      }),
+    ).toEqual([]);
   });
 
   it("includes stickers unless weapons only, and respects max price", () => {
